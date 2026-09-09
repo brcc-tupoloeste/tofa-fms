@@ -1532,65 +1532,75 @@ body {
 }
 
 /* ============================================================
-   TOFA DASHBOARD - ASSOCIATION BALANCE FINAL ADJUSTMENT
-   Center Association Balance and keep it fully visible on mobile.
+   TOFA DASHBOARD - TOTAL ASSOCIATION BALANCE FINAL
+   IMPORTANT: This styles ONLY the TOTAL ASSOCIATION BALANCE
+   at the bottom of Financial Statement.
    ============================================================ */
 
-#dashboardPage .dashboard-v2-summary .dashboard-balance-card {
-  grid-column: 2;
-  grid-row: 2;
+#dashboardPage .financial-total-row {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
-  min-height: 56px;
-  padding: 7px 10px;
+  width: 100%;
+  min-height: 62px;
+  margin-top: 8px;
+  padding: 8px 12px;
   box-sizing: border-box;
+  border: 1px solid #93c5fd;
+  border-radius: 9px;
+  background: #eff6ff;
 }
 
-#dashboardPage .dashboard-v2-summary .dashboard-balance-card .dashboard-card-title {
+#dashboardPage .financial-total-row span {
+  display: block;
   width: 100%;
+  margin: 0 0 2px 0;
   text-align: center;
-  font-weight: 700;
-  margin-bottom: 3px;
+  font-size: 12px;
+  line-height: 1.1;
+  font-weight: 800;
 }
 
-#dashboardPage .dashboard-v2-summary .dashboard-balance-card .dashboard-card-value {
+#dashboardPage .financial-total-row strong {
+  display: block;
   width: 100%;
+  margin: 0;
   text-align: center;
-  font-size: 25px;
-  line-height: 1;
+  font-size: 23px;
+  line-height: 1.05;
   font-weight: 800;
   white-space: nowrap;
 }
 
 @media (max-width: 750px) {
-  #dashboardPage .dashboard-v2-summary .dashboard-balance-card {
-    grid-column: 1 / -1;
-    grid-row: auto;
-    min-height: 72px;
-    padding: 9px 10px;
+  #dashboardPage .financial-total-row {
+    min-height: 64px;
+    margin-top: 7px;
+    padding: 8px 10px;
   }
 
-  #dashboardPage .dashboard-v2-summary .dashboard-balance-card .dashboard-card-title {
+  #dashboardPage .financial-total-row span {
     font-size: 11px;
-    margin-bottom: 4px;
   }
 
-  #dashboardPage .dashboard-v2-summary .dashboard-balance-card .dashboard-card-value {
-    font-size: 24px;
-    line-height: 1.05;
+  #dashboardPage .financial-total-row strong {
+    font-size: 21px;
   }
 }
 
 @media (max-width: 420px) {
-  #dashboardPage .dashboard-v2-summary .dashboard-balance-card {
-    grid-column: 1 / -1;
-    min-height: 70px;
+  #dashboardPage .financial-total-row {
+    min-height: 62px;
+    padding: 7px 8px;
   }
 
-  #dashboardPage .dashboard-v2-summary .dashboard-balance-card .dashboard-card-value {
-    font-size: 22px;
+  #dashboardPage .financial-total-row span {
+    font-size: 10px;
+  }
+
+  #dashboardPage .financial-total-row strong {
+    font-size: 20px;
   }
 }
