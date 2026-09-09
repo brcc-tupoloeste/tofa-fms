@@ -1044,3 +1044,512 @@ label {
     text-align: left;
   }
 }
+
+/* ============================================================
+   TOFA FMS - GLOBAL FIT TO SCREEN
+   ALL MODULES
+   ============================================================ */
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body {
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+.app {
+  width: 100%;
+  height: 100vh;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ============================================================
+   SIDEBAR - FIXED VIEWPORT
+   ============================================================ */
+
+.sidebar {
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+  flex: 0 0 235px;
+}
+
+/* ============================================================
+   MAIN AREA
+   ============================================================ */
+
+.main {
+  height: 100vh;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================================
+   TOPBAR
+   ============================================================ */
+
+.topbar {
+  flex: 0 0 54px;
+  height: 54px;
+  min-height: 54px;
+  padding: 8px 20px;
+}
+
+/* ============================================================
+   CONTENT VIEWPORT
+   ============================================================ */
+
+.content {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: calc(100vh - 54px);
+  overflow: hidden;
+  padding: 12px 18px;
+}
+
+/* ============================================================
+   EVERY MODULE PAGE
+   ============================================================ */
+
+.page {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.page.hidden {
+  display: none;
+}
+
+/* ============================================================
+   MODULE CARD
+   ============================================================ */
+
+.module-card,
+.welcome-card {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* ============================================================
+   COMPACT TYPOGRAPHY
+   ============================================================ */
+
+.module-header {
+  margin-bottom: 12px;
+}
+
+.module-header h2 {
+  font-size: 19px;
+}
+
+.module-header p {
+  font-size: 11px;
+  margin-top: 2px;
+}
+
+.section {
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+.section h3 {
+  font-size: 14px;
+  margin-bottom: 7px;
+}
+
+/* ============================================================
+   COMPACT FORM CONTROLS
+   ============================================================ */
+
+input,
+select,
+textarea,
+button {
+  box-sizing: border-box;
+}
+
+input,
+select {
+  min-height: 36px;
+}
+
+textarea {
+  min-height: 60px;
+}
+
+.primary-button,
+.secondary-button {
+  min-height: 36px;
+  padding: 8px 12px;
+}
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+
+#dashboardPage {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#dashboardPage .dashboard-card {
+  min-height: 64px;
+  padding: 9px 11px;
+  border-radius: 9px;
+}
+
+#dashboardPage .dashboard-card-title {
+  font-size: 10px;
+  margin-bottom: 3px;
+}
+
+#dashboardPage .dashboard-card-value {
+  font-size: 19px;
+  line-height: 1.05;
+}
+
+/* Dashboard sections */
+#dashboardPage .dashboard-summary,
+#dashboardPage .dashboard-secondary {
+  gap: 7px;
+  margin-bottom: 7px;
+}
+
+#dashboardPage .dashboard-panel,
+#dashboardPage .previous-month,
+#dashboardPage .outstanding-obligations,
+#dashboardPage .financial-position {
+  margin-bottom: 7px;
+  padding: 9px 11px;
+  border-radius: 9px;
+}
+
+/* ============================================================
+   COLLECTIONS
+   ============================================================ */
+
+#collectionsPage {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#collectionsPage .module-card {
+  height: 100%;
+  padding: 15px;
+  overflow: hidden;
+}
+
+#collectionsPage .section {
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+#collectionsPage .member-info {
+  gap: 7px;
+}
+
+#collectionsPage .obligation-item {
+  padding: 8px 0;
+}
+
+#collectionsPage .payment-summary {
+  margin-top: 8px;
+  padding: 10px;
+}
+
+#collectionsPage .collection-actions {
+  gap: 7px;
+}
+
+/* ============================================================
+   DESKTOP - COMPACT FIT
+   ============================================================ */
+
+@media (min-width: 751px) {
+
+  .sidebar {
+    width: 215px;
+    flex-basis: 215px;
+    padding: 12px 9px;
+  }
+
+  .brand {
+    padding: 6px 9px 14px;
+  }
+
+  .brand-title {
+    font-size: 20px;
+  }
+
+  .brand-subtitle {
+    font-size: 10px;
+  }
+
+  .navigation {
+    gap: 3px;
+  }
+
+  .nav-item {
+    min-height: 38px;
+    padding: 8px 11px;
+    font-size: 12px;
+  }
+
+  .topbar {
+    flex-basis: 50px;
+    height: 50px;
+    min-height: 50px;
+    padding: 7px 16px;
+  }
+
+  .page-title {
+    font-size: 17px;
+  }
+
+  .page-subtitle {
+    font-size: 10px;
+  }
+
+  .content {
+    height: calc(100vh - 50px);
+    padding: 9px 14px;
+  }
+
+  /*
+   * Scale the complete content slightly so the
+   * entire module can fit inside common laptop screens.
+   */
+  .content {
+    zoom: 0.90;
+  }
+}
+
+/* ============================================================
+   SMALL LAPTOP / 768px HEIGHT
+   ============================================================ */
+
+@media (min-width: 751px) and (max-height: 800px) {
+
+  .content {
+    padding: 7px 12px;
+    zoom: 0.82;
+  }
+
+  .module-card {
+    padding: 13px;
+  }
+
+  .module-header {
+    margin-bottom: 9px;
+  }
+
+  .section {
+    margin-top: 7px;
+    padding-top: 7px;
+  }
+
+  input,
+  select {
+    min-height: 33px;
+  }
+
+  textarea {
+    min-height: 50px;
+  }
+}
+
+/* ============================================================
+   VERY SHORT DESKTOP SCREENS
+   ============================================================ */
+
+@media (min-width: 751px) and (max-height: 700px) {
+
+  .content {
+    zoom: 0.74;
+  }
+
+  .sidebar {
+    padding-top: 8px;
+  }
+
+  .brand {
+    padding-bottom: 9px;
+  }
+
+  .nav-item {
+    min-height: 34px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+}
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 750px) {
+
+  html,
+  body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .app {
+    width: 100%;
+    height: 100vh;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    flex: 0 0 auto;
+    padding: 6px;
+    overflow: hidden;
+  }
+
+  .brand {
+    padding: 3px 7px 5px;
+  }
+
+  .brand-title {
+    font-size: 17px;
+  }
+
+  .brand-subtitle {
+    font-size: 9px;
+  }
+
+  .navigation {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+  }
+
+  .nav-item {
+    min-height: 34px;
+    padding: 7px 8px;
+    font-size: 11px;
+  }
+
+  .main {
+    width: 100%;
+    height: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .topbar {
+    height: 45px;
+    min-height: 45px;
+    flex-basis: 45px;
+    padding: 6px 10px;
+  }
+
+  .page-title {
+    font-size: 15px;
+  }
+
+  .page-subtitle {
+    font-size: 9px;
+  }
+
+  .content {
+    height: calc(100% - 45px);
+    min-height: 0;
+    padding: 6px;
+    overflow: hidden;
+  }
+
+  /*
+   * Do NOT zoom mobile by default.
+   * Existing mobile one-column layout is retained.
+   */
+  .page {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .module-card {
+    padding: 10px;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .module-header {
+    margin-bottom: 8px;
+  }
+
+  .module-header h2 {
+    font-size: 17px;
+  }
+
+  .module-header p {
+    font-size: 9px;
+  }
+
+  .section {
+    margin-top: 6px;
+    padding-top: 6px;
+  }
+
+  .section h3 {
+    font-size: 13px;
+    margin-bottom: 5px;
+  }
+
+  input,
+  select {
+    min-height: 34px;
+    font-size: 12px;
+  }
+
+  textarea {
+    min-height: 45px;
+    font-size: 12px;
+  }
+
+  .primary-button,
+  .secondary-button {
+    min-height: 34px;
+    padding: 7px 10px;
+    font-size: 12px;
+  }
+
+  /* Dashboard mobile */
+  #dashboardPage .dashboard-card {
+    min-height: 54px;
+    padding: 7px 8px;
+  }
+
+  #dashboardPage .dashboard-card-title {
+    font-size: 8px;
+  }
+
+  #dashboardPage .dashboard-card-value {
+    font-size: 15px;
+  }
+}
