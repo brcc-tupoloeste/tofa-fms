@@ -132,147 +132,570 @@
         class="content"
       >
 
-        <!-- DASHBOARD DEFAULT -->
-        <div id="dashboardPage" class="page">
+        <!-- =====================================================
+             DASHBOARD
+             ===================================================== -->
+        <div
+          id="dashboardPage"
+          class="page"
+        >
 
           <div class="dashboard-heading">
+
             <div>
-              <h2>Financial Overview</h2>
-              <p>Financial overview for <span id="dashboardYear">2026</span></p>
+
+              <h2>
+                Financial Overview
+              </h2>
+
+              <p>
+                Financial overview for
+                <span id="dashboardYear">
+                  2026
+                </span>
+              </p>
+
             </div>
-            <div class="dashboard-year" id="dashboardYearBadge">2026</div>
+
+            <div
+              class="dashboard-year"
+              id="dashboardYearBadge"
+            >
+              2026
+            </div>
+
           </div>
 
-          <!-- 1. PREVIOUS MONTH -->
-          <div class="dashboard-panel previous-month">
-            <div class="dashboard-panel-heading">
+
+          <!-- =================================================
+               1. PREVIOUS MONTH
+               ================================================= -->
+          <div
+            class="dashboard-panel previous-month"
+          >
+
+            <div
+              class="dashboard-panel-heading"
+            >
+
               <div>
-                <h3>Previous Month</h3>
-                <span id="previousMonthLabel">—</span>
+
+                <h3>
+                  Previous Month
+                </h3>
+
+                <span
+                  id="previousMonthLabel"
+                >
+                  —
+                </span>
+
               </div>
-              <div class="previous-balance">
-                <small>Previous Balance</small>
-                <strong id="dashboardPreviousBalance">₱0.00</strong>
+
+              <div
+                class="previous-balance"
+              >
+
+                <small>
+                  Previous Balance
+                </small>
+
+                <strong
+                  id="dashboardPreviousBalance"
+                >
+                  ₱0.00
+                </strong>
+
               </div>
+
             </div>
-            <div class="dashboard-mini-grid">
-              <div class="dashboard-mini-card">
-                <span>Collections</span>
-                <strong id="dashboardPreviousCollections">₱0.00</strong>
+
+
+            <div
+              class="dashboard-mini-grid"
+            >
+
+              <div
+                class="dashboard-mini-card"
+              >
+
+                <span>
+                  Collections
+                </span>
+
+                <strong
+                  id="dashboardPreviousCollections"
+                >
+                  ₱0.00
+                </strong>
+
               </div>
-              <div class="dashboard-mini-card">
-                <span>Expenses</span>
-                <strong id="dashboardPreviousExpenses">₱0.00</strong>
+
+
+              <div
+                class="dashboard-mini-card"
+              >
+
+                <span>
+                  Expenses
+                </span>
+
+                <strong
+                  id="dashboardPreviousExpenses"
+                >
+                  ₱0.00
+                </strong>
+
               </div>
-              <div class="dashboard-mini-card">
-                <span>Net Income</span>
-                <strong id="dashboardPreviousNetIncome">₱0.00</strong>
+
+
+              <div
+                class="dashboard-mini-card"
+              >
+
+                <span>
+                  Net Income
+                </span>
+
+                <strong
+                  id="dashboardPreviousNetIncome"
+                >
+                  ₱0.00
+                </strong>
+
               </div>
+
             </div>
+
           </div>
 
-          <!-- 2. CURRENT MONTH / FINANCIAL OVERVIEW -->
-          <div class="dashboard-panel current-month-overview">
-            <div class="dashboard-panel-heading">
+
+          <!-- =================================================
+               2. CURRENT MONTH / FINANCIAL OVERVIEW
+               ================================================= -->
+          <div
+            class="dashboard-panel current-month-overview"
+          >
+
+            <div
+              class="dashboard-panel-heading"
+            >
+
               <div>
-                <h3>Current Month / Financial Overview</h3>
-                <span>Year-to-date financial summary</span>
+
+                <h3>
+                  Current Month / Financial Overview
+                </h3>
+
+                <span>
+                  Year-to-date financial summary
+                </span>
+
               </div>
+
             </div>
 
-            <div class="dashboard-summary dashboard-v2-summary">
-              <div class="dashboard-card">
-                <div class="dashboard-card-title">Active Members</div>
-                <div class="dashboard-card-value" id="dashboardActiveMembers">—</div>
+
+            <div
+              class="dashboard-summary dashboard-v2-summary"
+            >
+
+              <div
+                class="dashboard-card"
+              >
+
+                <div
+                  class="dashboard-card-title"
+                >
+                  Active Members
+                </div>
+
+                <div
+                  class="dashboard-card-value"
+                  id="dashboardActiveMembers"
+                >
+                  —
+                </div>
+
               </div>
-              <div class="dashboard-card">
-                <div class="dashboard-card-title">Beginning Balance</div>
-                <div class="dashboard-card-value" id="dashboardBeginningBalance">₱0.00</div>
+
+
+              <div
+                class="dashboard-card"
+              >
+
+                <div
+                  class="dashboard-card-title"
+                >
+                  Beginning Balance
+                </div>
+
+                <div
+                  class="dashboard-card-value"
+                  id="dashboardBeginningBalance"
+                >
+                  ₱0.00
+                </div>
+
               </div>
-              <div class="dashboard-card">
-                <div class="dashboard-card-title">Total Collections</div>
-                <div class="dashboard-card-value" id="dashboardCollections">₱0.00</div>
+
+
+              <div
+                class="dashboard-card"
+              >
+
+                <div
+                  class="dashboard-card-title"
+                >
+                  Total Collections
+                </div>
+
+                <div
+                  class="dashboard-card-value"
+                  id="dashboardCollections"
+                >
+                  ₱0.00
+                </div>
+
               </div>
-              <div class="dashboard-card">
-                <div class="dashboard-card-title">Total Expenses</div>
-                <div class="dashboard-card-value" id="dashboardExpenses">₱0.00</div>
+
+
+              <div
+                class="dashboard-card"
+              >
+
+                <div
+                  class="dashboard-card-title"
+                >
+                  Total Expenses
+                </div>
+
+                <div
+                  class="dashboard-card-value"
+                  id="dashboardExpenses"
+                >
+                  ₱0.00
+                </div>
+
               </div>
-              <div class="dashboard-card">
-                <div class="dashboard-card-title">Net Income</div>
-                <div class="dashboard-card-value" id="dashboardNetIncome">₱0.00</div>
+
+
+              <div
+                class="dashboard-card"
+              >
+
+                <div
+                  class="dashboard-card-title"
+                >
+                  Net Income
+                </div>
+
+                <div
+                  class="dashboard-card-value"
+                  id="dashboardNetIncome"
+                >
+                  ₱0.00
+                </div>
+
               </div>
-              <div class="dashboard-card dashboard-balance-card">
-                <div class="dashboard-card-title">Association Balance</div>
-                <div class="dashboard-card-value" id="dashboardAssociationBalance">₱0.00</div>
+
+
+              <div
+                class="dashboard-card dashboard-balance-card"
+              >
+
+                <div
+                  class="dashboard-card-title"
+                >
+                  Association Balance
+                </div>
+
+                <div
+                  class="dashboard-card-value"
+                  id="dashboardAssociationBalance"
+                >
+                  ₱0.00
+                </div>
+
               </div>
+
             </div>
+
           </div>
 
-          <!-- 3. OUTSTANDING OBLIGATIONS -->
-          <div class="dashboard-panel outstanding-obligations">
-            <div class="dashboard-panel-heading">
+
+          <!-- =================================================
+               3. OUTSTANDING OBLIGATIONS
+               ================================================= -->
+          <div
+            class="dashboard-panel outstanding-obligations"
+          >
+
+            <div
+              class="dashboard-panel-heading"
+            >
+
               <div>
-                <h3>Outstanding Obligations</h3>
-                <span>Current unpaid and partially paid obligations</span>
+
+                <h3>
+                  Outstanding Obligations
+                </h3>
+
+                <span>
+                  Current unpaid and partially paid obligations
+                </span>
+
               </div>
-              <div class="previous-balance">
-                <small>Total Outstanding</small>
-                <strong id="dashboardOutstanding">₱0.00</strong>
+
+
+              <div
+                class="previous-balance"
+              >
+
+                <small>
+                  Total Outstanding
+                </small>
+
+                <strong
+                  id="dashboardOutstanding"
+                >
+                  ₱0.00
+                </strong>
+
               </div>
+
             </div>
-            <div class="dashboard-obligations-grid">
-              <div class="dashboard-mini-card"><span>Registration Fee</span><strong id="dashboardRegistrationFee">₱0.00</strong></div>
-              <div class="dashboard-mini-card"><span>Yearly Due</span><strong id="dashboardYearlyDue">₱0.00</strong></div>
-              <div class="dashboard-mini-card"><span>Rice</span><strong id="dashboardRiceDebt">₱0.00</strong></div>
-              <div class="dashboard-mini-card"><span>Fertilizer</span><strong id="dashboardFertilizerDebt">₱0.00</strong></div>
-              <div class="dashboard-mini-card"><span>Cash</span><strong id="dashboardCashDebt">₱0.00</strong></div>
+
+
+            <div
+              class="dashboard-obligations-grid"
+            >
+
+              <div
+                class="dashboard-mini-card"
+              >
+
+                <span>
+                  Registration Fee
+                </span>
+
+                <strong
+                  id="dashboardRegistrationFee"
+                >
+                  ₱0.00
+                </strong>
+
+              </div>
+
+
+              <div
+                class="dashboard-mini-card"
+              >
+
+                <span>
+                  Yearly Due
+                </span>
+
+                <strong
+                  id="dashboardYearlyDue"
+                >
+                  ₱0.00
+                </strong>
+
+              </div>
+
+
+              <div
+                class="dashboard-mini-card"
+              >
+
+                <span>
+                  Rice
+                </span>
+
+                <strong
+                  id="dashboardRiceDebt"
+                >
+                  ₱0.00
+                </strong>
+
+              </div>
+
+
+              <div
+                class="dashboard-mini-card"
+              >
+
+                <span>
+                  Fertilizer
+                </span>
+
+                <strong
+                  id="dashboardFertilizerDebt"
+                >
+                  ₱0.00
+                </strong>
+
+              </div>
+
+
+              <div
+                class="dashboard-mini-card"
+              >
+
+                <span>
+                  Cash
+                </span>
+
+                <strong
+                  id="dashboardCashDebt"
+                >
+                  ₱0.00
+                </strong>
+
+              </div>
+
             </div>
+
           </div>
 
-          <!-- 4. FINANCIAL STATEMENT -->
-          <div class="dashboard-panel financial-position">
-            <div class="dashboard-panel-heading">
+
+          <!-- =================================================
+               4. FINANCIAL STATEMENT
+               ================================================= -->
+          <div
+            class="dashboard-panel financial-position"
+          >
+
+            <div
+              class="dashboard-panel-heading"
+            >
+
               <div>
-                <h3>Financial Statement</h3>
-                <span>Financial position of the association</span>
+
+                <h3>
+                  Financial Statement
+                </h3>
+
+                <span>
+                  Financial position of the association
+                </span>
+
               </div>
+
             </div>
-            <div class="financial-position-flow">
-              <div class="position-card">
-                <span>Beginning Balance</span>
-                <strong id="dashboardPositionBeginning">₱0.00</strong>
+
+
+            <div
+              class="financial-position-flow"
+            >
+
+              <div
+                class="position-card"
+              >
+
+                <span>
+                  Beginning Balance
+                </span>
+
+                <strong
+                  id="dashboardPositionBeginning"
+                >
+                  ₱0.00
+                </strong>
+
               </div>
-              <b class="flow-symbol">+</b>
-              <div class="position-card">
-                <span>Net Income</span>
-                <strong id="dashboardPositionNetIncome">₱0.00</strong>
+
+
+              <b
+                class="flow-symbol"
+              >
+                +
+              </b>
+
+
+              <div
+                class="position-card"
+              >
+
+                <span>
+                  Net Income
+                </span>
+
+                <strong
+                  id="dashboardPositionNetIncome"
+                >
+                  ₱0.00
+                </strong>
+
               </div>
-              <b class="flow-symbol">+</b>
-              <div class="position-card">
-                <span>Bank Balance</span>
-                <strong id="dashboardPositionBankBalance">₱0.00</strong>
+
+
+              <b
+                class="flow-symbol"
+              >
+                +
+              </b>
+
+
+              <div
+                class="position-card"
+              >
+
+                <span>
+                  Bank Balance
+                </span>
+
+                <strong
+                  id="dashboardPositionBankBalance"
+                >
+                  ₱0.00
+                </strong>
+
               </div>
+
             </div>
-            <div class="financial-total-row">
-              <span>Total Association Balance</span>
-              <strong id="dashboardPositionBalance">₱0.00</strong>
+
+
+            <div
+              class="financial-total-row"
+            >
+
+              <span>
+                Total Association Balance
+              </span>
+
+              <strong
+                id="dashboardPositionBalance"
+              >
+                ₱0.00
+              </strong>
+
             </div>
+
           </div>
 
         </div>
 
-        
-<!-- COLLECTIONS -->
+
+        <!-- =====================================================
+             COLLECTIONS
+             ===================================================== -->
         <div
           id="collectionsPage"
           class="page hidden"
         >
 
-          <div class="module-card">
+          <div
+            class="module-card"
+          >
 
-            <div class="module-header">
+            <div
+              class="module-header"
+            >
 
               <div>
+
                 <h2>
                   Collections
                 </h2>
@@ -280,6 +703,7 @@
                 <p>
                   Record and manage member payments.
                 </p>
+
               </div>
 
             </div>
@@ -293,13 +717,18 @@
 
 
             <!-- MEMBER SEARCH -->
-            <div class="section">
+            <div
+              class="section"
+            >
 
               <h3>
                 Select Member
               </h3>
 
-              <div class="search-row">
+
+              <div
+                class="search-row"
+              >
 
                 <input
                   id="memberSearch"
@@ -307,6 +736,7 @@
                   placeholder="Search member name or Member ID..."
                   autocomplete="off"
                 >
+
 
                 <button
                   id="memberSearchButton"
@@ -332,65 +762,85 @@
               class="member-info hidden"
             >
 
-              <div class="info-item">
+              <div
+                class="info-item"
+              >
 
                 <span>
                   Member ID
                 </span>
 
-                <strong id="memberId">
+                <strong
+                  id="memberId"
+                >
                   —
                 </strong>
 
               </div>
 
 
-              <div class="info-item">
+              <div
+                class="info-item"
+              >
 
                 <span>
                   Full Name
                 </span>
 
-                <strong id="memberName">
+                <strong
+                  id="memberName"
+                >
                   —
                 </strong>
 
               </div>
 
 
-              <div class="info-item">
+              <div
+                class="info-item"
+              >
 
                 <span>
                   Address
                 </span>
 
-                <strong id="memberAddress">
+                <strong
+                  id="memberAddress"
+                >
                   —
                 </strong>
 
               </div>
 
 
-              <div class="info-item">
+              <div
+                class="info-item"
+              >
 
                 <span>
                   Sitio
                 </span>
 
-                <strong id="memberSitio">
+                <strong
+                  id="memberSitio"
+                >
                   —
                 </strong>
 
               </div>
 
 
-              <div class="info-item">
+              <div
+                class="info-item"
+              >
 
                 <span>
                   Contact Number
                 </span>
 
-                <strong id="memberContact">
+                <strong
+                  id="memberContact"
+                >
                   —
                 </strong>
 
@@ -398,51 +848,67 @@
 
             </div>
 
+
             <!-- COLLECTION ACTIONS -->
-<div
-  id="collectionActions"
-  class="collection-actions hidden"
->
-  <button
-    type="button"
-    id="enterPaymentButton"
-    class="collection-action primary"
-  >
-    💵 Enter Payment
-  </button>
+            <div
+              id="collectionActions"
+              class="collection-actions hidden"
+            >
 
-  <button
-    type="button"
-    id="viewObligationsButton"
-    class="collection-action"
-  >
-    📋 Obligations
-  </button>
+              <button
+                type="button"
+                id="enterPaymentButton"
+                class="collection-action primary"
+              >
+                💵 Enter Payment
+              </button>
 
-  <button
-    type="button"
-    id="viewHistoryButton"
-    class="collection-action"
-  >
-    🧾 Payment History
-  </button>
-</div>
 
-<!-- PAYMENT FOR SELECTOR -->
-<div
-  id="paymentSelector"
-  class="payment-selector hidden"
->
-  <label for="paymentForSelect">
-    What is this payment for?
-  </label>
+              <button
+                type="button"
+                id="viewObligationsButton"
+                class="collection-action"
+              >
+                📋 Obligations
+              </button>
 
-  <select id="paymentForSelect">
-    <option value="">
-      Select what to pay
-    </option>
-  </select>
-</div>
+
+              <button
+                type="button"
+                id="viewHistoryButton"
+                class="collection-action"
+              >
+                🧾 Payment History
+              </button>
+
+            </div>
+
+
+            <!-- PAYMENT FOR SELECTOR -->
+            <div
+              id="paymentSelector"
+              class="payment-selector hidden"
+            >
+
+              <label
+                for="paymentForSelect"
+              >
+                What is this payment for?
+              </label>
+
+
+              <select
+                id="paymentForSelect"
+              >
+
+                <option value="">
+                  Select what to pay
+                </option>
+
+              </select>
+
+            </div>
+
 
             <!-- OBLIGATIONS -->
             <div
@@ -461,28 +927,38 @@
               ></div>
 
 
-              <div class="payment-summary">
+              <div
+                class="payment-summary"
+              >
 
-                <div class="summary-item">
+                <div
+                  class="summary-item"
+                >
 
                   <span>
                     Selected Obligations
                   </span>
 
-                  <strong id="selectedCount">
+                  <strong
+                    id="selectedCount"
+                  >
                     0
                   </strong>
 
                 </div>
 
 
-                <div class="summary-total">
+                <div
+                  class="summary-total"
+                >
 
                   <span>
                     Total Payment
                   </span>
 
-                  <strong id="totalPayment">
+                  <strong
+                    id="totalPayment"
+                  >
                     ₱0.00
                   </strong>
 
@@ -504,11 +980,17 @@
               </h3>
 
 
-              <div class="form-grid">
+              <div
+                class="form-grid"
+              >
 
-                <div class="form-group">
+                <div
+                  class="form-group"
+                >
 
-                  <label for="paymentDate">
+                  <label
+                    for="paymentDate"
+                  >
                     Payment Date
                   </label>
 
@@ -520,13 +1002,19 @@
                 </div>
 
 
-                <div class="form-group">
+                <div
+                  class="form-group"
+                >
 
-                  <label for="paymentMethod">
+                  <label
+                    for="paymentMethod"
+                  >
                     Payment Method
                   </label>
 
-                  <select id="paymentMethod">
+                  <select
+                    id="paymentMethod"
+                  >
 
                     <option value="Cash">
                       Cash
@@ -549,9 +1037,13 @@
                 </div>
 
 
-                <div class="form-group">
+                <div
+                  class="form-group"
+                >
 
-                  <label for="receivedBy">
+                  <label
+                    for="receivedBy"
+                  >
                     Received By
                   </label>
 
@@ -564,7 +1056,9 @@
                 </div>
 
 
-                <div class="form-group">
+                <div
+                  class="form-group"
+                >
 
                   <label>
                     Total Amount
@@ -580,9 +1074,13 @@
                 </div>
 
 
-                <div class="form-group full">
+                <div
+                  class="form-group full"
+                >
 
-                  <label for="remarks">
+                  <label
+                    for="remarks"
+                  >
                     Remarks
                   </label>
 
@@ -596,7 +1094,9 @@
               </div>
 
 
-              <div class="action-row">
+              <div
+                class="action-row"
+              >
 
                 <button
                   id="clearPaymentButton"
@@ -622,30 +1122,41 @@
                 class="success-box hidden"
               >
 
-                <div class="success-title">
+                <div
+                  class="success-title"
+                >
                   Payment Successfully Recorded
                 </div>
 
-                <div class="success-row">
+
+                <div
+                  class="success-row"
+                >
 
                   <span>
                     Receipt No.
                   </span>
 
-                  <strong id="receiptNumber">
+                  <strong
+                    id="receiptNumber"
+                  >
                     —
                   </strong>
 
                 </div>
 
 
-                <div class="success-row">
+                <div
+                  class="success-row"
+                >
 
                   <span>
                     Collection ID
                   </span>
 
-                  <strong id="collectionId">
+                  <strong
+                    id="collectionId"
+                  >
                     —
                   </strong>
 
@@ -669,5 +1180,6 @@
   <script src="js/api.js"></script>
   <script src="js/dashboard.js"></script>
   <script src="js/app.js"></script>
+
 </body>
 </html>
