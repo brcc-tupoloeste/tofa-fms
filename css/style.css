@@ -1583,3 +1583,47 @@ and (max-height: 700px) {
   }
 
 }
+/* ============================================================
+   DASHBOARD - REMOVE DUPLICATE YEAR
+   ============================================================ */
+
+#dashboardPage #dashboardYear {
+  display: none !important;
+}
+
+
+/* Keep only the year badge */
+#dashboardPage #dashboardYearBadge {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 48px;
+  height: 30px;
+
+  padding: 0 12px;
+
+  border: 1px solid #bfdbfe;
+  border-radius: 18px;
+
+  background: #eff6ff;
+
+  color: #2563eb;
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+
+/* Move the square cards closer to the heading */
+#dashboardPage .dashboard-summary,
+#dashboardPage .dashboard-v2-summary {
+  margin-top: 4px;
+}
+
+
+/* Keep the six cards centered */
+#dashboardPage .dashboard-summary,
+#dashboardPage .dashboard-v2-summary {
+  justify-content: center;
+}
