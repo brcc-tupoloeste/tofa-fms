@@ -71,21 +71,26 @@ function setupNavigation() {
       }
     );
 
+const openCollectionsButton =
+  document.getElementById(
+    'openCollectionsButton'
+  );
 
-  document
-    .getElementById(
-      'openCollectionsButton'
-    )
-    .addEventListener(
-      'click',
-      function() {
+if (openCollectionsButton) {
 
-        showPage(
-          'collections'
-        );
+  openCollectionsButton.addEventListener(
+    'click',
+    function() {
 
-      }
-    );
+      showPage(
+        'collections'
+      );
+
+    }
+  );
+
+}
+
 
 }
 
