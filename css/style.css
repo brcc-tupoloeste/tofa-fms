@@ -1,176 +1,1400 @@
-/* ============================================================
-   DASHBOARD - COMPACT CARD STYLE
-   ============================================================ */
-
-.dashboard-summary {
-  display: grid;
-  grid-template-columns: repeat(3, 150px);
-  gap: 8px;
-
-  justify-content: start;
-
-  margin-bottom: 8px;
-}
-
-.dashboard-summary .dashboard-card {
-  width: 150px;
-  height: 88px;
-  min-height: 88px;
-
-  padding: 10px;
-
-  box-sizing: border-box;
-
-  border-radius: 10px;
-}
-
-.dashboard-card-title {
-  font-size: 9px;
-  line-height: 1.15;
-  margin-bottom: 6px;
-}
-
-.dashboard-card-value {
-  font-size: 18px;
-  line-height: 1.1;
-}
-
-
-/* ============================================================
-   PREVIOUS MONTH CARDS
-   ============================================================ */
-
-.dashboard-mini-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 150px);
-  gap: 8px;
-}
-
-.dashboard-mini-card {
-  width: 150px;
-  height: 58px;
-  min-height: 58px;
-
+* {
   box-sizing: border-box;
 }
 
-
-/* ============================================================
-   OUTSTANDING CARDS
-   ============================================================ */
-
-.dashboard-obligations-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 135px);
-  gap: 8px;
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
 }
 
-.dashboard-obligations-grid .dashboard-mini-card {
-  width: 135px;
-  height: 58px;
-  min-height: 58px;
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #f5f7fa;
+  color: #1f2937;
+  overflow-x: hidden;
 }
 
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
 
 /* ============================================================
-   FINANCIAL POSITION
+   APP
    ============================================================ */
 
-.financial-position-flow {
-  display: grid;
+.app {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
 
-  grid-template-columns:
-    180px
-    25px
-    180px
-    25px
-    180px;
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
 
-  align-items: center;
+.sidebar {
+  width: 235px;
+  min-height: 100vh;
+  flex: 0 0 235px;
+  background: #111827;
+  color: #ffffff;
+  padding: 18px 12px;
+}
 
+.brand {
+  padding: 8px 12px 24px;
+}
+
+.brand-title {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.brand-subtitle {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #9ca3af;
+  line-height: 1.4;
+}
+
+.navigation {
+  display: flex;
+  flex-direction: column;
   gap: 5px;
 }
 
-.position-card {
-  width: 180px;
-  height: 58px;
-  min-height: 58px;
-
-  box-sizing: border-box;
+.nav-item {
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: #d1d5db;
+  text-align: left;
+  padding: 11px 13px;
+  border-radius: 8px;
 }
 
+.nav-item:hover:not(:disabled) {
+  background: #1f2937;
+  color: #ffffff;
+}
+
+.nav-item.active {
+  background: #2563eb;
+  color: #ffffff;
+}
 
 /* ============================================================
-   LARGE DESKTOP
+   MAIN
    ============================================================ */
 
-@media (min-width: 1200px) {
-
-  .dashboard-summary {
-    grid-template-columns:
-      repeat(3, 155px);
-  }
-
-  .dashboard-summary .dashboard-card {
-    width: 155px;
-    height: 92px;
-    min-height: 92px;
-  }
-
+.main {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
 }
 
+.topbar {
+  min-height: 68px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+}
+
+.page-title {
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.page-subtitle {
+  margin-top: 3px;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.content {
+  width: 100%;
+  padding: 24px;
+}
+
+.page.hidden {
+  display: none;
+}
 
 /* ============================================================
-   SHORT LAPTOP
+   CARDS
    ============================================================ */
 
-@media
-(min-width: 751px)
-and (max-height: 800px) {
-
-  .content {
-    zoom: 0.90;
-  }
-
+.welcome-card,
+.module-card {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 24px;
 }
 
+.welcome-card h1 {
+  margin: 0 0 8px;
+  font-size: 25px;
+}
+
+.welcome-card p {
+  color: #6b7280;
+  margin: 0 0 20px;
+}
+
+.module-header {
+  margin-bottom: 22px;
+}
+
+.module-header h2 {
+  margin: 0;
+  font-size: 21px;
+}
+
+.module-header p {
+  margin: 5px 0 0;
+  color: #6b7280;
+  font-size: 13px;
+}
 
 /* ============================================================
-   MOBILE
+   SECTION
+   ============================================================ */
+
+.section {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 20px;
+  margin-top: 20px;
+}
+
+.section h3 {
+  margin: 0 0 14px;
+  font-size: 16px;
+}
+
+/* ============================================================
+   SEARCH
+   ============================================================ */
+
+.search-row {
+  display: flex;
+  gap: 10px;
+}
+
+.search-row input {
+  flex: 1;
+}
+
+/* ============================================================
+   FORM
+   ============================================================ */
+
+input,
+select,
+textarea {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 44px;
+  background: #ffffff;
+  color: #111827;
+  outline: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
+}
+
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.form-group.full {
+  grid-column: 1 / -1;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+
+.primary-button,
+.secondary-button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  padding: 11px 18px;
+  font-weight: 700;
+}
+
+.primary-button {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.primary-button:hover {
+  background: #1d4ed8;
+}
+
+.secondary-button {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.secondary-button:hover {
+  background: #d1d5db;
+}
+
+/* ============================================================
+   MEMBER RESULTS
+   ============================================================ */
+
+.member-results {
+  margin-top: 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.member-result {
+  padding: 14px;
+  border-bottom: 1px solid #e5e7eb;
+  cursor: pointer;
+  background: #ffffff;
+}
+
+.member-result:last-child {
+  border-bottom: 0;
+}
+
+.member-result:hover {
+  background: #f9fafb;
+}
+
+.member-result-name {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.member-result-meta {
+  margin-top: 3px;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+/* ============================================================
+   MEMBER INFO
+   ============================================================ */
+
+.member-info {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.info-item span {
+  display: block;
+  color: #6b7280;
+  font-size: 11px;
+  margin-bottom: 4px;
+}
+
+.info-item strong {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+/* ============================================================
+   PAYMENT SELECTOR
+   ============================================================ */
+
+.payment-selector {
+  margin-top: 18px;
+  padding: 15px;
+  border: 1px solid #dbeafe;
+  background: #eff6ff;
+  border-radius: 10px;
+}
+
+.payment-selector label {
+  color: #1e3a8a;
+}
+
+.payment-selector select {
+  background: #ffffff;
+}
+
+/* ============================================================
+   OBLIGATIONS
+   ============================================================ */
+
+.obligation-item {
+  display: grid;
+  grid-template-columns: 1fr 150px;
+  gap: 15px;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.obligation-item:last-child {
+  border-bottom: 0;
+}
+
+.obligation-name {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.obligation-description {
+  margin-top: 4px;
+  color: #6b7280;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.obligation-balance {
+  margin-top: 7px;
+  font-size: 13px;
+}
+
+.amount-input {
+  text-align: right;
+  font-weight: 700;
+}
+
+/* ============================================================
+   SUMMARY
+   ============================================================ */
+
+.payment-summary {
+  margin-top: 16px;
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 15px;
+}
+
+.summary-item,
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.summary-item {
+  font-size: 13px;
+}
+
+.summary-total {
+  margin-top: 10px;
+  padding-top: 12px;
+  border-top: 1px solid #d1d5db;
+  font-size: 18px;
+}
+
+/* ============================================================
+   ACTIONS
+   ============================================================ */
+
+.action-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.collection-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.collection-action {
+  min-height: 48px;
+  border: 1px solid #dbeafe;
+  background: #ffffff;
+  color: #1d4ed8;
+  border-radius: 9px;
+  font-weight: 700;
+}
+
+.collection-action.primary {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+/* ============================================================
+   STATUS
+   ============================================================ */
+
+.status {
+  padding: 12px 14px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  font-size: 13px;
+}
+
+.status.hidden {
+  display: none;
+}
+
+.status.info {
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
+.status.success {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.status.error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+/* ============================================================
+   SUCCESS
+   ============================================================ */
+
+.success-box {
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: 10px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+}
+
+.success-box.hidden {
+  display: none;
+}
+
+.success-title {
+  color: #065f46;
+  font-weight: 800;
+  margin-bottom: 12px;
+}
+
+.success-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+}
+
+#receiptNumber {
+  font-size: 18px;
+}
+
+/* ============================================================
+   MOBILE FIRST
    ============================================================ */
 
 @media (max-width: 750px) {
 
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .app {
+    display: block;
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    width: 100%;
+    min-height: auto;
+    height: auto;
+    padding: 10px;
+    flex: none;
+  }
+
+  .brand {
+    padding: 6px 8px 10px;
+  }
+
+  .brand-title {
+    font-size: 20px;
+  }
+
+  .brand-subtitle {
+    font-size: 10px;
+  }
+
+  .navigation {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .nav-item {
+    min-height: 44px;
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .main {
+    width: 100%;
+  }
+
+  .topbar {
+    min-height: 58px;
+    padding: 12px 14px;
+  }
+
+  .page-title {
+    font-size: 18px;
+  }
+
+  .page-subtitle {
+    font-size: 11px;
+  }
+
+  .content {
+    width: 100%;
+    padding: 8px;
+  }
+
+  .welcome-card,
+  .module-card {
+    width: 100%;
+    padding: 13px;
+    border-radius: 10px;
+  }
+
+  .welcome-card h1 {
+    font-size: 20px;
+  }
+
+  .module-header {
+    margin-bottom: 16px;
+  }
+
+  .module-header h2 {
+    font-size: 19px;
+  }
+
+  .section {
+    padding-top: 15px;
+    margin-top: 15px;
+  }
+
+  .section h3 {
+    font-size: 15px;
+    margin-bottom: 11px;
+  }
+
+  .search-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .search-row button {
+    width: 100%;
+  }
+
+  .form-grid,
+  .member-info {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .form-group.full {
+    grid-column: auto;
+  }
+
+  .obligation-item {
+    display: block;
+    padding: 14px 0;
+  }
+
+  .obligation-item .amount-input {
+    width: 100%;
+    margin-top: 10px;
+    text-align: left;
+  }
+
+  .obligation-name {
+    font-size: 14px;
+  }
+
+  .obligation-description {
+    font-size: 12px;
+  }
+
+  .obligation-balance {
+    font-size: 13px;
+  }
+
+  .payment-summary {
+    position: sticky;
+    bottom: 8px;
+    z-index: 5;
+    margin-top: 12px;
+    padding: 13px;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.10);
+  }
+
+  .summary-total {
+    font-size: 17px;
+  }
+
+  .collection-actions {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .collection-action {
+    width: 100%;
+  }
+
+  .action-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .action-row button {
+    width: 100%;
+  }
+
+  .primary-button,
+  .secondary-button {
+    width: 100%;
+    min-height: 46px;
+  }
+
+  .payment-selector {
+    padding: 12px;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+    min-height: 46px;
+  }
+
+  textarea {
+    min-height: 80px;
+  }
+
+  .success-row {
+    gap: 12px;
+  }
+}
+
+/* ============================================================
+   VERY SMALL PHONES
+   ============================================================ */
+
+@media (max-width: 380px) {
+
+  .content {
+    padding: 5px;
+  }
+
+  .module-card,
+  .welcome-card {
+    padding: 10px;
+  }
+
+  .navigation {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .nav-item {
+    font-size: 12px;
+    padding: 9px 6px;
+  }
+
+  .page-title {
+    font-size: 17px;
+  }
+}
+
+/* ============================================================
+   DASHBOARD SUMMARY
+   ============================================================ */
+.dashboard-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.dashboard-secondary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.dashboard-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 18px;
+  min-height: 105px;
+}
+
+.dashboard-card-title {
+  color: #374151;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.dashboard-card-value {
+  color: #111827;
+  font-size: 25px;
+  font-weight: 800;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.dashboard-welcome {
+  margin-top: 0;
+}
+
+@media (max-width: 750px) {
   .dashboard-summary {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-
-    justify-content: stretch;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 
-  .dashboard-summary .dashboard-card {
+  .dashboard-secondary {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .dashboard-card {
+    min-height: 92px;
+    padding: 13px;
+    border-radius: 10px;
+  }
+
+  .dashboard-card-title {
+    font-size: 11px;
+    margin-bottom: 7px;
+  }
+
+  .dashboard-card-value {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 380px) {
+  .dashboard-summary {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   TOFA FMS - FINAL VIEWPORT / COMPACT LAYOUT
+   Keep every module inside the application viewport.
+   No browser-level horizontal or vertical scrolling.
+   ============================================================ */
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body {
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+.app {
+  width: 100%;
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.sidebar {
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.main {
+  height: 100vh;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  flex: 0 0 52px;
+  height: 52px;
+  min-height: 52px;
+  padding: 7px 16px;
+}
+
+.content {
+  flex: 1 1 auto;
+  height: calc(100vh - 52px);
+  min-height: 0;
+  overflow: hidden;
+  padding: 10px 14px;
+}
+
+.page {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+/* Dashboard: readable, compact, no excessive zoom */
+#dashboardPage {
+  height: 100%;
+  overflow: hidden;
+}
+
+#dashboardPage .dashboard-summary {
+  gap: 7px;
+  margin-bottom: 7px;
+}
+
+#dashboardPage .dashboard-card {
+  min-height: 62px;
+  padding: 8px 11px;
+}
+
+#dashboardPage .dashboard-card-title {
+  font-size: 10px;
+  margin-bottom: 3px;
+}
+
+#dashboardPage .dashboard-card-value {
+  font-size: 18px;
+  line-height: 1.05;
+}
+
+#dashboardPage .dashboard-secondary {
+  gap: 7px;
+  margin-bottom: 7px;
+}
+
+#dashboardPage .dashboard-panel,
+#dashboardPage .previous-month,
+#dashboardPage .outstanding-obligations,
+#dashboardPage .financial-position {
+  padding: 9px 11px;
+  margin-bottom: 7px;
+}
+
+#dashboardPage .mini-card,
+#dashboardPage .dashboard-mini-card,
+#dashboardPage .obligation-card,
+#dashboardPage .outstanding-card {
+  padding: 7px 9px;
+  min-height: 48px;
+}
+
+#dashboardPage .mini-card-value,
+#dashboardPage .dashboard-mini-value,
+#dashboardPage .obligation-card-value,
+#dashboardPage .outstanding-card-value {
+  font-size: 14px;
+}
+
+/* Remove the redundant welcome/open-collections block */
+#dashboardPage .dashboard-welcome {
+  display: none !important;
+}
+
+/* Desktop: preserve readability and use the available width */
+@media (min-width: 751px) {
+  .sidebar {
+    width: 215px;
+    flex: 0 0 215px;
+    padding: 12px 9px;
+  }
+
+  .brand {
+    padding: 6px 9px 14px;
+  }
+
+  .brand-title {
+    font-size: 20px;
+  }
+
+  .brand-subtitle {
+    font-size: 10px;
+  }
+
+  .navigation {
+    gap: 3px;
+  }
+
+  .nav-item {
+    min-height: 38px;
+    padding: 8px 11px;
+    font-size: 12px;
+  }
+
+  /* Use only a small scale reduction on short laptop screens */
+  .content {
+    zoom: 0.92;
+  }
+}
+
+@media (min-width: 751px) and (max-height: 800px) {
+  .content {
+    zoom: 0.86;
+    padding: 8px 12px;
+  }
+
+  .topbar {
+    flex-basis: 49px;
+    height: 49px;
+    min-height: 49px;
+  }
+}
+
+@media (min-width: 751px) and (max-height: 700px) {
+  .content {
+    zoom: 0.80;
+  }
+
+  .nav-item {
+    min-height: 34px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+}
+
+/* Mobile: retain one-column behavior but keep the viewport fixed */
+@media (max-width: 750px) {
+  html,
+  body {
+    overflow: hidden;
+  }
+
+  .app {
+    height: 100vh;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .sidebar {
     width: 100%;
-    height: 82px;
-    min-height: 82px;
+    height: auto;
+    min-height: 0;
+    flex: 0 0 auto;
+    padding: 6px;
   }
 
-  .dashboard-mini-grid {
-    grid-template-columns:
-      repeat(3, minmax(0, 1fr));
+  .brand {
+    padding: 3px 7px 5px;
   }
 
-  .dashboard-mini-card {
+  .brand-title {
+    font-size: 17px;
+  }
+
+  .brand-subtitle {
+    font-size: 9px;
+  }
+
+  .navigation {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+  }
+
+  .nav-item {
+    min-height: 34px;
+    padding: 7px 8px;
+    font-size: 11px;
+  }
+
+  .main {
+    height: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .topbar {
+    flex: 0 0 45px;
+    height: 45px;
+    min-height: 45px;
+    padding: 6px 10px;
+  }
+
+  .content {
+    height: calc(100% - 45px);
+    min-height: 0;
+    padding: 6px;
+    overflow: hidden;
+    zoom: 1;
+  }
+
+  .page {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .module-card {
+    max-height: 100%;
+    overflow: hidden;
+  }
+}
+
+/* ============================================================
+   TOFA DASHBOARD V2 - COMPLETE COMPACT VIEW
+   ============================================================ */
+#dashboardPage {
+  box-sizing: border-box;
+  padding: 0;
+}
+
+.dashboard-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 7px;
+}
+
+.dashboard-heading h2 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.15;
+}
+
+.dashboard-heading p {
+  margin: 2px 0 0;
+  font-size: 10px;
+}
+
+.dashboard-year {
+  padding: 7px 13px;
+  border: 1px solid #bfdbfe;
+  border-radius: 18px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.dashboard-v2-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  margin-bottom: 7px;
+}
+
+.dashboard-v2-summary .dashboard-card {
+  min-height: 56px;
+  padding: 8px 10px;
+}
+
+.dashboard-v2-summary .dashboard-card-title {
+  font-size: 10px;
+  margin-bottom: 3px;
+}
+
+.dashboard-v2-summary .dashboard-card-value {
+  font-size: 18px;
+}
+
+.dashboard-balance-card,
+.position-balance {
+  border-color: #93c5fd !important;
+  background: #eff6ff !important;
+}
+
+.dashboard-panel {
+  border: 1px solid #d9dee7;
+  border-radius: 9px;
+  background: #fff;
+  padding: 8px 10px;
+  margin-bottom: 7px;
+  box-sizing: border-box;
+}
+
+.dashboard-panel-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.dashboard-panel-heading h3 {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.1;
+}
+
+.dashboard-panel-heading span {
+  display: block;
+  margin-top: 2px;
+  font-size: 9px;
+  color: #4b5563;
+}
+
+.previous-balance {
+  text-align: right;
+  flex: 0 0 auto;
+}
+
+.previous-balance small {
+  display: block;
+  font-size: 8px;
+  color: #6b7280;
+}
+
+.previous-balance strong {
+  display: block;
+  font-size: 14px;
+  line-height: 1.05;
+}
+
+.dashboard-mini-grid,
+.dashboard-obligations-grid {
+  display: grid;
+  gap: 6px;
+}
+
+.dashboard-mini-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.dashboard-obligations-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.dashboard-mini-card {
+  min-width: 0;
+  min-height: 42px;
+  padding: 6px 8px;
+  border: 1px solid #dfe4eb;
+  border-radius: 7px;
+  background: #f8fafc;
+  box-sizing: border-box;
+}
+
+.dashboard-mini-card span {
+  display: block;
+  font-size: 9px;
+  color: #374151;
+  margin-bottom: 2px;
+}
+
+.dashboard-mini-card strong {
+  display: block;
+  font-size: 14px;
+  line-height: 1.05;
+}
+
+.financial-position-flow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr) 20px minmax(0, 1fr);
+  align-items: center;
+  gap: 5px;
+}
+
+.position-card {
+  min-width: 0;
+  min-height: 43px;
+  padding: 6px 8px;
+  border: 1px solid #dfe4eb;
+  border-radius: 7px;
+  background: #f8fafc;
+}
+
+.position-card span {
+  display: block;
+  font-size: 9px;
+  color: #374151;
+  margin-bottom: 2px;
+}
+
+.position-card strong {
+  display: block;
+  font-size: 15px;
+}
+
+.flow-symbol {
+  text-align: center;
+  font-size: 16px;
+}
+
+@media (min-width: 751px) and (min-height: 801px) {
+  .content {
+    zoom: 0.94;
+  }
+}
+
+@media (max-width: 750px) {
+  html, body { overflow: hidden; }
+  .dashboard-v2-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-mini-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .dashboard-obligations-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .financial-position-flow { grid-template-columns: 1fr; }
+  .flow-symbol { line-height: 12px; }
+}
+
+@media (max-width: 420px) {
+  .dashboard-v2-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-mini-grid { grid-template-columns: 1fr; }
+  .dashboard-obligations-grid { grid-template-columns: 1fr 1fr; }
+}
+
+
+
+/* ============================================================
+   TOFA DASHBOARD - SQUARE SUMMARY CARDS
+   Final override: dashboard cards are compact square cards,
+   not stretched horizontal rectangles.
+   ============================================================ */
+#dashboardPage .dashboard-v2-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 180px);
+  gap: 10px;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 0 10px 0;
+}
+
+#dashboardPage .dashboard-v2-summary .dashboard-card {
+  width: 180px;
+  height: 180px;
+  min-width: 180px;
+  min-height: 180px;
+  aspect-ratio: 1 / 1;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-radius: 10px;
+}
+
+#dashboardPage .dashboard-v2-summary .dashboard-card-title {
+  font-size: 11px;
+  margin-bottom: 8px;
+}
+
+#dashboardPage .dashboard-v2-summary .dashboard-card-value {
+  font-size: 22px;
+  line-height: 1.15;
+}
+
+#dashboardPage .dashboard-v2-summary .dashboard-balance-card {
+  background: #eff6ff !important;
+}
+
+@media (min-width: 751px) and (max-height: 800px) {
+  #dashboardPage .dashboard-v2-summary {
+    grid-template-columns: repeat(3, 150px);
+    gap: 8px;
+  }
+
+  #dashboardPage .dashboard-v2-summary .dashboard-card {
+    width: 150px;
+    height: 150px;
+    min-width: 150px;
+    min-height: 150px;
+    padding: 12px;
+  }
+
+  #dashboardPage .dashboard-v2-summary .dashboard-card-title {
+    font-size: 10px;
+  }
+
+  #dashboardPage .dashboard-v2-summary .dashboard-card-value {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 750px) {
+  #dashboardPage .dashboard-v2-summary {
     width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
 
-  .dashboard-obligations-grid {
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-  }
-
-  .dashboard-obligations-grid
-  .dashboard-mini-card {
+  #dashboardPage .dashboard-v2-summary .dashboard-card {
     width: 100%;
+    height: auto;
+    min-width: 0;
+    min-height: 0;
+    aspect-ratio: 1 / 1;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 420px) {
+  #dashboardPage .dashboard-v2-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  #dashboardPage .dashboard-v2-summary .dashboard-card-value {
+    font-size: 17px;
+  }
 }
