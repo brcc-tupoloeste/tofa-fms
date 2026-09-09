@@ -1104,3 +1104,528 @@ body {
     overflow: hidden;
   }
 }
+
+/* ============================================================
+   TOFA DASHBOARD V2
+   ============================================================ */
+
+#dashboardPage {
+  box-sizing: border-box;
+  padding: 0;
+}
+
+
+/* ============================================================
+   DASHBOARD HEADER
+   ============================================================ */
+
+.dashboard-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 7px;
+}
+
+.dashboard-heading h2 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.15;
+}
+
+.dashboard-heading p {
+  margin: 2px 0 0;
+  font-size: 10px;
+}
+
+.dashboard-year {
+  padding: 7px 13px;
+  border: 1px solid #bfdbfe;
+  border-radius: 18px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+
+/* ============================================================
+   FINANCIAL OVERVIEW
+   ============================================================ */
+
+.dashboard-v2-summary {
+  display: grid;
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 7px;
+  margin-bottom: 7px;
+}
+
+.dashboard-v2-summary
+.dashboard-card {
+
+  min-height: 56px;
+
+  padding:
+    8px 10px;
+
+}
+
+.dashboard-v2-summary
+.dashboard-card-title {
+
+  font-size: 10px;
+
+  margin-bottom: 3px;
+
+}
+
+.dashboard-v2-summary
+.dashboard-card-value {
+
+  font-size: 18px;
+
+}
+
+
+/* ASSOCIATION BALANCE */
+
+.dashboard-balance-card {
+
+  border-color:
+    #93c5fd !important;
+
+  background:
+    #eff6ff !important;
+
+}
+
+
+/* ============================================================
+   DASHBOARD PANELS
+   ============================================================ */
+
+.dashboard-panel {
+
+  border:
+    1px solid #d9dee7;
+
+  border-radius:
+    9px;
+
+  background:
+    #ffffff;
+
+  padding:
+    8px 10px;
+
+  margin-bottom:
+    7px;
+
+  box-sizing:
+    border-box;
+
+}
+
+
+.dashboard-panel-heading {
+
+  display:
+    flex;
+
+  justify-content:
+    space-between;
+
+  align-items:
+    center;
+
+  gap:
+    10px;
+
+  margin-bottom:
+    6px;
+
+}
+
+
+.dashboard-panel-heading h3 {
+
+  margin:
+    0;
+
+  font-size:
+    13px;
+
+  line-height:
+    1.1;
+
+}
+
+
+.dashboard-panel-heading span {
+
+  display:
+    block;
+
+  margin-top:
+    2px;
+
+  font-size:
+    9px;
+
+  color:
+    #4b5563;
+
+}
+
+
+/* ============================================================
+   PREVIOUS MONTH
+   ============================================================ */
+
+.previous-balance {
+
+  text-align:
+    right;
+
+  flex:
+    0 0 auto;
+
+}
+
+
+.previous-balance small {
+
+  display:
+    block;
+
+  font-size:
+    8px;
+
+  color:
+    #6b7280;
+
+}
+
+
+.previous-balance strong {
+
+  display:
+    block;
+
+  font-size:
+    14px;
+
+  line-height:
+    1.05;
+
+}
+
+
+/* ============================================================
+   MINI CARDS
+   ============================================================ */
+
+.dashboard-mini-grid,
+.dashboard-obligations-grid {
+
+  display:
+    grid;
+
+  gap:
+    6px;
+
+}
+
+
+.dashboard-mini-grid {
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+}
+
+
+.dashboard-obligations-grid {
+
+  grid-template-columns:
+    repeat(5, minmax(0, 1fr));
+
+}
+
+
+.dashboard-mini-card {
+
+  min-width:
+    0;
+
+  min-height:
+    42px;
+
+  padding:
+    6px 8px;
+
+  border:
+    1px solid #dfe4eb;
+
+  border-radius:
+    7px;
+
+  background:
+    #f8fafc;
+
+  box-sizing:
+    border-box;
+
+}
+
+
+.dashboard-mini-card span {
+
+  display:
+    block;
+
+  font-size:
+    9px;
+
+  color:
+    #374151;
+
+  margin-bottom:
+    2px;
+
+}
+
+
+.dashboard-mini-card strong {
+
+  display:
+    block;
+
+  font-size:
+    14px;
+
+  line-height:
+    1.05;
+
+}
+
+
+/* ============================================================
+   FINANCIAL POSITION
+   ============================================================ */
+
+.financial-position-flow {
+
+  display:
+    grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    20px
+    minmax(0, 1fr)
+    20px
+    minmax(0, 1fr);
+
+  align-items:
+    center;
+
+  gap:
+    5px;
+
+}
+
+
+.position-card {
+
+  min-width:
+    0;
+
+  min-height:
+    43px;
+
+  padding:
+    6px 8px;
+
+  border:
+    1px solid #dfe4eb;
+
+  border-radius:
+    7px;
+
+  background:
+    #f8fafc;
+
+}
+
+
+.position-card span {
+
+  display:
+    block;
+
+  font-size:
+    9px;
+
+  color:
+    #374151;
+
+  margin-bottom:
+    2px;
+
+}
+
+
+.position-card strong {
+
+  display:
+    block;
+
+  font-size:
+    15px;
+
+}
+
+
+.flow-symbol {
+
+  text-align:
+    center;
+
+  font-size:
+    16px;
+
+}
+
+
+.position-balance {
+
+  border-color:
+    #93c5fd !important;
+
+  background:
+    #eff6ff !important;
+
+}
+
+
+/* ============================================================
+   DESKTOP COMPACT
+   ============================================================ */
+
+@media
+(min-width: 751px) {
+
+  .dashboard-v2-summary {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+}
+
+
+/* ============================================================
+   SHORT DESKTOP SCREEN
+   ============================================================ */
+
+@media
+(min-width: 751px)
+and (max-height: 800px) {
+
+  .content {
+    zoom:
+      0.86;
+  }
+
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media
+(max-width: 750px) {
+
+  html,
+  body {
+
+    overflow:
+      hidden;
+
+  }
+
+
+  .dashboard-v2-summary {
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+  }
+
+
+  .dashboard-mini-grid {
+
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+
+  }
+
+
+  .dashboard-obligations-grid {
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+  }
+
+
+  .financial-position-flow {
+
+    grid-template-columns:
+      1fr;
+
+  }
+
+
+  .flow-symbol {
+
+    line-height:
+      12px;
+
+  }
+
+}
+
+
+/* ============================================================
+   VERY SMALL MOBILE
+   ============================================================ */
+
+@media
+(max-width: 420px) {
+
+  .dashboard-v2-summary {
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+  }
+
+
+  .dashboard-mini-grid {
+
+    grid-template-columns:
+      1fr;
+
+  }
+
+
+  .dashboard-obligations-grid {
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+  }
+
+}
