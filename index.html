@@ -20,7 +20,9 @@
 
   <div class="app">
 
-    <!-- SIDEBAR -->
+    <!-- =====================================================
+         SIDEBAR
+         ===================================================== -->
     <aside class="sidebar">
 
       <div class="brand">
@@ -103,12 +105,15 @@
     </aside>
 
 
-    <!-- MAIN -->
+    <!-- =====================================================
+         MAIN
+         ===================================================== -->
     <main class="main">
 
       <header class="topbar">
 
         <div>
+
           <div
             id="pageTitle"
             class="page-title"
@@ -122,46 +127,407 @@
           >
             TOFA Financial Management System
           </div>
+
         </div>
 
       </header>
 
 
+      <!-- ===================================================
+           APP CONTENT
+           =================================================== -->
       <section
         id="appContent"
         class="content"
       >
 
-        <!-- DASHBOARD DEFAULT -->
+
+        <!-- =================================================
+             DASHBOARD
+             ================================================= -->
         <div
           id="dashboardPage"
           class="page"
         >
 
-          <div class="welcome-card">
+          <div class="dashboard-header">
 
-            <h1>
-              TOFA Financial Management System
-            </h1>
+            <div>
 
-            <p>
-              Welcome to the Tupol Oeste Farmer's Association
-              financial management system.
-            </p>
+              <h1>
+                Dashboard
+              </h1>
 
-            <button
-              id="openCollectionsButton"
-              class="primary-button"
-            >
-              Open Collections
-            </button>
+              <p>
+                TOFA Financial Management System
+              </p>
+
+            </div>
 
           </div>
+
+
+          <!-- FINANCIAL SUMMARY -->
+          <div class="dashboard-section">
+
+            <div class="section-title">
+
+              <h2>
+                Financial Summary
+              </h2>
+
+              <span id="dashboardYear">
+                —
+              </span>
+
+            </div>
+
+
+            <div class="dashboard-grid">
+
+
+              <!-- ACTIVE MEMBERS -->
+              <div class="dashboard-card">
+
+                <div class="dashboard-card-icon">
+                  👥
+                </div>
+
+                <div class="dashboard-card-label">
+                  Active Members
+                </div>
+
+                <div
+                  id="dashActiveMembers"
+                  class="dashboard-card-value"
+                >
+                  —
+                </div>
+
+              </div>
+
+
+              <!-- REGISTRATION -->
+              <div class="dashboard-card">
+
+                <div class="dashboard-card-icon">
+                  🧾
+                </div>
+
+                <div class="dashboard-card-label">
+                  Registration Fee
+                </div>
+
+                <div
+                  id="dashRegistration"
+                  class="dashboard-card-value"
+                >
+                  ₱0.00
+                </div>
+
+              </div>
+
+
+              <!-- YEARLY DUE -->
+              <div class="dashboard-card">
+
+                <div class="dashboard-card-icon">
+                  📅
+                </div>
+
+                <div class="dashboard-card-label">
+                  Yearly Due
+                </div>
+
+                <div
+                  id="dashYearlyDue"
+                  class="dashboard-card-value"
+                >
+                  ₱0.00
+                </div>
+
+              </div>
+
+
+              <!-- COLLECTIONS -->
+              <div class="dashboard-card">
+
+                <div class="dashboard-card-icon">
+                  💰
+                </div>
+
+                <div class="dashboard-card-label">
+                  Total Collections
+                </div>
+
+                <div
+                  id="dashCollections"
+                  class="dashboard-card-value"
+                >
+                  ₱0.00
+                </div>
+
+              </div>
+
+
+              <!-- EXPENSES -->
+              <div class="dashboard-card">
+
+                <div class="dashboard-card-icon">
+                  💸
+                </div>
+
+                <div class="dashboard-card-label">
+                  Total Expenses
+                </div>
+
+                <div
+                  id="dashExpenses"
+                  class="dashboard-card-value"
+                >
+                  ₱0.00
+                </div>
+
+              </div>
+
+
+              <!-- ASSOCIATION BALANCE -->
+              <div
+                class="dashboard-card highlight"
+              >
+
+                <div class="dashboard-card-icon">
+                  🏦
+                </div>
+
+                <div class="dashboard-card-label">
+                  Association Balance
+                </div>
+
+                <div
+                  id="dashBalance"
+                  class="dashboard-card-value"
+                >
+                  ₱0.00
+                </div>
+
+              </div>
+
+
+            </div>
+
+          </div>
+
+
+          <!-- =================================================
+               QUICK ACTIONS
+               ================================================= -->
+          <div class="dashboard-section">
+
+            <div class="section-title">
+
+              <h2>
+                Quick Actions
+              </h2>
+
+            </div>
+
+
+            <div class="quick-actions">
+
+
+              <!-- COLLECTIONS -->
+              <button
+                type="button"
+                class="quick-action primary"
+                id="dashboardCollectionsButton"
+              >
+
+                <span class="quick-action-icon">
+                  💰
+                </span>
+
+                <span>
+
+                  <strong>
+                    Collections
+                  </strong>
+
+                  <small>
+                    Record member payment
+                  </small>
+
+                </span>
+
+              </button>
+
+
+              <!-- MEMBERS -->
+              <button
+                type="button"
+                class="quick-action"
+                id="dashboardMembersButton"
+                disabled
+              >
+
+                <span class="quick-action-icon">
+                  👥
+                </span>
+
+                <span>
+
+                  <strong>
+                    Members
+                  </strong>
+
+                  <small>
+                    Coming soon
+                  </small>
+
+                </span>
+
+              </button>
+
+
+              <!-- EXPENSES -->
+              <button
+                type="button"
+                class="quick-action"
+                id="dashboardExpensesButton"
+                disabled
+              >
+
+                <span class="quick-action-icon">
+                  💸
+                </span>
+
+                <span>
+
+                  <strong>
+                    Expenses
+                  </strong>
+
+                  <small>
+                    Coming soon
+                  </small>
+
+                </span>
+
+              </button>
+
+
+              <!-- BANK -->
+              <button
+                type="button"
+                class="quick-action"
+                id="dashboardBankButton"
+                disabled
+              >
+
+                <span class="quick-action-icon">
+                  🏦
+                </span>
+
+                <span>
+
+                  <strong>
+                    Bank
+                  </strong>
+
+                  <small>
+                    Coming soon
+                  </small>
+
+                </span>
+
+              </button>
+
+
+            </div>
+
+          </div>
+
+
+          <!-- =================================================
+               SYSTEM STATUS
+               ================================================= -->
+          <div class="dashboard-section">
+
+            <div class="section-title">
+
+              <h2>
+                System Status
+              </h2>
+
+            </div>
+
+
+            <div class="dashboard-status-card">
+
+
+              <div class="status-line">
+
+                <span>
+                  Collections Module
+                </span>
+
+                <strong class="status-online">
+                  ● Active
+                </strong>
+
+              </div>
+
+
+              <div class="status-line">
+
+                <span>
+                  Payment Allocation
+                </span>
+
+                <strong class="status-online">
+                  ● Active
+                </strong>
+
+              </div>
+
+
+              <div class="status-line">
+
+                <span>
+                  Member Accounts
+                </span>
+
+                <strong class="status-online">
+                  ● Active
+                </strong>
+
+              </div>
+
+
+              <div class="status-line">
+
+                <span>
+                  Financial Backend
+                </span>
+
+                <strong class="status-online">
+                  ● Connected
+                </strong>
+
+              </div>
+
+
+            </div>
+
+          </div>
+
 
         </div>
 
 
-        <!-- COLLECTIONS -->
+        <!-- =================================================
+             COLLECTIONS
+             ================================================= -->
         <div
           id="collectionsPage"
           class="page hidden"
@@ -172,6 +538,7 @@
             <div class="module-header">
 
               <div>
+
                 <h2>
                   Collections
                 </h2>
@@ -179,6 +546,7 @@
                 <p>
                   Record and manage member payments.
                 </p>
+
               </div>
 
             </div>
@@ -297,53 +665,70 @@
 
             </div>
 
-            <!-- COLLECTION ACTIONS -->
-<div
-  id="collectionActions"
-  class="collection-actions hidden"
->
-  <button
-    type="button"
-    id="enterPaymentButton"
-    class="collection-action primary"
-  >
-    💵 Enter Payment
-  </button>
 
-  <button
-    type="button"
-    id="viewObligationsButton"
-    class="collection-action"
-  >
-    📋 Obligations
-  </button>
+            <!-- =================================================
+                 COLLECTION ACTIONS
+                 ================================================= -->
+            <div
+              id="collectionActions"
+              class="collection-actions hidden"
+            >
 
-  <button
-    type="button"
-    id="viewHistoryButton"
-    class="collection-action"
-  >
-    🧾 Payment History
-  </button>
-</div>
+              <button
+                type="button"
+                id="enterPaymentButton"
+                class="collection-action primary"
+              >
+                💵 Enter Payment
+              </button>
 
-<!-- PAYMENT FOR SELECTOR -->
-<div
-  id="paymentSelector"
-  class="payment-selector hidden"
->
-  <label for="paymentForSelect">
-    What is this payment for?
-  </label>
 
-  <select id="paymentForSelect">
-    <option value="">
-      Select what to pay
-    </option>
-  </select>
-</div>
+              <button
+                type="button"
+                id="viewObligationsButton"
+                class="collection-action"
+              >
+                📋 Obligations
+              </button>
 
-            <!-- OBLIGATIONS -->
+
+              <button
+                type="button"
+                id="viewHistoryButton"
+                class="collection-action"
+              >
+                🧾 Payment History
+              </button>
+
+            </div>
+
+
+            <!-- =================================================
+                 PAYMENT FOR SELECTOR
+                 ================================================= -->
+            <div
+              id="paymentSelector"
+              class="payment-selector hidden"
+            >
+
+              <label for="paymentForSelect">
+                What is this payment for?
+              </label>
+
+              <select id="paymentForSelect">
+
+                <option value="">
+                  Select what to pay
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <!-- =================================================
+                 OBLIGATIONS
+                 ================================================= -->
             <div
               id="obligationsSection"
               class="section hidden"
@@ -392,7 +777,9 @@
             </div>
 
 
-            <!-- PAYMENT DETAILS -->
+            <!-- =================================================
+                 PAYMENT DETAILS
+                 ================================================= -->
             <div
               id="paymentSection"
               class="section hidden"
@@ -404,6 +791,7 @@
 
 
               <div class="form-grid">
+
 
                 <div class="form-group">
 
@@ -492,6 +880,7 @@
 
                 </div>
 
+
               </div>
 
 
@@ -515,7 +904,7 @@
               </div>
 
 
-              <!-- SUCCESS -->
+              <!-- PAYMENT SUCCESS -->
               <div
                 id="paymentSuccess"
                 class="success-box hidden"
@@ -524,6 +913,7 @@
                 <div class="success-title">
                   Payment Successfully Recorded
                 </div>
+
 
                 <div class="success-row">
 
@@ -550,13 +940,16 @@
 
                 </div>
 
+
               </div>
 
             </div>
 
+
           </div>
 
         </div>
+
 
       </section>
 
@@ -565,182 +958,459 @@
   </div>
 
 
+  <!-- =======================================================
+       JAVASCRIPT
+       ======================================================= -->
+
   <script src="js/api.js"></script>
   <script src="js/app.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
 
-  const actions = document.getElementById('collectionActions');
-  const paymentSelector =
-    document.getElementById('paymentSelector');
 
-  const paymentForSelect =
-    document.getElementById('paymentForSelect');
+  <!-- =======================================================
+       COLLECTION UI HELPERS
+       Does NOT change payment/accounting logic.
+       ======================================================= -->
+  <script>
 
-  const enterPaymentButton =
-    document.getElementById('enterPaymentButton');
-
-  const viewObligationsButton =
-    document.getElementById('viewObligationsButton');
-
-  if (!actions) return;
-
-  function refreshPaymentSelector() {
-
-    const inputs =
-      document.querySelectorAll('.amount-input');
-
-    if (!inputs.length) {
-      paymentSelector.classList.add('hidden');
-      return;
-    }
-
-    paymentForSelect.innerHTML =
-      '<option value="">Select what to pay</option>';
-
-    inputs.forEach(function (input, index) {
-
-      const row = input.closest('.obligation-item');
-
-      if (!row) return;
-
-      const name =
-        row.querySelector('.obligation-name');
-
-      const description =
-        row.querySelector('.obligation-description');
-
-      const balance =
-        row.querySelector('.obligation-balance');
-
-      const label =
-        description && description.textContent.trim()
-          ? description.textContent.trim()
-          : name
-            ? name.textContent.trim()
-            : 'Obligation ' + (index + 1);
-
-      const option =
-        document.createElement('option');
-
-      option.value = index;
-
-      option.textContent =
-        label +
-        (balance
-          ? ' — ' + balance.textContent.trim()
-          : '');
-
-      paymentForSelect.appendChild(option);
-
-    });
-
-    paymentSelector.classList.remove('hidden');
-  }
-
-  paymentForSelect.addEventListener(
-    'change',
+  document.addEventListener(
+    'DOMContentLoaded',
     function () {
 
-      const index =
-        Number(this.value);
 
-      if (
-        Number.isNaN(index) ||
-        this.value === ''
-      ) {
+      const actions =
+        document.getElementById(
+          'collectionActions'
+        );
+
+
+      const paymentSelector =
+        document.getElementById(
+          'paymentSelector'
+        );
+
+
+      const paymentForSelect =
+        document.getElementById(
+          'paymentForSelect'
+        );
+
+
+      const enterPaymentButton =
+        document.getElementById(
+          'enterPaymentButton'
+        );
+
+
+      const viewObligationsButton =
+        document.getElementById(
+          'viewObligationsButton'
+        );
+
+
+      const viewHistoryButton =
+        document.getElementById(
+          'viewHistoryButton'
+        );
+
+
+      if (!actions) {
         return;
       }
 
-      const inputs =
-        document.querySelectorAll('.amount-input');
 
-      const input = inputs[index];
+      /*
+       * -----------------------------------------------
+       * PAYMENT SELECTOR
+       * -----------------------------------------------
+       */
 
-      if (!input) return;
+      function refreshPaymentSelector() {
 
-      input.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center'
-      });
 
-      setTimeout(function () {
-        input.focus();
-      }, 300);
+        if (!paymentSelector ||
+            !paymentForSelect) {
 
-    }
-  );
+          return;
 
-  enterPaymentButton.addEventListener(
-    'click',
-    function () {
+        }
 
-      const paymentSection =
-        document.getElementById('paymentSection');
 
-      if (paymentSection) {
-        paymentSection.classList.remove('hidden');
+        const inputs =
+          document.querySelectorAll(
+            '.amount-input'
+          );
 
-        paymentSection.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
+
+        if (!inputs.length) {
+
+          paymentSelector.classList.add(
+            'hidden'
+          );
+
+          return;
+
+        }
+
+
+        paymentForSelect.innerHTML =
+          '<option value="">Select what to pay</option>';
+
+
+        inputs.forEach(
+          function (input, index) {
+
+
+            const row =
+              input.closest(
+                '.obligation-item'
+              );
+
+
+            if (!row) {
+              return;
+            }
+
+
+            const name =
+              row.querySelector(
+                '.obligation-name'
+              );
+
+
+            const description =
+              row.querySelector(
+                '.obligation-description'
+              );
+
+
+            const balance =
+              row.querySelector(
+                '.obligation-balance'
+              );
+
+
+            let label = '';
+
+
+            if (
+              description &&
+              description.textContent.trim()
+            ) {
+
+              label =
+                description.textContent.trim();
+
+            }
+            else if (
+              name &&
+              name.textContent.trim()
+            ) {
+
+              label =
+                name.textContent.trim();
+
+            }
+            else {
+
+              label =
+                'Obligation ' +
+                (index + 1);
+
+            }
+
+
+            const option =
+              document.createElement(
+                'option'
+              );
+
+
+            option.value =
+              index;
+
+
+            option.textContent =
+              label +
+              (
+                balance
+                  ? ' — ' +
+                    balance.textContent.trim()
+                  : ''
+              );
+
+
+            paymentForSelect.appendChild(
+              option
+            );
+
+
+          }
+        );
+
+
+        paymentSelector.classList.remove(
+          'hidden'
+        );
+
       }
 
-    }
-  );
 
-  viewObligationsButton.addEventListener(
-    'click',
-    function () {
+      /*
+       * -----------------------------------------------
+       * SELECT PAYMENT TARGET
+       * -----------------------------------------------
+       */
 
-      const section =
-        document.getElementById('obligationsSection');
+      if (paymentForSelect) {
 
-      if (section) {
-        section.classList.remove('hidden');
+        paymentForSelect.addEventListener(
+          'change',
+          function () {
 
-        section.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
+
+            if (this.value === '') {
+              return;
+            }
+
+
+            const index =
+              Number(
+                this.value
+              );
+
+
+            if (
+              Number.isNaN(index)
+            ) {
+              return;
+            }
+
+
+            const inputs =
+              document.querySelectorAll(
+                '.amount-input'
+              );
+
+
+            const input =
+              inputs[index];
+
+
+            if (!input) {
+              return;
+            }
+
+
+            input.scrollIntoView(
+              {
+                behavior: 'smooth',
+                block: 'center'
+              }
+            );
+
+
+            setTimeout(
+              function () {
+
+                input.focus();
+
+              },
+              300
+            );
+
+
+          }
+        );
+
       }
 
-    }
-  );
 
-  /*
-   * app.js creates the obligation rows dynamically.
-   * Watch for those rows and automatically populate
-   * the payment selector.
-   */
-  const observer =
-    new MutationObserver(function () {
+      /*
+       * -----------------------------------------------
+       * ENTER PAYMENT
+       * -----------------------------------------------
+       */
 
-      const hasObligations =
-        document.querySelectorAll(
-          '.amount-input'
-        ).length > 0;
+      if (enterPaymentButton) {
 
-      if (hasObligations) {
+        enterPaymentButton.addEventListener(
+          'click',
+          function () {
 
-        actions.classList.remove('hidden');
 
-        refreshPaymentSelector();
+            const paymentSection =
+              document.getElementById(
+                'paymentSection'
+              );
+
+
+            if (!paymentSection) {
+              return;
+            }
+
+
+            paymentSection.classList.remove(
+              'hidden'
+            );
+
+
+            paymentSection.scrollIntoView(
+              {
+                behavior: 'smooth',
+                block: 'start'
+              }
+            );
+
+
+          }
+        );
 
       }
 
-    });
 
-  observer.observe(
-    document.getElementById('appContent'),
-    {
-      childList: true,
-      subtree: true
+      /*
+       * -----------------------------------------------
+       * VIEW OBLIGATIONS
+       * -----------------------------------------------
+       */
+
+      if (viewObligationsButton) {
+
+        viewObligationsButton.addEventListener(
+          'click',
+          function () {
+
+
+            const section =
+              document.getElementById(
+                'obligationsSection'
+              );
+
+
+            if (!section) {
+              return;
+            }
+
+
+            section.classList.remove(
+              'hidden'
+            );
+
+
+            section.scrollIntoView(
+              {
+                behavior: 'smooth',
+                block: 'start'
+              }
+            );
+
+
+          }
+        );
+
+      }
+
+
+      /*
+       * -----------------------------------------------
+       * PAYMENT HISTORY
+       *
+       * For now this button only opens the area where
+       * history will be displayed in the next phase.
+       *
+       * No fake history is generated.
+       * -----------------------------------------------
+       */
+
+      if (viewHistoryButton) {
+
+        viewHistoryButton.addEventListener(
+          'click',
+          function () {
+
+            const memberInfo =
+              document.getElementById(
+                'memberInfo'
+              );
+
+
+            if (memberInfo) {
+
+              memberInfo.scrollIntoView(
+                {
+                  behavior: 'smooth',
+                  block: 'start'
+                }
+              );
+
+            }
+
+
+          }
+        );
+
+      }
+
+
+      /*
+       * -----------------------------------------------
+       * WATCH DYNAMIC OBLIGATION ROWS
+       * -----------------------------------------------
+       */
+
+      const appContent =
+        document.getElementById(
+          'appContent'
+        );
+
+
+      if (!appContent) {
+        return;
+      }
+
+
+      const observer =
+        new MutationObserver(
+          function () {
+
+
+            const inputs =
+              document.querySelectorAll(
+                '.amount-input'
+              );
+
+
+            if (inputs.length > 0) {
+
+
+              actions.classList.remove(
+                'hidden'
+              );
+
+
+              refreshPaymentSelector();
+
+
+            }
+
+
+          }
+        );
+
+
+      observer.observe(
+        appContent,
+        {
+          childList: true,
+          subtree: true
+        }
+      );
+
+
     }
   );
 
-});
-</script>
+  </script>
+
 </body>
 </html>
