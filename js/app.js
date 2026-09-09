@@ -974,7 +974,6 @@ async function savePayment() {
     );
 
     return;
-
   }
 
 
@@ -982,8 +981,7 @@ async function savePayment() {
 
 
   if (
-    selectedObligations.length ===
-    0
+    selectedObligations.length === 0
   ) {
 
     showStatus(
@@ -992,7 +990,6 @@ async function savePayment() {
     );
 
     return;
-
   }
 
 
@@ -1001,18 +998,14 @@ async function savePayment() {
       function(total, item) {
 
         return total +
-          Number(
-            item.amount
-          );
+          Number(item.amount);
 
       },
       0
     );
 
 
-  if (
-    totalAmount <= 0
-  ) {
+  if (totalAmount <= 0) {
 
     showStatus(
       'Payment amount must be greater than zero.',
@@ -1020,26 +1013,247 @@ async function savePayment() {
     );
 
     return;
-
   }
 
 
-  /*
-   * We intentionally stop here for the first GitHub test.
-   *
-   * The backend is already validated.
-   * Before enabling browser POST/payment submission,
-   * we will verify the GitHub -> GAS API connection and
-   * handle the browser cross-origin requirement safely.
-   */
+  const paymentDate =
+    document
+      .getElementById('paymentDate')
+      .value
+      .trim();
 
-  showStatus(
-    'Payment form is ready. API write connection will be enabled after the connection test.',
-    'info'
-  );
+
+  const paymentMethod =
+    document
+      .getElementById('paymentMethod')
+      .value
+      .trim();
+
+
+  const receivedBy =
+    document
+      .getElementById('receivedBy')
+      .value
+      .trim();
+
+
+  const remarks =
+    document
+      .getElementById('remarks')
+      .value
+      .trim();
+
+
+  if (!paymentDate) {
+
+    showStatus(
+      'Payment date is required.',
+      'error'
+    );
+
+    return;
+  }
+
+
+  if (!paymentMethod) {
+
+    showStatus(
+      'Payment method is required.',
+      'error'
+    );
+
+    return;
+  }
+
+
+  if (!receivedBy) {
+
+    showStatus(
+      'Received By is required.',
+      'error'
+    );
+
+    return;
+  }
+
+
+  const button =
+    document.getElementById(
+      'savePaymentButton'
+    );
+
+
+  if (button.disabled) {
+    return;
+  }
+
+
+  const originalButtonText =
+    button.textContent;
+
+
+  try {
+
+    button.disabled = true;
+
+    button.textContent =
+      'Saving Payment...';
+
+
+    showStatus(
+      'Saving payment. Please wait...',
+      'info'
+    );
+
+
+    const paymentData = {
+
+      memberId:
+        selectedMember.memberId,
+
+      paymentDate:
+        paymentDate,
+
+      totalAmount:
+        roundMoney(totalAmount),
+
+      paymentMethod:
+        paymentMethod,
+
+      receivedBy:
+        receivedBy,
+
+      remarks:
+        remarks,
+
+      allocations:
+        selectedObligations.map(
+          function(item) {
+
+            return {
+              obligationId:
+                item.obligationId,
+
+              amount:
+                roundMoney(
+                  item.amount
+                )
+            };
+
+          }
+        )
+
+    };
+
+
+    const result =
+      await apiRecordMemberPayment(
+        paymentData
+      );
+
+
+    showStatus(
+      'Payment successfully recorded.',
+      'success'
+    );
+
+
+    const successBox =
+      document.getElementById(
+        'paymentSuccess'
+      );
+
+
+    if (successBox) {
+
+      successBox.classList.remove(
+        'hidden'
+      );
+
+
+      successBox.innerHTML =
+        '<strong>Payment Recorded</strong>' +
+        '<br>' +
+        'Receipt No.: ' +
+        escapeHtml(
+          result.receiptNo ||
+          result.collectionId ||
+          '—'
+        ) +
+        '<br>' +
+        'Amount: ' +
+        formatCurrency(
+          result.totalAmount ||
+          totalAmount
+        );
+
+    }
+
+
+    /*
+     * Reload the member account from the backend.
+     * This ensures the frontend displays the actual
+     * balances calculated by the server.
+     */
+    await selectMember(
+      selectedMember.memberId
+    );
+
+
+    /*
+     * Clear only the payment-entry fields.
+     * The selected member remains active.
+     */
+    document
+      .querySelectorAll(
+        '.amount-input'
+      )
+      .forEach(
+        function(input) {
+
+          input.value = '';
+
+        }
+      );
+
+
+    document
+      .getElementById(
+        'receivedBy'
+      )
+      .value = '';
+
+
+    document
+      .getElementById(
+        'remarks'
+      )
+      .value = '';
+
+
+    updatePaymentSummary();
+
+
+  }
+  catch (error) {
+
+    showStatus(
+      error.message ||
+      'Unable to record payment.',
+      'error'
+    );
+
+  }
+  finally {
+
+    button.disabled = false;
+
+    button.textContent =
+      originalButtonText;
+
+  }
 
 }
-
 
 /**
  * ============================================================
