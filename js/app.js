@@ -24,6 +24,8 @@ document.addEventListener(
 
     setupNavigation();
 
+    setupDashboard();
+
     setupCollections();
 
   }
