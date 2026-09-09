@@ -1089,19 +1089,21 @@ body {
     height: calc(100% - 45px);
     min-height: 0;
     padding: 6px;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     zoom: 1;
   }
 
   .page {
-    height: 100%;
-    min-height: 0;
-    overflow: hidden;
+    height: auto;
+    min-height: 100%;
+    overflow: visible;
   }
 
   .module-card {
-    max-height: 100%;
-    overflow: hidden;
+    max-height: none;
+    overflow: visible;
   }
 }
 
@@ -1518,7 +1520,7 @@ body {
 }
 
 @media (max-width: 750px) {
-  #dashboardPage { overflow: hidden; }
+  #dashboardPage { overflow: visible; height: auto; min-height: 100%; }
   #dashboardPage .dashboard-v2-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   #dashboardPage .dashboard-obligations-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   #dashboardPage .financial-position-flow { grid-template-columns: 1fr; }
