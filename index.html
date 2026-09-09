@@ -133,66 +133,60 @@
       >
 
         <!-- DASHBOARD DEFAULT -->
-        <div
-          id="dashboardPage"
-          class="page"
-        >
+        <div id="dashboardPage" class="page">
 
-          <!-- DASHBOARD SUMMARY -->
-          <div class="dashboard-summary">
-
-            <div class="dashboard-card">
-              <div class="dashboard-card-title">Active Members</div>
-              <div class="dashboard-card-value" id="dashboardActiveMembers">—</div>
+          <div class="dashboard-heading">
+            <div>
+              <h2>Financial Overview</h2>
+              <p>Financial overview for <span id="dashboardYear">2026</span></p>
             </div>
-
-            <div class="dashboard-card">
-              <div class="dashboard-card-title">Registration Fee</div>
-              <div class="dashboard-card-value" id="dashboardRegistrationFee">₱0.00</div>
-            </div>
-
-            <div class="dashboard-card">
-              <div class="dashboard-card-title">Yearly Due</div>
-              <div class="dashboard-card-value" id="dashboardYearlyDue">₱0.00</div>
-            </div>
-
-            <div class="dashboard-card">
-              <div class="dashboard-card-title">Total Collections</div>
-              <div class="dashboard-card-value" id="dashboardCollections">₱0.00</div>
-            </div>
-
-            <div class="dashboard-card">
-              <div class="dashboard-card-title">Total Expenses</div>
-              <div class="dashboard-card-value" id="dashboardExpenses">₱0.00</div>
-            </div>
-
-            <div class="dashboard-card">
-              <div class="dashboard-card-title">Association Balance</div>
-              <div class="dashboard-card-value" id="dashboardAssociationBalance">₱0.00</div>
-            </div>
-
+            <div class="dashboard-year" id="dashboardYearBadge">2026</div>
           </div>
 
-          <div class="dashboard-secondary">
-
-            <div class="dashboard-card">
-              <div class="dashboard-card-title" id="previousCollectionsTitle">Previous Month Collections</div>
-              <div class="dashboard-card-value" id="dashboardPreviousCollections">₱0.00</div>
-            </div>
-
-            <div class="dashboard-card">
-              <div class="dashboard-card-title">Outstanding</div>
-              <div class="dashboard-card-value" id="dashboardOutstanding">₱0.00</div>
-            </div>
-
+          <div class="dashboard-summary dashboard-v2-summary">
+            <div class="dashboard-card"><div class="dashboard-card-title">Active Members</div><div class="dashboard-card-value" id="dashboardActiveMembers">—</div></div>
+            <div class="dashboard-card"><div class="dashboard-card-title">Beginning Balance</div><div class="dashboard-card-value" id="dashboardBeginningBalance">₱0.00</div></div>
+            <div class="dashboard-card"><div class="dashboard-card-title">Total Collections</div><div class="dashboard-card-value" id="dashboardCollections">₱0.00</div></div>
+            <div class="dashboard-card"><div class="dashboard-card-title">Total Expenses</div><div class="dashboard-card-value" id="dashboardExpenses">₱0.00</div></div>
+            <div class="dashboard-card"><div class="dashboard-card-title">Net Income</div><div class="dashboard-card-value" id="dashboardNetIncome">₱0.00</div></div>
+            <div class="dashboard-card dashboard-balance-card"><div class="dashboard-card-title">Association Balance</div><div class="dashboard-card-value" id="dashboardAssociationBalance">₱0.00</div></div>
           </div>
 
+          <div class="dashboard-panel previous-month">
+            <div class="dashboard-panel-heading"><div><h3>Previous Month</h3><span id="previousMonthLabel">—</span></div><div class="previous-balance"><small>Previous Balance</small><strong id="dashboardPreviousBalance">₱0.00</strong></div></div>
+            <div class="dashboard-mini-grid">
+              <div class="dashboard-mini-card"><span>Collections</span><strong id="dashboardPreviousCollections">₱0.00</strong></div>
+              <div class="dashboard-mini-card"><span>Expenses</span><strong id="dashboardPreviousExpenses">₱0.00</strong></div>
+              <div class="dashboard-mini-card"><span>Net Income</span><strong id="dashboardPreviousNetIncome">₱0.00</strong></div>
+            </div>
+          </div>
 
+          <div class="dashboard-panel outstanding-obligations">
+            <div class="dashboard-panel-heading"><div><h3>Outstanding Obligations</h3><span>Current unpaid and partially paid obligations</span></div><div class="previous-balance"><small>Total Outstanding</small><strong id="dashboardOutstanding">₱0.00</strong></div></div>
+            <div class="dashboard-obligations-grid">
+              <div class="dashboard-mini-card"><span>Registration Fee</span><strong id="dashboardRegistrationFee">₱0.00</strong></div>
+              <div class="dashboard-mini-card"><span>Yearly Due</span><strong id="dashboardYearlyDue">₱0.00</strong></div>
+              <div class="dashboard-mini-card"><span>Rice</span><strong id="dashboardRiceDebt">₱0.00</strong></div>
+              <div class="dashboard-mini-card"><span>Fertilizer</span><strong id="dashboardFertilizerDebt">₱0.00</strong></div>
+              <div class="dashboard-mini-card"><span>Cash</span><strong id="dashboardCashDebt">₱0.00</strong></div>
+            </div>
+          </div>
+
+          <div class="dashboard-panel financial-position">
+            <div class="dashboard-panel-heading"><div><h3>Financial Position</h3><span>Beginning balance plus net income</span></div></div>
+            <div class="financial-position-flow">
+              <div class="position-card"><span>Beginning Balance</span><strong id="dashboardPositionBeginning">₱0.00</strong></div>
+              <b class="flow-symbol">+</b>
+              <div class="position-card"><span>Net Income</span><strong id="dashboardPositionNetIncome">₱0.00</strong></div>
+              <b class="flow-symbol">=</b>
+              <div class="position-card position-balance"><span>Association Balance</span><strong id="dashboardPositionBalance">₱0.00</strong></div>
+            </div>
+          </div>
 
         </div>
 
-
-        <!-- COLLECTIONS -->
+        
+<!-- COLLECTIONS -->
         <div
           id="collectionsPage"
           class="page hidden"
