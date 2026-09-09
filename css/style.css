@@ -1606,3 +1606,154 @@ body {
     font-size: 20px;
   }
 }
+
+/* ============================================================
+   TOFA FINAL MOBILE VIEW FIX
+   - Compact mobile navigation
+   - Dashboard can scroll vertically
+   - No horizontal scrolling
+   - Keeps all dashboard sections reachable
+   ============================================================ */
+
+@media (max-width: 750px) {
+  html,
+  body {
+    width: 100%;
+    min-width: 0;
+    height: auto !important;
+    min-height: 100%;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+  body {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .app {
+    display: block !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  .sidebar {
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    padding: 8px 10px !important;
+    overflow: visible !important;
+  }
+
+  .brand {
+    padding: 4px 8px 8px !important;
+  }
+
+  .brand-title {
+    font-size: 18px !important;
+    line-height: 1.15 !important;
+  }
+
+  .brand-subtitle {
+    margin-top: 2px !important;
+    font-size: 9px !important;
+    line-height: 1.2 !important;
+  }
+
+  .navigation {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 4px !important;
+    width: 100% !important;
+  }
+
+  .nav-item {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 34px !important;
+    height: 34px !important;
+    padding: 6px 9px !important;
+    border-radius: 7px !important;
+    font-size: 11px !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+    text-align: left !important;
+  }
+
+  .main {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  .topbar {
+    width: 100% !important;
+    min-height: 45px !important;
+    height: auto !important;
+    padding: 7px 12px !important;
+  }
+
+  .content {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    padding: 8px !important;
+  }
+
+  /* Dashboard itself must never create a clipped viewport. */
+  #dashboardPage {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+  }
+
+  #dashboardPage .dashboard-panel,
+  #dashboardPage .dashboard-section,
+  #dashboardPage .dashboard-card,
+  #dashboardPage .financial-position,
+  #dashboardPage .financial-statement,
+  #dashboardPage .financial-total-row {
+    max-width: 100% !important;
+  }
+
+  /* Keep the bottom Total Association Balance fully visible. */
+  #dashboardPage .financial-total-row {
+    margin-bottom: 14px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .sidebar {
+    padding: 7px 8px !important;
+  }
+
+  .brand {
+    padding: 3px 7px 7px !important;
+  }
+
+  .brand-title {
+    font-size: 17px !important;
+  }
+
+  .brand-subtitle {
+    font-size: 8px !important;
+  }
+
+  .navigation {
+    gap: 3px !important;
+  }
+
+  .nav-item {
+    min-height: 32px !important;
+    height: 32px !important;
+    padding: 5px 8px !important;
+    font-size: 10px !important;
+  }
+}
