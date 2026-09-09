@@ -1,3 +1,10 @@
+/**
+ * ============================================================
+ * TOFA FINANCIAL MANAGEMENT SYSTEM
+ * FRONTEND API SERVICE
+ * ============================================================
+ */
+
 const TOFA_API_URL =
   'https://script.google.com/macros/s/AKfycbybRrN6IH2Gvn5e07mJ2SmkbAhGUpInZ5CQF9SeBK4nDkLjRJ6fORR4zZhIQbT2Vwbpyg/exec';
 
@@ -7,52 +14,119 @@ const TOFA_API_URL =
  * GET API
  * ============================================================
  */
-async function apiGet(action, params = {}) {
+async function apiGet(
+  action,
+  params = {}
+) {
 
-  const query = new URLSearchParams();
+  if (!action) {
 
-  query.set('api', '1');
-  query.set('action', action);
+    throw new Error(
+      'API action is required.'
+    );
 
-  Object.keys(params).forEach(function(key) {
+  }
 
-    const value = params[key];
 
-    if (
-      value !== undefined &&
-      value !== null &&
-      String(value).trim() !== ''
-    ) {
-      query.set(key, String(value));
-    }
+  const query =
+    new URLSearchParams();
 
-  });
 
-  const response = await fetch(
-    TOFA_API_URL + '?' + query.toString(),
-    {
-      method: 'GET',
-      cache: 'no-store'
+  query.set(
+    'api',
+    '1'
+  );
+
+
+  query.set(
+    'action',
+    action
+  );
+
+
+  Object.keys(
+    params
+  ).forEach(
+    function(key) {
+
+      const value =
+        params[key];
+
+
+      if (
+        value !== undefined &&
+        value !== null &&
+        String(value).trim() !== ''
+      ) {
+
+        query.set(
+          key,
+          String(value)
+        );
+
+      }
+
     }
   );
 
-  if (!response.ok) {
-    throw new Error(
-      'API request failed: HTTP ' + response.status
+
+  const response =
+    await fetch(
+      TOFA_API_URL +
+      '?' +
+      query.toString(),
+      {
+        method: 'GET',
+        cache: 'no-store'
+      }
     );
+
+
+  if (!response.ok) {
+
+    throw new Error(
+      'API request failed: HTTP ' +
+      response.status
+    );
+
   }
 
-  const result = await response.json();
 
-  if (!result || result.success !== true) {
+  let result;
+
+
+  try {
+
+    result =
+      await response.json();
+
+  }
+  catch (error) {
+
     throw new Error(
-      result && result.error
+      'API returned an invalid response.'
+    );
+
+  }
+
+
+  if (
+    !result ||
+    result.success !== true
+  ) {
+
+    throw new Error(
+      result &&
+      result.error
         ? result.error
         : 'API request failed.'
     );
+
   }
 
+
   return result;
+
 }
 
 
@@ -61,45 +135,100 @@ async function apiGet(action, params = {}) {
  * POST API
  *
  * text/plain is intentional.
- * It allows the browser to send the Apps Script request
- * without requiring a JSON CORS preflight.
+ *
+ * This avoids a JSON CORS preflight when sending requests
+ * from the GitHub Pages frontend to Google Apps Script.
  * ============================================================
  */
-async function apiPost(action, data = {}) {
+async function apiPost(
+  action,
+  data = {}
+) {
 
-  const payload = {
-    action: action,
-    data: data
-  };
+  if (!action) {
 
-  const response = await fetch(
-    TOFA_API_URL,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain;charset=utf-8'
-      },
-      body: JSON.stringify(payload)
-    }
-  );
-
-  if (!response.ok) {
     throw new Error(
-      'API request failed: HTTP ' + response.status
+      'API action is required.'
     );
+
   }
 
-  const result = await response.json();
 
-  if (!result || result.success !== true) {
+  const payload = {
+
+    action:
+      action,
+
+    data:
+      data
+
+  };
+
+
+  const response =
+    await fetch(
+      TOFA_API_URL,
+      {
+        method: 'POST',
+
+        headers: {
+          'Content-Type':
+            'text/plain;charset=utf-8'
+        },
+
+        body:
+          JSON.stringify(
+            payload
+          )
+      }
+    );
+
+
+  if (!response.ok) {
+
     throw new Error(
-      result && result.error
+      'API request failed: HTTP ' +
+      response.status
+    );
+
+  }
+
+
+  let result;
+
+
+  try {
+
+    result =
+      await response.json();
+
+  }
+  catch (error) {
+
+    throw new Error(
+      'API returned an invalid response.'
+    );
+
+  }
+
+
+  if (
+    !result ||
+    result.success !== true
+  ) {
+
+    throw new Error(
+      result &&
+      result.error
         ? result.error
         : 'API request failed.'
     );
+
   }
 
+
   return result;
+
 }
 
 
@@ -109,7 +238,11 @@ async function apiPost(action, data = {}) {
  * ============================================================
  */
 function apiGetMembers() {
-  return apiGet('members');
+
+  return apiGet(
+    'members'
+  );
+
 }
 
 
@@ -118,20 +251,27 @@ function apiGetMembers() {
  * MEMBER OBLIGATIONS
  * ============================================================
  */
-function apiGetMemberObligations(memberId) {
+function apiGetMemberObligations(
+  memberId
+) {
 
   if (!memberId) {
+
     throw new Error(
       'Member ID is required.'
     );
+
   }
+
 
   return apiGet(
     'memberobligations',
     {
-      memberId: memberId
+      memberId:
+        memberId
     }
   );
+
 }
 
 
@@ -140,20 +280,27 @@ function apiGetMemberObligations(memberId) {
  * MEMBER HISTORY
  * ============================================================
  */
-function apiGetMemberHistory(memberId) {
+function apiGetMemberHistory(
+  memberId
+) {
 
   if (!memberId) {
+
     throw new Error(
       'Member ID is required.'
     );
+
   }
+
 
   return apiGet(
     'memberhistory',
     {
-      memberId: memberId
+      memberId:
+        memberId
     }
   );
+
 }
 
 
@@ -162,11 +309,147 @@ function apiGetMemberHistory(memberId) {
  * RECORD MEMBER PAYMENT
  * ============================================================
  */
-function apiRecordMemberPayment(data) {
+function apiRecordMemberPayment(
+  data
+) {
+
+  if (
+    !data ||
+    typeof data !== 'object'
+  ) {
+
+    throw new Error(
+      'Payment data is required.'
+    );
+
+  }
+
 
   return apiPost(
     'recordmemberpayment',
     data
   );
+
+}
+
+
+/**
+ * ============================================================
+ * DASHBOARD
+ *
+ * These functions are prepared for the Dashboard API.
+ *
+ * They should only be used after the corresponding backend
+ * actions have been added to 06_WebApi.gs.
+ * ============================================================
+ */
+
+
+/**
+ * Get complete Dashboard summary.
+ *
+ * Expected backend action:
+ *
+ * dashboardsummary
+ *
+ * Expected future response structure:
+ *
+ * {
+ *   success: true,
+ *   dashboard: {
+ *     activeMembers: 0,
+ *     registrationCollection: 0,
+ *     yearlyDueCollection: 0,
+ *     totalCollections: 0,
+ *     totalExpenses: 0,
+ *     associationBalance: 0
+ *   }
+ * }
+ */
+function apiGetDashboardSummary(
+  year
+) {
+
+  const params = {};
+
+
+  if (
+    year !== undefined &&
+    year !== null &&
+    String(year).trim() !== ''
+  ) {
+
+    params.year =
+      String(year);
+
+  }
+
+
+  return apiGet(
+    'dashboardsummary',
+    params
+  );
+
+}
+
+
+/**
+ * ============================================================
+ * DASHBOARD MEMBERS
+ * ============================================================
+ *
+ * Optional separate endpoint if needed later.
+ * ============================================================
+ */
+function apiGetDashboardMembers() {
+
+  return apiGet(
+    'members'
+  );
+
+}
+
+
+/**
+ * ============================================================
+ * API CONNECTION TEST
+ * ============================================================
+ */
+async function apiTestConnection() {
+
+  try {
+
+    const result =
+      await apiGetMembers();
+
+
+    return {
+
+      success:
+        true,
+
+      message:
+        'TOFA API connection successful.',
+
+      result:
+        result
+
+    };
+
+  }
+  catch (error) {
+
+    return {
+
+      success:
+        false,
+
+      message:
+        error.message ||
+        'TOFA API connection failed.'
+
+    };
+
+  }
 
 }
