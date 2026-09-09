@@ -766,913 +766,767 @@ label {
 }
 
 /* ============================================================
-   TOFA DASHBOARD - FINAL SQUARE CARD LAYOUT
+   DASHBOARD SUMMARY
    ============================================================ */
-
-#dashboardPage {
-  width: 100%;
-  box-sizing: border-box;
-}
-
-
-/* ============================================================
-   MAIN DASHBOARD CARDS
-   ============================================================ */
-
-#dashboardPage .dashboard-summary,
-#dashboardPage .dashboard-v2-summary {
-
+.dashboard-summary {
   display: grid;
-
-  grid-template-columns:
-    repeat(3, 170px);
-
-  gap: 10px;
-
-  justify-content: center;
-
-  margin-bottom: 8px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
 }
 
+.dashboard-secondary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+}
 
-#dashboardPage .dashboard-summary .dashboard-card,
-#dashboardPage .dashboard-v2-summary .dashboard-card {
-
-  display: flex;
-
-  flex-direction: column;
-
-  justify-content: center;
-
-  width: 170px;
-
-  height: 92px;
-
-  min-height: 92px;
-
-  box-sizing: border-box;
-
-  padding: 11px;
-
+.dashboard-card {
   background: #ffffff;
-
-  border: 1px solid #d9dee7;
-
-  border-radius: 10px;
-
-  box-shadow: none;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 18px;
+  min-height: 105px;
 }
 
-
-#dashboardPage .dashboard-summary .dashboard-card-title,
-#dashboardPage .dashboard-v2-summary .dashboard-card-title {
-
-  display: block;
-
-  font-size: 10px;
-
-  line-height: 1.15;
-
-  margin-bottom: 6px;
-
+.dashboard-card-title {
   color: #374151;
-}
-
-
-#dashboardPage .dashboard-summary .dashboard-card-value,
-#dashboardPage .dashboard-v2-summary .dashboard-card-value {
-
-  display: block;
-
-  font-size: 19px;
-
-  line-height: 1.1;
-
-  font-weight: 800;
-
-  color: #111827;
-}
-
-
-/* ============================================================
-   ASSOCIATION BALANCE
-   ============================================================ */
-
-#dashboardPage .dashboard-balance-card {
-
-  background: #eff6ff !important;
-
-  border:
-    1px solid #93c5fd !important;
-}
-
-
-/* ============================================================
-   DASHBOARD PANELS
-   ============================================================ */
-
-#dashboardPage .dashboard-panel {
-
-  width: 100%;
-
-  box-sizing: border-box;
-
-  padding: 8px 10px;
-
-  margin-bottom: 7px;
-
-  border:
-    1px solid #d9dee7;
-
-  border-radius: 9px;
-
-  background: #ffffff;
-}
-
-
-#dashboardPage .dashboard-panel-heading {
-
-  display: flex;
-
-  justify-content: space-between;
-
-  align-items: center;
-
-  gap: 10px;
-
-  margin-bottom: 6px;
-}
-
-
-#dashboardPage .dashboard-panel-heading h3 {
-
-  margin: 0;
-
   font-size: 13px;
-
-  line-height: 1.1;
+  font-weight: 700;
+  margin-bottom: 10px;
 }
 
-
-#dashboardPage .dashboard-panel-heading span {
-
-  display: block;
-
-  margin-top: 2px;
-
-  font-size: 9px;
-
-  color: #4b5563;
-}
-
-
-/* ============================================================
-   PREVIOUS BALANCE
-   ============================================================ */
-
-#dashboardPage .previous-balance {
-
-  text-align: right;
-
-  flex: 0 0 auto;
-}
-
-
-#dashboardPage .previous-balance small {
-
-  display: block;
-
-  font-size: 8px;
-
-  color: #6b7280;
-}
-
-
-#dashboardPage .previous-balance strong {
-
-  display: block;
-
-  font-size: 14px;
-
-  line-height: 1.05;
-}
-
-
-/* ============================================================
-   PREVIOUS MONTH
-   ============================================================ */
-
-#dashboardPage .dashboard-mini-grid {
-
-  display: grid;
-
-  grid-template-columns:
-    repeat(3, minmax(0, 1fr));
-
-  gap: 8px;
-}
-
-
-#dashboardPage .dashboard-mini-card {
-
-  min-width: 0;
-
-  min-height: 50px;
-
-  padding: 8px 10px;
-
-  box-sizing: border-box;
-
-  border:
-    1px solid #dfe4eb;
-
-  border-radius: 8px;
-
-  background: #f8fafc;
-}
-
-
-#dashboardPage .dashboard-mini-card span {
-
-  display: block;
-
-  font-size: 9px;
-
-  color: #374151;
-
-  margin-bottom: 3px;
-}
-
-
-#dashboardPage .dashboard-mini-card strong {
-
-  display: block;
-
-  font-size: 15px;
-
-  line-height: 1.05;
-
+.dashboard-card-value {
+  color: #111827;
+  font-size: 25px;
   font-weight: 800;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
+.dashboard-welcome {
+  margin-top: 0;
+}
+
+@media (max-width: 750px) {
+  .dashboard-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .dashboard-secondary {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .dashboard-card {
+    min-height: 92px;
+    padding: 13px;
+    border-radius: 10px;
+  }
+
+  .dashboard-card-title {
+    font-size: 11px;
+    margin-bottom: 7px;
+  }
+
+  .dashboard-card-value {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 380px) {
+  .dashboard-summary {
+    grid-template-columns: 1fr;
+  }
+}
 
 /* ============================================================
-   OUTSTANDING OBLIGATIONS
-   ============================================================ */
-
-#dashboardPage .dashboard-obligations-grid {
-
-  display: grid;
-
-  grid-template-columns:
-    repeat(5, minmax(0, 1fr));
-
-  gap: 8px;
-}
-
-
-/* ============================================================
-   FINANCIAL POSITION
-   ============================================================ */
-
-#dashboardPage .financial-position-flow {
-
-  display: grid;
-
-  grid-template-columns:
-    minmax(0, 1fr)
-    25px
-    minmax(0, 1fr)
-    25px
-    minmax(0, 1fr);
-
-  align-items: center;
-
-  gap: 5px;
-}
-
-
-#dashboardPage .position-card {
-
-  min-width: 0;
-
-  min-height: 52px;
-
-  padding: 8px 10px;
-
-  box-sizing: border-box;
-
-  border:
-    1px solid #dfe4eb;
-
-  border-radius: 8px;
-
-  background: #f8fafc;
-}
-
-
-#dashboardPage .position-card span {
-
-  display: block;
-
-  font-size: 9px;
-
-  color: #374151;
-
-  margin-bottom: 3px;
-}
-
-
-#dashboardPage .position-card strong {
-
-  display: block;
-
-  font-size: 15px;
-
-  line-height: 1.05;
-
-  font-weight: 800;
-}
-
-
-#dashboardPage .position-balance {
-
-  background: #eff6ff !important;
-
-  border:
-    1px solid #93c5fd !important;
-}
-
-
-#dashboardPage .flow-symbol {
-
-  text-align: center;
-
-  font-size: 17px;
-
-  font-weight: 800;
-}
-
-
-/* ============================================================
-   REMOVE OPEN COLLECTIONS / WELCOME CARD
-   ============================================================ */
-
-#dashboardPage .dashboard-welcome,
-#dashboardPage .welcome-card {
-
-  display: none !important;
-}
-
-
-/* ============================================================
-   GLOBAL VIEWPORT
+   TOFA FMS - FINAL VIEWPORT / COMPACT LAYOUT
+   Keep every module inside the application viewport.
+   No browser-level horizontal or vertical scrolling.
    ============================================================ */
 
 html,
 body {
-
   width: 100%;
-
   height: 100%;
-
   margin: 0;
-
   padding: 0;
-
   overflow: hidden;
 }
 
-
 body {
-
   overflow-x: hidden;
-
   overflow-y: hidden;
 }
 
-
 .app {
-
   width: 100%;
-
   height: 100vh;
-
   min-height: 0;
-
   overflow: hidden;
 }
-
 
 .sidebar {
-
   height: 100vh;
-
   min-height: 0;
-
   overflow: hidden;
 }
 
-
 .main {
-
   height: 100vh;
-
   min-height: 0;
-
   min-width: 0;
-
   overflow: hidden;
-
   display: flex;
-
   flex-direction: column;
 }
 
-
 .topbar {
-
-  flex:
-    0 0 52px;
-
+  flex: 0 0 52px;
   height: 52px;
-
   min-height: 52px;
-
   padding: 7px 16px;
 }
 
-
 .content {
-
-  flex:
-    1 1 auto;
-
-  height:
-    calc(100vh - 52px);
-
+  flex: 1 1 auto;
+  height: calc(100vh - 52px);
   min-height: 0;
-
   overflow: hidden;
-
-  padding: 9px 14px;
+  padding: 10px 14px;
 }
-
 
 .page {
-
   width: 100%;
-
   height: 100%;
-
   min-height: 0;
 }
 
-
-/* ============================================================
-   DESKTOP
-   ============================================================ */
-
-@media (min-width: 751px) {
-
-  .sidebar {
-
-    width: 215px;
-
-    flex:
-      0 0 215px;
-
-    padding:
-      12px 9px;
-  }
-
-
-  .brand {
-
-    padding:
-      6px 9px 14px;
-  }
-
-
-  .brand-title {
-
-    font-size: 20px;
-  }
-
-
-  .brand-subtitle {
-
-    font-size: 10px;
-  }
-
-
-  .navigation {
-
-    gap: 3px;
-  }
-
-
-  .nav-item {
-
-    min-height: 38px;
-
-    padding:
-      8px 11px;
-
-    font-size: 12px;
-  }
-
+/* Dashboard: readable, compact, no excessive zoom */
+#dashboardPage {
+  height: 100%;
+  overflow: hidden;
 }
 
-
-/* ============================================================
-   LAPTOP 720-800 HEIGHT
-   ============================================================ */
-
-@media
-(min-width: 751px)
-and (max-height: 800px) {
-
-  .content {
-
-    zoom:
-      0.92;
-  }
-
+#dashboardPage .dashboard-summary {
+  gap: 7px;
+  margin-bottom: 7px;
 }
 
-
-/* ============================================================
-   SHORT LAPTOP
-   ============================================================ */
-
-@media
-(min-width: 751px)
-and (max-height: 700px) {
-
-  .content {
-
-    zoom:
-      0.86;
-  }
-
-
-  .nav-item {
-
-    min-height:
-      34px;
-
-    padding-top:
-      6px;
-
-    padding-bottom:
-      6px;
-  }
-
+#dashboardPage .dashboard-card {
+  min-height: 62px;
+  padding: 8px 11px;
 }
 
-
-/* ============================================================
-   MOBILE
-   ============================================================ */
-
-@media (max-width: 750px) {
-
-  html,
-  body {
-
-    overflow:
-      hidden;
-  }
-
-
-  .app {
-
-    height:
-      100vh;
-
-    min-height:
-      0;
-
-    display:
-      flex;
-
-    flex-direction:
-      column;
-
-    overflow:
-      hidden;
-  }
-
-
-  .sidebar {
-
-    width:
-      100%;
-
-    height:
-      auto;
-
-    min-height:
-      0;
-
-    flex:
-      0 0 auto;
-
-    padding:
-      6px;
-  }
-
-
-  .brand {
-
-    padding:
-      3px 7px 5px;
-  }
-
-
-  .brand-title {
-
-    font-size:
-      17px;
-  }
-
-
-  .brand-subtitle {
-
-    font-size:
-      9px;
-  }
-
-
-  .navigation {
-
-    display:
-      grid;
-
-    grid-template-columns:
-      repeat(2, 1fr);
-
-    gap:
-      4px;
-  }
-
-
-  .nav-item {
-
-    min-height:
-      34px;
-
-    padding:
-      7px 8px;
-
-    font-size:
-      11px;
-  }
-
-
-  .main {
-
-    height:
-      auto;
-
-    flex:
-      1 1 auto;
-
-    min-height:
-      0;
-
-    overflow:
-      hidden;
-  }
-
-
-  .topbar {
-
-    flex:
-      0 0 45px;
-
-    height:
-      45px;
-
-    min-height:
-      45px;
-
-    padding:
-      6px 10px;
-  }
-
-
-  .content {
-
-    height:
-      calc(100% - 45px);
-
-    min-height:
-      0;
-
-    padding:
-      6px;
-
-    overflow:
-      hidden;
-
-    zoom:
-      1;
-  }
-
-
-  .page {
-
-    height:
-      100%;
-
-    min-height:
-      0;
-
-    overflow:
-      hidden;
-  }
-
-
-  .module-card {
-
-    max-height:
-      100%;
-
-    overflow:
-      hidden;
-  }
-
-
-  /* Dashboard mobile */
-
-  #dashboardPage .dashboard-summary,
-  #dashboardPage .dashboard-v2-summary {
-
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-
-    justify-content:
-      stretch;
-  }
-
-
-  #dashboardPage .dashboard-summary .dashboard-card,
-  #dashboardPage .dashboard-v2-summary .dashboard-card {
-
-    width:
-      100%;
-
-    height:
-      82px;
-
-    min-height:
-      82px;
-  }
-
-
-  #dashboardPage .dashboard-obligations-grid {
-
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-  }
-
-
-  #dashboardPage .financial-position-flow {
-
-    grid-template-columns:
-      1fr;
-  }
-
-
-  #dashboardPage .flow-symbol {
-
-    line-height:
-      12px;
-  }
-
+#dashboardPage .dashboard-card-title {
+  font-size: 10px;
+  margin-bottom: 3px;
 }
 
-
-/* ============================================================
-   VERY SMALL MOBILE
-   ============================================================ */
-
-@media (max-width: 420px) {
-
-  #dashboardPage .dashboard-summary,
-  #dashboardPage .dashboard-v2-summary {
-
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
-  }
-
-
-  #dashboardPage .dashboard-mini-grid {
-
-    grid-template-columns:
-      1fr;
-  }
-
-
-  #dashboardPage .dashboard-obligations-grid {
-
-    grid-template-columns:
-      1fr 1fr;
-  }
-
+#dashboardPage .dashboard-card-value {
+  font-size: 18px;
+  line-height: 1.05;
 }
-/* ============================================================
-   DASHBOARD - REMOVE DUPLICATE YEAR
-   ============================================================ */
 
-#dashboardPage #dashboardYear {
+#dashboardPage .dashboard-secondary {
+  gap: 7px;
+  margin-bottom: 7px;
+}
+
+#dashboardPage .dashboard-panel,
+#dashboardPage .previous-month,
+#dashboardPage .outstanding-obligations,
+#dashboardPage .financial-position {
+  padding: 9px 11px;
+  margin-bottom: 7px;
+}
+
+#dashboardPage .mini-card,
+#dashboardPage .dashboard-mini-card,
+#dashboardPage .obligation-card,
+#dashboardPage .outstanding-card {
+  padding: 7px 9px;
+  min-height: 48px;
+}
+
+#dashboardPage .mini-card-value,
+#dashboardPage .dashboard-mini-value,
+#dashboardPage .obligation-card-value,
+#dashboardPage .outstanding-card-value {
+  font-size: 14px;
+}
+
+/* Remove the redundant welcome/open-collections block */
+#dashboardPage .dashboard-welcome {
   display: none !important;
 }
 
+/* Desktop: preserve readability and use the available width */
+@media (min-width: 751px) {
+  .sidebar {
+    width: 215px;
+    flex: 0 0 215px;
+    padding: 12px 9px;
+  }
 
-/* Keep only the year badge */
-#dashboardPage #dashboardYearBadge {
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
+  .brand {
+    padding: 6px 9px 14px;
+  }
 
-  min-width: 48px;
-  height: 30px;
+  .brand-title {
+    font-size: 20px;
+  }
 
-  padding: 0 12px;
+  .brand-subtitle {
+    font-size: 10px;
+  }
 
-  border: 1px solid #bfdbfe;
-  border-radius: 18px;
+  .navigation {
+    gap: 3px;
+  }
 
-  background: #eff6ff;
+  .nav-item {
+    min-height: 38px;
+    padding: 8px 11px;
+    font-size: 12px;
+  }
 
-  color: #2563eb;
-
-  font-size: 12px;
-  font-weight: 800;
+  /* Use only a small scale reduction on short laptop screens */
+  .content {
+    zoom: 0.92;
+  }
 }
 
+@media (min-width: 751px) and (max-height: 800px) {
+  .content {
+    zoom: 0.86;
+    padding: 8px 12px;
+  }
 
-/* Move the square cards closer to the heading */
-#dashboardPage .dashboard-summary,
-#dashboardPage .dashboard-v2-summary {
-  margin-top: 4px;
+  .topbar {
+    flex-basis: 49px;
+    height: 49px;
+    min-height: 49px;
+  }
 }
 
+@media (min-width: 751px) and (max-height: 700px) {
+  .content {
+    zoom: 0.80;
+  }
 
-/* Keep the six cards centered */
-#dashboardPage .dashboard-summary,
-#dashboardPage .dashboard-v2-summary {
-  justify-content: center;
+  .nav-item {
+    min-height: 34px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
 }
+
+/* Mobile: retain one-column behavior but keep the viewport fixed */
+@media (max-width: 750px) {
+  html,
+  body {
+    overflow: hidden;
+  }
+
+  .app {
+    height: 100vh;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    flex: 0 0 auto;
+    padding: 6px;
+  }
+
+  .brand {
+    padding: 3px 7px 5px;
+  }
+
+  .brand-title {
+    font-size: 17px;
+  }
+
+  .brand-subtitle {
+    font-size: 9px;
+  }
+
+  .navigation {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+  }
+
+  .nav-item {
+    min-height: 34px;
+    padding: 7px 8px;
+    font-size: 11px;
+  }
+
+  .main {
+    height: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .topbar {
+    flex: 0 0 45px;
+    height: 45px;
+    min-height: 45px;
+    padding: 6px 10px;
+  }
+
+  .content {
+    height: calc(100% - 45px);
+    min-height: 0;
+    padding: 6px;
+    overflow: hidden;
+    zoom: 1;
+  }
+
+  .page {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .module-card {
+    max-height: 100%;
+    overflow: hidden;
+  }
+}
+
 /* ============================================================
-   DASHBOARD YEAR - FINAL POSITION FIX
+   TOFA DASHBOARD V2 - COMPLETE COMPACT VIEW
    ============================================================ */
-
-/* Show the year inside "Financial overview for 2026" */
-#dashboardPage #dashboardYear {
-  display: inline !important;
+#dashboardPage {
+  box-sizing: border-box;
+  padding: 0;
 }
 
-
-/* Put the year badge at the upper-right */
-#dashboardPage .dashboard-heading {
-  position: relative;
-}
-
-
-#dashboardPage #dashboardYearBadge {
-  position: absolute;
-
-  top: 0;
-  right: 0;
-
-  display: inline-flex !important;
-
+.dashboard-heading {
+  display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  margin: 0 0 7px;
+}
 
-  min-width: 48px;
-  height: 30px;
+.dashboard-heading h2 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.15;
+}
 
-  padding: 0 12px;
+.dashboard-heading p {
+  margin: 2px 0 0;
+  font-size: 10px;
+}
 
+.dashboard-year {
+  padding: 7px 13px;
   border: 1px solid #bfdbfe;
   border-radius: 18px;
-
   background: #eff6ff;
-
   color: #2563eb;
-
-  font-size: 12px;
   font-weight: 800;
+  font-size: 13px;
+}
+
+.dashboard-v2-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  margin-bottom: 7px;
+}
+
+.dashboard-v2-summary .dashboard-card {
+  min-height: 56px;
+  padding: 8px 10px;
+}
+
+.dashboard-v2-summary .dashboard-card-title {
+  font-size: 10px;
+  margin-bottom: 3px;
+}
+
+.dashboard-v2-summary .dashboard-card-value {
+  font-size: 18px;
+}
+
+.dashboard-balance-card,
+.position-balance {
+  border-color: #93c5fd !important;
+  background: #eff6ff !important;
+}
+
+.dashboard-panel {
+  border: 1px solid #d9dee7;
+  border-radius: 9px;
+  background: #fff;
+  padding: 8px 10px;
+  margin-bottom: 7px;
+  box-sizing: border-box;
+}
+
+.dashboard-panel-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.dashboard-panel-heading h3 {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.1;
+}
+
+.dashboard-panel-heading span {
+  display: block;
+  margin-top: 2px;
+  font-size: 9px;
+  color: #4b5563;
+}
+
+.previous-balance {
+  text-align: right;
+  flex: 0 0 auto;
+}
+
+.previous-balance small {
+  display: block;
+  font-size: 8px;
+  color: #6b7280;
+}
+
+.previous-balance strong {
+  display: block;
+  font-size: 14px;
+  line-height: 1.05;
+}
+
+.dashboard-mini-grid,
+.dashboard-obligations-grid {
+  display: grid;
+  gap: 6px;
+}
+
+.dashboard-mini-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.dashboard-obligations-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.dashboard-mini-card {
+  min-width: 0;
+  min-height: 42px;
+  padding: 6px 8px;
+  border: 1px solid #dfe4eb;
+  border-radius: 7px;
+  background: #f8fafc;
+  box-sizing: border-box;
+}
+
+.dashboard-mini-card span {
+  display: block;
+  font-size: 9px;
+  color: #374151;
+  margin-bottom: 2px;
+}
+
+.dashboard-mini-card strong {
+  display: block;
+  font-size: 14px;
+  line-height: 1.05;
+}
+
+.financial-position-flow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr) 20px minmax(0, 1fr);
+  align-items: center;
+  gap: 5px;
+}
+
+.position-card {
+  min-width: 0;
+  min-height: 43px;
+  padding: 6px 8px;
+  border: 1px solid #dfe4eb;
+  border-radius: 7px;
+  background: #f8fafc;
+}
+
+.position-card span {
+  display: block;
+  font-size: 9px;
+  color: #374151;
+  margin-bottom: 2px;
+}
+
+.position-card strong {
+  display: block;
+  font-size: 15px;
+}
+
+.flow-symbol {
+  text-align: center;
+  font-size: 16px;
+}
+
+@media (min-width: 751px) and (min-height: 801px) {
+  .content {
+    zoom: 0.94;
+  }
+}
+
+@media (max-width: 750px) {
+  html, body { overflow: hidden; }
+  .dashboard-v2-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-mini-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .dashboard-obligations-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .financial-position-flow { grid-template-columns: 1fr; }
+  .flow-symbol { line-height: 12px; }
+}
+
+@media (max-width: 420px) {
+  .dashboard-v2-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-mini-grid { grid-template-columns: 1fr; }
+  .dashboard-obligations-grid { grid-template-columns: 1fr 1fr; }
 }
 
 
-/* Keep the six square cards centered */
-#dashboardPage .dashboard-summary,
+
+/* ============================================================
+   TOFA DASHBOARD - FINAL ORDER / COMPACT LAYOUT
+   ============================================================ */
+#dashboardPage {
+  box-sizing: border-box;
+  padding: 0;
+  overflow: hidden;
+}
+
+#dashboardPage .dashboard-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 7px;
+}
+
+#dashboardPage .dashboard-heading h2 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.15;
+}
+
+#dashboardPage .dashboard-heading p {
+  margin: 2px 0 0;
+  font-size: 10px;
+}
+
+#dashboardPage .dashboard-year {
+  flex: 0 0 auto;
+  padding: 6px 12px;
+  border: 1px solid #bfdbfe;
+  border-radius: 18px;
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+#dashboardPage .dashboard-panel {
+  border: 1px solid #d9dee7;
+  border-radius: 9px;
+  background: #fff;
+  padding: 8px 10px;
+  margin-bottom: 7px;
+  box-sizing: border-box;
+}
+
+#dashboardPage .dashboard-panel-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+#dashboardPage .dashboard-panel-heading h3 {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.1;
+}
+
+#dashboardPage .dashboard-panel-heading span {
+  display: block;
+  margin-top: 2px;
+  font-size: 9px;
+  color: #4b5563;
+}
+
+#dashboardPage .previous-balance {
+  text-align: right;
+  flex: 0 0 auto;
+}
+
+#dashboardPage .previous-balance small {
+  display: block;
+  font-size: 8px;
+  color: #6b7280;
+}
+
+#dashboardPage .previous-balance strong {
+  display: block;
+  font-size: 14px;
+  line-height: 1.05;
+}
+
 #dashboardPage .dashboard-v2-summary {
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+#dashboardPage .dashboard-v2-summary .dashboard-card {
+  min-width: 0;
+  min-height: 56px;
+  padding: 8px 10px;
+  border: 1px solid #dfe4eb;
+  border-radius: 7px;
+  background: #f8fafc;
+  box-sizing: border-box;
+}
+
+#dashboardPage .dashboard-v2-summary .dashboard-card-title {
+  font-size: 10px;
+  margin-bottom: 3px;
+}
+
+#dashboardPage .dashboard-v2-summary .dashboard-card-value {
+  font-size: 18px;
+}
+
+#dashboardPage .dashboard-balance-card,
+#dashboardPage .position-balance {
+  border-color: #93c5fd !important;
+  background: #eff6ff !important;
+}
+
+#dashboardPage .dashboard-mini-grid,
+#dashboardPage .dashboard-obligations-grid {
+  display: grid;
+  gap: 6px;
+}
+
+#dashboardPage .dashboard-mini-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+#dashboardPage .dashboard-obligations-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+#dashboardPage .dashboard-mini-card {
+  min-width: 0;
+  min-height: 42px;
+  padding: 6px 8px;
+  border: 1px solid #dfe4eb;
+  border-radius: 7px;
+  background: #f8fafc;
+  box-sizing: border-box;
+}
+
+#dashboardPage .dashboard-mini-card span {
+  display: block;
+  font-size: 9px;
+  color: #374151;
+  margin-bottom: 2px;
+}
+
+#dashboardPage .dashboard-mini-card strong {
+  display: block;
+  font-size: 14px;
+  line-height: 1.05;
+}
+
+#dashboardPage .financial-position-flow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20px minmax(0, 1fr) 20px minmax(0, 1fr);
+  align-items: center;
+  gap: 5px;
+}
+
+#dashboardPage .position-card {
+  min-width: 0;
+  min-height: 43px;
+  padding: 6px 8px;
+  border: 1px solid #dfe4eb;
+  border-radius: 7px;
+  background: #f8fafc;
+  box-sizing: border-box;
+}
+
+#dashboardPage .position-card span {
+  display: block;
+  font-size: 9px;
+  color: #374151;
+  margin-bottom: 2px;
+}
+
+#dashboardPage .position-card strong {
+  display: block;
+  font-size: 15px;
+}
+
+#dashboardPage .flow-symbol {
+  text-align: center;
+  font-size: 16px;
+}
+
+#dashboardPage .financial-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 7px;
+  padding: 8px 11px;
+  border: 1px solid #93c5fd;
+  border-radius: 8px;
+  background: #eff6ff;
+}
+
+#dashboardPage .financial-total-row span {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+#dashboardPage .financial-total-row strong {
+  font-size: 17px;
+}
+
+@media (max-width: 750px) {
+  #dashboardPage { overflow: hidden; }
+  #dashboardPage .dashboard-v2-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #dashboardPage .dashboard-obligations-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #dashboardPage .financial-position-flow { grid-template-columns: 1fr; }
+  #dashboardPage .flow-symbol { line-height: 12px; }
+}
+
+@media (max-width: 420px) {
+  #dashboardPage .dashboard-v2-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #dashboardPage .dashboard-mini-grid { grid-template-columns: 1fr; }
+  #dashboardPage .dashboard-obligations-grid { grid-template-columns: 1fr 1fr; }
 }
