@@ -190,7 +190,176 @@ function showPage(
 
 }
 
+/**
+ * ============================================================
+ * DASHBOARD
+ * ============================================================
+ */
 
+function setupDashboard() {
+
+  loadDashboardSummary();
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * LOAD DASHBOARD SUMMARY
+ * ------------------------------------------------------------
+ */
+
+async function loadDashboardSummary() {
+
+  try {
+
+    const currentYear =
+      new Date().getFullYear();
+
+    const result =
+      await apiGetDashboardSummary(
+        currentYear
+      );
+
+    if (!result || result.success === false) {
+
+      throw new Error(
+        result && result.error
+          ? result.error
+          : 'Unable to load dashboard summary.'
+      );
+
+    }
+
+    setDashboardText(
+      'dashboardActiveMembers',
+      Number(
+        result.activeMembers || 0
+      ).toLocaleString('en-PH')
+    );
+
+    setDashboardMoney(
+      'dashboardRegistrationFee',
+      result.registrationFeeOutstanding
+    );
+
+    setDashboardMoney(
+      'dashboardYearlyDue',
+      result.yearlyDueOutstanding
+    );
+
+    setDashboardMoney(
+      'dashboardCollections',
+      result.totalCollections
+    );
+
+    setDashboardMoney(
+      'dashboardExpenses',
+      result.totalExpenses
+    );
+
+    setDashboardMoney(
+      'dashboardAssociationBalance',
+      result.associationBalance
+    );
+
+    setDashboardMoney(
+      'dashboardOutstanding',
+      result.totalOutstanding
+    );
+
+    setDashboardMoney(
+      'dashboardPreviousCollections',
+      result.previousMonthCollections
+    );
+
+    const previousTitle =
+      document.getElementById(
+        'previousCollectionsTitle'
+      );
+
+    if (previousTitle) {
+
+      previousTitle.textContent =
+        (
+          result.previousMonthLabel ||
+          'Previous Month'
+        ) +
+        ' Collections';
+
+    }
+
+  }
+
+  catch (error) {
+
+    console.error(
+      'Dashboard error:',
+      error
+    );
+
+    setDashboardText(
+      'dashboardActiveMembers',
+      '—'
+    );
+
+  }
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * DASHBOARD TEXT
+ * ------------------------------------------------------------
+ */
+
+function setDashboardText(
+  elementId,
+  value
+) {
+
+  const element =
+    document.getElementById(
+      elementId
+    );
+
+  if (!element) {
+    return;
+  }
+
+  element.textContent =
+    value;
+
+}
+
+
+/**
+ * ------------------------------------------------------------
+ * DASHBOARD MONEY
+ * ------------------------------------------------------------
+ */
+
+function setDashboardMoney(
+  elementId,
+  value
+) {
+
+  const element =
+    document.getElementById(
+      elementId
+    );
+
+  if (!element) {
+    return;
+  }
+
+  element.textContent =
+    formatCurrency(
+      Number(value || 0)
+    );
+
+}
 /**
  * ============================================================
  * COLLECTIONS SETUP
