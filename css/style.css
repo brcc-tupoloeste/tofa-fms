@@ -1627,3 +1627,52 @@ and (max-height: 700px) {
 #dashboardPage .dashboard-v2-summary {
   justify-content: center;
 }
+/* ============================================================
+   DASHBOARD YEAR - FINAL POSITION FIX
+   ============================================================ */
+
+/* Show the year inside "Financial overview for 2026" */
+#dashboardPage #dashboardYear {
+  display: inline !important;
+}
+
+
+/* Put the year badge at the upper-right */
+#dashboardPage .dashboard-heading {
+  position: relative;
+}
+
+
+#dashboardPage #dashboardYearBadge {
+  position: absolute;
+
+  top: 0;
+  right: 0;
+
+  display: inline-flex !important;
+
+  align-items: center;
+  justify-content: center;
+
+  min-width: 48px;
+  height: 30px;
+
+  padding: 0 12px;
+
+  border: 1px solid #bfdbfe;
+  border-radius: 18px;
+
+  background: #eff6ff;
+
+  color: #2563eb;
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+
+/* Keep the six square cards centered */
+#dashboardPage .dashboard-summary,
+#dashboardPage .dashboard-v2-summary {
+  justify-content: center;
+}
