@@ -2,7 +2,13 @@
   box-sizing: border-box;
 }
 
-html,
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100%;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -11,6 +17,7 @@ body {
   font-family: Arial, Helvetica, sans-serif;
   background: #f5f7fa;
   color: #1f2937;
+  overflow-x: hidden;
 }
 
 button,
@@ -29,7 +36,6 @@ button:disabled {
   opacity: 0.55;
 }
 
-
 /* ============================================================
    APP
    ============================================================ */
@@ -37,8 +43,8 @@ button:disabled {
 .app {
   display: flex;
   min-height: 100vh;
+  width: 100%;
 }
-
 
 /* ============================================================
    SIDEBAR
@@ -47,6 +53,7 @@ button:disabled {
 .sidebar {
   width: 235px;
   min-height: 100vh;
+  flex: 0 0 235px;
   background: #111827;
   color: #ffffff;
   padding: 18px 12px;
@@ -76,6 +83,7 @@ button:disabled {
 
 .nav-item {
   width: 100%;
+  min-height: 44px;
   border: 0;
   background: transparent;
   color: #d1d5db;
@@ -94,7 +102,6 @@ button:disabled {
   color: #ffffff;
 }
 
-
 /* ============================================================
    MAIN
    ============================================================ */
@@ -102,6 +109,7 @@ button:disabled {
 .main {
   flex: 1;
   min-width: 0;
+  width: 100%;
 }
 
 .topbar {
@@ -125,6 +133,7 @@ button:disabled {
 }
 
 .content {
+  width: 100%;
   padding: 24px;
 }
 
@@ -132,13 +141,13 @@ button:disabled {
   display: none;
 }
 
-
 /* ============================================================
    CARDS
    ============================================================ */
 
 .welcome-card,
 .module-card {
+  width: 100%;
   background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
@@ -170,7 +179,6 @@ button:disabled {
   font-size: 13px;
 }
 
-
 /* ============================================================
    SECTION
    ============================================================ */
@@ -186,7 +194,6 @@ button:disabled {
   font-size: 16px;
 }
 
-
 /* ============================================================
    SEARCH
    ============================================================ */
@@ -200,9 +207,8 @@ button:disabled {
   flex: 1;
 }
 
-
 /* ============================================================
-   FORM ELEMENTS
+   FORM
    ============================================================ */
 
 input,
@@ -211,7 +217,8 @@ textarea {
   width: 100%;
   border: 1px solid #d1d5db;
   border-radius: 8px;
-  padding: 11px 12px;
+  padding: 12px;
+  min-height: 44px;
   background: #ffffff;
   color: #111827;
   outline: none;
@@ -221,6 +228,7 @@ input:focus,
 select:focus,
 textarea:focus {
   border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.08);
 }
 
 textarea {
@@ -245,13 +253,13 @@ label {
   grid-column: 1 / -1;
 }
 
-
 /* ============================================================
    BUTTONS
    ============================================================ */
 
 .primary-button,
 .secondary-button {
+  min-height: 44px;
   border: 0;
   border-radius: 8px;
   padding: 11px 18px;
@@ -276,7 +284,6 @@ label {
   background: #d1d5db;
 }
 
-
 /* ============================================================
    MEMBER RESULTS
    ============================================================ */
@@ -289,9 +296,10 @@ label {
 }
 
 .member-result {
-  padding: 12px;
+  padding: 14px;
   border-bottom: 1px solid #e5e7eb;
   cursor: pointer;
+  background: #ffffff;
 }
 
 .member-result:last-child {
@@ -312,7 +320,6 @@ label {
   color: #6b7280;
   font-size: 12px;
 }
-
 
 /* ============================================================
    MEMBER INFO
@@ -338,8 +345,28 @@ label {
 
 .info-item strong {
   font-size: 14px;
+  overflow-wrap: anywhere;
 }
 
+/* ============================================================
+   PAYMENT SELECTOR
+   ============================================================ */
+
+.payment-selector {
+  margin-top: 18px;
+  padding: 15px;
+  border: 1px solid #dbeafe;
+  background: #eff6ff;
+  border-radius: 10px;
+}
+
+.payment-selector label {
+  color: #1e3a8a;
+}
+
+.payment-selector select {
+  background: #ffffff;
+}
 
 /* ============================================================
    OBLIGATIONS
@@ -364,20 +391,21 @@ label {
 }
 
 .obligation-description {
-  margin-top: 3px;
+  margin-top: 4px;
   color: #6b7280;
   font-size: 12px;
+  line-height: 1.4;
 }
 
 .obligation-balance {
-  margin-top: 6px;
+  margin-top: 7px;
   font-size: 13px;
 }
 
 .amount-input {
   text-align: right;
+  font-weight: 700;
 }
-
 
 /* ============================================================
    SUMMARY
@@ -395,6 +423,7 @@ label {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
 }
 
 .summary-item {
@@ -408,7 +437,6 @@ label {
   font-size: 18px;
 }
 
-
 /* ============================================================
    ACTIONS
    ============================================================ */
@@ -420,6 +448,27 @@ label {
   margin-top: 18px;
 }
 
+.collection-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.collection-action {
+  min-height: 48px;
+  border: 1px solid #dbeafe;
+  background: #ffffff;
+  color: #1d4ed8;
+  border-radius: 9px;
+  font-weight: 700;
+}
+
+.collection-action.primary {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
 
 /* ============================================================
    STATUS
@@ -454,7 +503,6 @@ label {
   border: 1px solid #fecaca;
 }
 
-
 /* ============================================================
    SUCCESS
    ============================================================ */
@@ -487,33 +535,121 @@ label {
   font-size: 18px;
 }
 
-
 /* ============================================================
-   MOBILE
+   MOBILE FIRST
    ============================================================ */
 
 @media (max-width: 750px) {
 
-  .sidebar {
-    width: 190px;
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
-  .content {
-    padding: 12px;
+  .app {
+    display: block;
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    width: 100%;
+    min-height: auto;
+    height: auto;
+    padding: 10px;
+    flex: none;
+  }
+
+  .brand {
+    padding: 6px 8px 10px;
+  }
+
+  .brand-title {
+    font-size: 20px;
+  }
+
+  .brand-subtitle {
+    font-size: 10px;
+  }
+
+  .navigation {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .nav-item {
+    min-height: 44px;
+    padding: 10px;
+    font-size: 13px;
+  }
+
+  .main {
+    width: 100%;
   }
 
   .topbar {
-    padding: 12px;
+    min-height: 58px;
+    padding: 12px 14px;
+  }
+
+  .page-title {
+    font-size: 18px;
+  }
+
+  .page-subtitle {
+    font-size: 11px;
+  }
+
+  .content {
+    width: 100%;
+    padding: 8px;
   }
 
   .welcome-card,
   .module-card {
-    padding: 16px;
+    width: 100%;
+    padding: 13px;
+    border-radius: 10px;
+  }
+
+  .welcome-card h1 {
+    font-size: 20px;
+  }
+
+  .module-header {
+    margin-bottom: 16px;
+  }
+
+  .module-header h2 {
+    font-size: 19px;
+  }
+
+  .section {
+    padding-top: 15px;
+    margin-top: 15px;
+  }
+
+  .section h3 {
+    font-size: 15px;
+    margin-bottom: 11px;
+  }
+
+  .search-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .search-row button {
+    width: 100%;
   }
 
   .form-grid,
   .member-info {
     grid-template-columns: 1fr;
+    gap: 10px;
   }
 
   .form-group.full {
@@ -521,23 +657,110 @@ label {
   }
 
   .obligation-item {
+    display: block;
+    padding: 14px 0;
+  }
+
+  .obligation-item .amount-input {
+    width: 100%;
+    margin-top: 10px;
+    text-align: left;
+  }
+
+  .obligation-name {
+    font-size: 14px;
+  }
+
+  .obligation-description {
+    font-size: 12px;
+  }
+
+  .obligation-balance {
+    font-size: 13px;
+  }
+
+  .payment-summary {
+    position: sticky;
+    bottom: 8px;
+    z-index: 5;
+    margin-top: 12px;
+    padding: 13px;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.10);
+  }
+
+  .summary-total {
+    font-size: 17px;
+  }
+
+  .collection-actions {
     grid-template-columns: 1fr;
+    gap: 8px;
   }
 
-  .search-row {
-    flex-direction: column;
-  }
-
-  .search-row button {
+  .collection-action {
     width: 100%;
   }
 
   .action-row {
     flex-direction: column;
+    gap: 8px;
   }
 
   .action-row button {
     width: 100%;
   }
 
+  .primary-button,
+  .secondary-button {
+    width: 100%;
+    min-height: 46px;
+  }
+
+  .payment-selector {
+    padding: 12px;
+  }
+
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+    min-height: 46px;
+  }
+
+  textarea {
+    min-height: 80px;
+  }
+
+  .success-row {
+    gap: 12px;
+  }
+}
+
+/* ============================================================
+   VERY SMALL PHONES
+   ============================================================ */
+
+@media (max-width: 380px) {
+
+  .content {
+    padding: 5px;
+  }
+
+  .module-card,
+  .welcome-card {
+    padding: 10px;
+  }
+
+  .navigation {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .nav-item {
+    font-size: 12px;
+    padding: 9px 6px;
+  }
+
+  .page-title {
+    font-size: 17px;
+  }
 }
