@@ -659,11 +659,23 @@ td{
 @media print{
   body{background:#fff!important}
   body *{visibility:hidden!important}
+
+  /* Financial Report */
   #reportPanel,#reportPanel *{visibility:visible!important}
   #reportPanel{position:absolute!important;left:0;top:0;width:100%;box-shadow:none!important;border:0!important;margin:0!important;padding:0!important}
   #reportControls,#reportActions{display:none!important}
   .report-table{min-width:0!important}
   .report-table th,.report-table td{font-size:9pt;padding:5px}
+
+  /* Outstanding Balances */
+  #outstandingPanel,#outstandingPanel *{visibility:visible!important}
+  #outstandingPanel{position:absolute!important;left:0;top:0;width:100%;box-shadow:none!important;border:0!important;margin:0!important;padding:0!important}
+  #outstandingActions{display:none!important}
+  #outstandingPanel .table-wrap{overflow:visible!important}
+  #outstandingPanel .member-table{min-width:0!important;width:100%!important}
+  #outstandingPanel .member-table th,#outstandingPanel .member-table td{font-size:9pt;padding:5px}
+  #outstandingPanel .panel-title{font-size:16pt;margin-bottom:8px}
+  #outstandingPanel .panel-note{font-size:10pt;margin-bottom:10px}
 }
 
 </style>
@@ -969,7 +981,10 @@ td{
       <tbody id="outstandingBody"></tbody>
     </table>
   </div>
-  <button class="alt" onclick="backToDashboard()">← Back to Dashboard</button>
+  <div class="form-actions-row" id="outstandingActions">
+    <button class="print-btn" type="button" onclick="printOutstandingList()">🖨️ PRINT</button>
+    <button class="alt" type="button" onclick="backToDashboard()">← Back to Dashboard</button>
+  </div>
 </div>
 
 <!-- =======================================================
@@ -3312,6 +3327,18 @@ async function openOutstandingList(){
       'dashboardMsg'
     );
   }
+}
+
+/* =========================================================
+   PRINT OUTSTANDING BALANCES
+========================================================= */
+function printOutstandingList(){
+  const panel = document.getElementById('outstandingPanel');
+  if(!panel || panel.classList.contains('hidden')){
+    return;
+  }
+
+  window.print();
 }
 
 /* =========================================================
