@@ -143,19 +143,22 @@ function fail(e,id){const m=e&&e.message?e.message:String(e||'Error');if(m==='SE
 function sendApiRequest(req){
   const frame=document.getElementById('apiFrame');
   if(!frame||!frame.contentWindow){req.reject(new Error('API bridge is not available.'));return;}
+  console.log('[TOFA API] SEND', req);
   frame.contentWindow.postMessage({__onlineApiRequest:true,id:req.id,action:req.action,payload:req.payload||{}},'*');
 }
 
 window.addEventListener('message',function(ev){
   const msgData=ev.data||{};
+  console.log('[TOFA API] MESSAGE', ev.origin, msgData);
   if(msgData.__onlineBridgeReady){
     if(API_ORIGINS.indexOf(ev.origin)!==-1){
+      console.log('[TOFA API] BRIDGE READY from',ev.origin);
       apiReady=true;
       while(pendingQueue.length)sendApiRequest(pendingQueue.shift());
     }
     return;
   }
-  if(API_ORIGINS.indexOf(ev.origin)===-1)return;
+  if(API_ORIGINS.indexOf(ev.origin)===-1){console.log('[TOFA API] ignored origin',ev.origin);return;}
   if(!msgData.__onlineApi)return;
   const pending=window.__pendingApi;
   if(!pending||msgData.id!==pending.id)return;
@@ -168,6 +171,7 @@ function api(action,payload,title,sub){
     const id='r'+(++requestSeq);
     const req={id,action,payload,resolve,reject};
     window.__pendingApi={id,resolve,reject};
+    console.log('[TOFA API] REQUEST',id,action,payload);
     showBusy(title||'Please wait...',sub||'Processing request');
     if(apiReady)sendApiRequest(req);else pendingQueue.push(req);
     requestTimer=setTimeout(()=>{
@@ -177,11 +181,14 @@ function api(action,payload,title,sub){
         hideBusy();
         reject(new Error('The server took too long to respond. Please try again.'));
       }
-    },45000);
+    },15000);
   });
 }
 
-document.getElementById('apiFrame').src=API_URL;
+const apiFrame=document.getElementById('apiFrame');
+apiFrame.addEventListener('load',function(){console.log('[TOFA API] iframe LOAD', apiFrame.src);});
+console.log('[TOFA API] loading iframe',API_URL);
+apiFrame.src=API_URL;
 
 async function login(){
   const b=document.getElementById('loginBtn');b.disabled=true;
