@@ -552,9 +552,52 @@ td{
 .dashboard-title{font-size:16px;font-weight:800;color:#0f172a}
 .dashboard-period{font-size:11px;color:#64748b;text-align:right}
 .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:10px}
-.stat{border:1px solid #e5e7eb;border-radius:10px;padding:9px 7px;background:#fff;min-width:0}
-.stat-label{font-size:10px;line-height:1.2;color:#64748b;font-weight:700;min-height:25px}
-.stat-value{font-size:14px;line-height:1.25;font-weight:800;color:#0f172a;margin-top:4px;word-break:break-word}
+.stat{
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+  padding:9px 7px;
+  background:#fff;
+  min-width:0;
+  width:100%;
+  box-sizing:border-box;
+  text-align:center;
+  appearance:none;
+  -webkit-appearance:none;
+  font-family:inherit;
+  color:inherit;
+  margin:0;
+}
+
+.stat-label{
+  font-size:10px;
+  line-height:1.2;
+  color:#64748b;
+  font-weight:700;
+  min-height:25px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+}
+
+.stat-value{
+  font-size:14px;
+  line-height:1.25;
+  font-weight:800;
+  color:#0f172a;
+  margin-top:4px;
+  word-break:break-word;
+  text-align:center;
+}
+
+.stat-button{
+  cursor:pointer;
+}
+
+.stat-button:hover{
+  filter:none;
+  background:#fff;
+}
 .stat-value.small{font-size:12px}
 .quick-title{font-size:14px;font-weight:800;margin:4px 0 7px}
 .quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
@@ -563,6 +606,20 @@ td{
 .dashboard-loading{font-size:12px;color:#64748b;padding:5px 0}
 .panel-title{margin:0 0 10px;font-size:16px}
 .panel-note{font-size:12px;color:#64748b;margin:4px 0 10px}
+  .panel-nav{
+  margin-bottom:10px;
+}
+
+.back-dashboard{
+  width:auto!important;
+  display:inline-block;
+  margin:0!important;
+  padding:8px 12px!important;
+  background:#64748b!important;
+  color:#fff!important;
+  font-size:12px!important;
+  border-radius:9px!important;
+}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
 .form-grid .full{grid-column:1/-1}
 .form-actions-row{display:flex;gap:8px;margin-top:12px}
@@ -584,7 +641,9 @@ td{
 
 @media(max-width:619px){
   .stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
-  .stat{padding:8px 5px}
+ .stat{
+  padding:8px 5px;
+}
   .stat-value{font-size:12px}
   .stat-label{font-size:9px;min-height:24px}
   .quick-grid{gap:6px}
@@ -791,23 +850,92 @@ td{
      ADD MEMBER
 ======================================================= -->
 <div id="addMemberPanel" class="card hidden">
+
+  <div class="panel-nav">
+    <button
+      type="button"
+      class="back-dashboard"
+      onclick="backToDashboard()">
+      ← Back to Dashboard
+    </button>
+  </div>
+
   <h3 class="panel-title">➕ Add Member</h3>
-  <div class="panel-note">Enter the member information below.</div>
+
+  <div class="panel-note">
+    Enter the member information below.
+  </div>
+
   <div class="form-grid">
-    <div class="full"><label>Full Name</label><input id="newMemberName" autocomplete="off"></div>
-    <div><label>Address / Sitio</label><input id="newMemberAddress"></div>
-    <div><label>Contact No.</label><input id="newMemberContact" inputmode="tel"></div>
-    <div><label>RSBA No.</label><input id="newMemberRSBA"></div>
-    <div><label>Rice Area (ha)</label><input id="newMemberArea" type="number" min="0" step="0.01" inputmode="decimal"></div>
-    <div><label>Registration Fee</label><input id="newMemberFee" type="number" min="0" step="0.01" inputmode="decimal"></div>
-    <div class="full"><label>Farm Information</label><input id="newMemberFarm"></div>
-    <div class="full"><label>Remarks</label><textarea id="newMemberRemarks"></textarea></div>
+
+    <div class="full">
+      <label>Full Name</label>
+      <input
+        id="newMemberName"
+        autocomplete="off">
+    </div>
+
+    <div>
+      <label>Address / Sitio</label>
+      <input id="newMemberAddress">
+    </div>
+
+    <div>
+      <label>Contact No.</label>
+      <input
+        id="newMemberContact"
+        inputmode="tel">
+    </div>
+
+    <div>
+      <label>RSBA No.</label>
+      <input id="newMemberRSBA">
+    </div>
+
+    <div>
+      <label>Rice Area (ha)</label>
+      <input
+        id="newMemberArea"
+        type="number"
+        min="0"
+        step="0.01"
+        inputmode="decimal">
+    </div>
+
+    <div>
+      <label>Registration Fee</label>
+      <input
+        id="newMemberFee"
+        type="number"
+        min="0"
+        step="0.01"
+        inputmode="decimal">
+    </div>
+
+    <div class="full">
+      <label>Farm Information</label>
+      <input id="newMemberFarm">
+    </div>
+
+    <div class="full">
+      <label>Remarks</label>
+      <textarea id="newMemberRemarks"></textarea>
+    </div>
+
   </div>
+
   <div class="form-actions-row">
-    <button onclick="saveNewMember()">SAVE MEMBER</button>
-    <button class="alt" onclick="backToDashboard()">CANCEL</button>
+
+    <button
+      type="button"
+      onclick="saveNewMember()">
+      SAVE MEMBER
+    </button>
+
   </div>
+
   <div id="addMemberMsg"></div>
+
 </div>
 
 <!-- =======================================================
@@ -867,6 +995,15 @@ td{
 <div
   id="searchCard"
   class="card hidden">
+
+  <div class="panel-nav">
+    <button
+      type="button"
+      class="back-dashboard"
+      onclick="backToDashboard()">
+      ← Back to Dashboard
+    </button>
+  </div>
 
   <h3>
     🔎 Search Member
