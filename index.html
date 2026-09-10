@@ -606,7 +606,8 @@ const API_URL =
  * We learn the real origin from the READY message.
  */
 
-let API_BRIDGE_ORIGIN = '';
+let API_BRIDGE_ORIGIN='';
+let API_BRIDGE_WINDOW=null;
 
 const GITHUB_ORIGIN =
   'https://brcc-tupoloeste.github.io';
@@ -792,19 +793,10 @@ function fail(e,id){
 
 function sendApiRequest(req){
 
-  const frame =
-    document.getElementById(
-      'apiFrame'
-    );
-
-
-  if(
-    !frame ||
-    !frame.contentWindow
-  ){
+  if(!API_BRIDGE_WINDOW){
 
     console.log(
-      '[TOFA API] SEND FAILED: iframe unavailable'
+      '[TOFA API] SEND FAILED: bridge window unavailable'
     );
 
     req.reject(
@@ -822,11 +814,11 @@ function sendApiRequest(req){
     req.id,
     req.action,
     'target:',
-    API_BRIDGE_ORIGIN || '*'
+    API_BRIDGE_ORIGIN
   );
 
 
-  frame.contentWindow.postMessage(
+  API_BRIDGE_WINDOW.postMessage(
 
     {
       __onlineApiRequest:true,
@@ -835,16 +827,11 @@ function sendApiRequest(req){
       payload:req.payload || {}
     },
 
-    /*
-     * After READY we use the exact dynamic
-     * origin received from Apps Script.
-     */
-    API_BRIDGE_ORIGIN || '*'
+    API_BRIDGE_ORIGIN
 
   );
 
 }
-
 
 /************************************************************
  * MESSAGE HANDLER
@@ -875,63 +862,45 @@ window.addEventListener(
     /******************************************************
      * BRIDGE READY
      ******************************************************/
+if(msgData.__onlineBridgeReady){
 
-    if(
-      msgData.__onlineBridgeReady
-    ){
+  API_BRIDGE_ORIGIN=ev.origin;
 
-      /*
-       * Capture the actual Apps Script origin.
-       *
-       * Example:
-       *
-       * https://n-xxxxxxxx.script.googleusercontent.com
-       */
+  API_BRIDGE_WINDOW=ev.source;
 
-      API_BRIDGE_ORIGIN =
-        ev.origin;
+  console.log(
+    '[TOFA API] BRIDGE READY from',
+    API_BRIDGE_ORIGIN
+  );
 
+  console.log(
+    '[TOFA API] BRIDGE WINDOW CAPTURED',
+    !!API_BRIDGE_WINDOW
+  );
 
-      console.log(
-        '[TOFA API] BRIDGE READY from',
-        API_BRIDGE_ORIGIN
-      );
+  apiReady=true;
 
+  console.log(
+    '[TOFA API] apiReady = true'
+  );
 
-      apiReady = true;
+  while(pendingQueue.length){
 
+    const req=
+      pendingQueue.shift();
 
-      console.log(
-        '[TOFA API] apiReady = true'
-      );
+    console.log(
+      '[TOFA API] sending queued request',
+      req.id,
+      req.action
+    );
 
+    sendApiRequest(req);
+  }
 
-      while(
-        pendingQueue.length
-      ){
-
-        const req =
-          pendingQueue.shift();
-
-
-        console.log(
-          '[TOFA API] sending queued request',
-          req.id,
-          req.action
-        );
-
-
-        sendApiRequest(
-          req
-        );
-
-      }
-
-
-      return;
-    }
-
-
+  return;
+}
+ 
     /******************************************************
      * WAIT UNTIL BRIDGE ORIGIN EXISTS
      ******************************************************/
