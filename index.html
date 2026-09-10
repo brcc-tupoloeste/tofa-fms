@@ -1,47 +1,61 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#1f4e78">
 
-<title>Tupol Oeste Farmer's Association - Payments Received</title>
+<head>
+
+<meta charset="utf-8">
+
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1,viewport-fit=cover">
+
+<meta
+  name="theme-color"
+  content="#1f4e78">
+
+<title>
+  Tupol Oeste Farmer's Association - Payments Received
+</title>
 
 <style>
-*{box-sizing:border-box}
 
-html,body{
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
   margin:0;
   min-height:100%;
   font-family:Arial,sans-serif;
   background:#f3f6f8;
-  color:#1f2937
+  color:#1f2937;
 }
 
 body.busy{
-  overflow:hidden
+  overflow:hidden;
 }
 
 .wrap{
   width:100%;
   max-width:760px;
   margin:auto;
-  padding:12px
+  padding:12px;
 }
 
 .brand{
   text-align:center;
-  padding:14px 8px 8px
+  padding:14px 8px 8px;
 }
 
 .brand h1{
   margin:0;
-  font-size:20px
+  font-size:20px;
 }
 
 .brand p{
   margin:5px 0 0;
-  color:#6b7280
+  color:#6b7280;
 }
 
 .card{
@@ -49,18 +63,18 @@ body.busy{
   border-radius:16px;
   padding:15px;
   margin-bottom:12px;
-  box-shadow:0 2px 10px rgba(0,0,0,.07)
+  box-shadow:0 2px 10px rgba(0,0,0,.07);
 }
 
 .hidden{
-  display:none!important
+  display:none!important;
 }
 
 label{
   display:block;
   font-size:13px;
   font-weight:700;
-  margin:11px 0 6px
+  margin:11px 0 6px;
 }
 
 input,
@@ -68,7 +82,7 @@ select,
 textarea,
 button{
   width:100%;
-  font:inherit
+  font:inherit;
 }
 
 input,
@@ -77,11 +91,12 @@ textarea{
   padding:12px;
   border:1px solid #ccd4dc;
   border-radius:10px;
-  background:#fff
+  background:#fff;
 }
 
 textarea{
-  min-height:70px
+  min-height:70px;
+  resize:vertical;
 }
 
 button{
@@ -92,28 +107,36 @@ button{
   color:#fff;
   font-weight:700;
   margin-top:10px;
-  cursor:pointer
+  cursor:pointer;
+}
+
+button:hover{
+  opacity:.94;
+}
+
+button:active{
+  transform:scale(.995);
 }
 
 button.alt{
-  background:#64748b
+  background:#64748b;
 }
 
 button.danger{
   background:#991b1b;
   width:auto;
-  margin:0
+  margin:0;
 }
 
 button.back{
   background:#64748b;
   margin-top:0;
-  margin-bottom:12px
+  margin-bottom:12px;
 }
 
 button.success-back{
   background:#166534;
-  margin-top:10px
+  margin-top:10px;
 }
 
 button:disabled,
@@ -121,42 +144,43 @@ input:disabled,
 select:disabled,
 textarea:disabled{
   opacity:.55;
-  cursor:not-allowed
+  cursor:not-allowed;
 }
 
 .msg{
   padding:10px;
   margin-top:10px;
   border-radius:9px;
-  font-size:13px
+  font-size:13px;
 }
 
 .error{
   background:#fee2e2;
-  color:#991b1b
+  color:#991b1b;
 }
 
 .ok{
   background:#dcfce7;
-  color:#166534
+  color:#166534;
 }
 
 .top{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-bottom:10px
+  margin-bottom:10px;
 }
 
 .search{
   display:grid;
   grid-template-columns:1fr auto;
   gap:8px;
-  align-items:end
+  align-items:end;
 }
 
 .search button{
-  width:auto
+  width:auto;
+  white-space:nowrap;
 }
 
 .result{
@@ -165,44 +189,44 @@ textarea:disabled{
   border-radius:10px;
   margin-top:8px;
   cursor:pointer;
-  background:#fff
+  background:#fff;
 }
 
 .result:active{
-  transform:scale(.995)
+  transform:scale(.995);
 }
 
 .result strong,
 .result small{
-  display:block
+  display:block;
 }
 
 .result small{
   color:#6b7280;
-  margin-top:3px
+  margin-top:3px;
 }
 
 .result.locked{
   opacity:.5;
-  pointer-events:none
+  pointer-events:none;
 }
 
 .result.selected{
   border-color:#1f4e78;
-  background:#f4f8fb
+  background:#f4f8fb;
 }
 
 .profile{
   display:flex;
   align-items:center;
-  gap:12px
+  gap:12px;
 }
 
 .photo-wrap{
   position:relative;
   width:74px;
   height:74px;
-  flex:0 0 74px
+  flex:0 0 74px;
 }
 
 .photo{
@@ -211,7 +235,7 @@ textarea:disabled{
   border-radius:50%;
   object-fit:cover;
   background:#e5e7eb;
-  border:1px solid #d1d5db
+  border:1px solid #d1d5db;
 }
 
 .camera{
@@ -224,58 +248,59 @@ textarea:disabled{
   padding:0;
   margin:0;
   font-size:15px;
-  background:#1f4e78
+  background:#1f4e78;
 }
 
 #photoInput{
-  display:none
+  display:none;
 }
 
 .name{
   font-weight:800;
-  font-size:18px
+  font-size:18px;
 }
 
 .sub{
   font-size:12px;
   color:#6b7280;
-  margin-top:3px
+  margin-top:3px;
 }
 
 .accounts{
   display:grid;
   grid-template-columns:1fr;
   gap:9px;
-  margin-top:14px
+  margin-top:14px;
 }
 
 .account{
   border:1px solid #e5e7eb;
   border-radius:11px;
-  padding:11px
+  padding:11px;
 }
 
 .account b{
   display:block;
-  margin-bottom:6px
+  margin-bottom:6px;
 }
 
 .line{
   display:flex;
   justify-content:space-between;
+  gap:10px;
   padding:4px 0;
-  font-size:13px
+  font-size:13px;
 }
 
 .balance{
   border-top:1px solid #e5e7eb;
   margin-top:5px;
   padding-top:7px;
-  font-weight:800
+  font-weight:800;
 }
 
 .profile-actions{
-  margin-bottom:12px
+  margin-bottom:12px;
 }
 
 .payment-success{
@@ -285,13 +310,13 @@ textarea:disabled{
   padding:12px;
   margin-top:12px;
   color:#166534;
-  font-weight:700
+  font-weight:700;
 }
 
 table{
   width:100%;
   border-collapse:collapse;
-  min-width:500px
+  min-width:500px;
 }
 
 th,
@@ -299,11 +324,16 @@ td{
   padding:8px;
   border-bottom:1px solid #e5e7eb;
   font-size:12px;
-  text-align:left
+  text-align:left;
+}
+
+th{
+  font-weight:800;
+  background:#f8fafc;
 }
 
 .scroll{
-  overflow:auto
+  overflow:auto;
 }
 
 .busy-overlay{
@@ -314,7 +344,7 @@ td{
   display:flex;
   align-items:center;
   justify-content:center;
-  z-index:9999
+  z-index:9999;
 }
 
 .busy-box{
@@ -323,7 +353,7 @@ td{
   padding:22px 26px;
   text-align:center;
   min-width:220px;
-  box-shadow:0 8px 30px rgba(0,0,0,.16)
+  box-shadow:0 8px 30px rgba(0,0,0,.16);
 }
 
 .spinner{
@@ -333,49 +363,81 @@ td{
   border:4px solid #dbe3ea;
   border-top-color:#1f4e78;
   border-radius:50%;
-  animation:spin .8s linear infinite
+  animation:spin .8s linear infinite;
 }
 
 @keyframes spin{
-  to{transform:rotate(360deg)}
+  to{
+    transform:rotate(360deg);
+  }
 }
 
 .busy-title{
-  font-weight:800
+  font-weight:800;
 }
 
 .busy-sub{
   font-size:12px;
   color:#6b7280;
-  margin-top:5px
-}
-
-.api-frame{
-  position:absolute;
-  width:1px;
-  height:1px;
-  border:0;
-  left:-10000px;
-  top:-10000px
+  margin-top:5px;
 }
 
 @media(min-width:620px){
 
   .accounts{
-    grid-template-columns:repeat(3,1fr)
+    grid-template-columns:repeat(3,1fr);
   }
 
 }
+
+@media(max-width:480px){
+
+  .wrap{
+    padding:8px;
+  }
+
+  .brand{
+    padding-top:10px;
+  }
+
+  .brand h1{
+    font-size:18px;
+  }
+
+  .card{
+    padding:13px;
+    border-radius:14px;
+  }
+
+  .search{
+    grid-template-columns:1fr;
+  }
+
+  .search button{
+    width:100%;
+  }
+
+  .profile{
+    align-items:flex-start;
+  }
+
+}
+
 </style>
+
 </head>
+
 
 <body>
 
-<!-- =======================================================
-     BUSY OVERLAY
-======================================================= -->
 
-<div id="busyOverlay" class="busy-overlay hidden">
+<!-- =====================================================
+     BUSY OVERLAY
+====================================================== -->
+
+<div
+  id="busyOverlay"
+  class="busy-overlay hidden">
 
   <div class="busy-box">
 
@@ -398,604 +460,572 @@ td{
 </div>
 
 
-  <!-- =====================================================
-       BRAND
-  ====================================================== -->
 
-  <div class="brand">
-
-    <h1>
-      Tupol Oeste Farmer's Association
-    </h1>
-
-    <p>
-      Payments Received
-    </p>
-
-  </div>
+<div class="wrap">
 
 
-  <!-- =====================================================
-       LOGIN
-  ====================================================== -->
+<!-- =====================================================
+     BRAND
+====================================================== -->
 
-  <div
-    id="loginView"
-    class="card">
+<div class="brand">
 
-    <h2>
-      🔐 Admin Login
-    </h2>
+  <h1>
+    Tupol Oeste Farmer's Association
+  </h1>
 
-    <label>
-      Username
-    </label>
+  <p>
+    Payments Received
+  </p>
+
+</div>
+
+
+
+<!-- =====================================================
+     LOGIN
+====================================================== -->
+
+<div
+  id="loginView"
+  class="card">
+
+  <h2>
+    🔐 Admin Login
+  </h2>
+
+  <label>
+    Username
+  </label>
+
+  <input
+    id="username"
+    value="admin"
+    autocomplete="username">
+
+  <label>
+    Password
+  </label>
+
+  <input
+    id="password"
+    type="password"
+    autocomplete="current-password">
+
+  <label style="font-weight:400">
 
     <input
-      id="username"
-      value="admin"
-      autocomplete="username">
+      id="showPass"
+      type="checkbox"
+      style="width:auto">
+
+    Show password
+
+  </label>
+
+  <button
+    id="loginBtn"
+    onclick="login()">
+
+    LOGIN
+
+  </button>
+
+  <div id="loginMsg"></div>
+
+</div>
 
 
-    <label>
-      Password
-    </label>
 
-    <input
-      id="password"
-      type="password"
-      autocomplete="current-password">
+<!-- =====================================================
+     APPLICATION
+====================================================== -->
+
+<div
+  id="appView"
+  class="hidden">
 
 
-    <label style="font-weight:400">
+<!-- =====================================================
+     TOP BAR
+====================================================== -->
+
+<div class="top">
+
+  <b>
+    💵 Payments Received
+  </b>
+
+</div>
+
+
+
+<!-- =====================================================
+     SEARCH MEMBER
+====================================================== -->
+
+<div
+  id="searchCard"
+  class="card">
+
+  <h3>
+    🔎 Search Member
+  </h3>
+
+  <div class="search">
+
+    <div>
+
+      <label>
+        Member ID or Name
+      </label>
 
       <input
-        id="showPass"
-        type="checkbox"
-        style="width:auto">
+        id="searchText"
+        placeholder="Search member"
+        autocomplete="off">
 
-      Show password
-
-    </label>
-
+    </div>
 
     <button
-      id="loginBtn"
-      onclick="login()">
+      id="searchBtn"
+      onclick="searchMembers()">
 
-      LOGIN
+      Search
 
     </button>
 
+  </div>
 
-    <div id="loginMsg"></div>
+  <div id="searchMsg"></div>
+
+  <div id="results"></div>
+
+</div>
+
+
+
+<!-- =====================================================
+     MEMBER PROFILE
+====================================================== -->
+
+<div
+  id="profileCard"
+  class="card hidden">
+
+
+  <!-- BACK TO SEARCH -->
+
+  <div class="profile-actions">
+
+    <button
+      class="back"
+      onclick="backToSearch()">
+
+      ← Back to Search
+
+    </button>
 
   </div>
 
 
-  <!-- =====================================================
-       APPLICATION
-  ====================================================== -->
+  <!-- MEMBER HEADER -->
 
-  <div
-    id="appView"
-    class="hidden">
+  <div class="profile">
 
+    <div class="photo-wrap">
 
-    <!-- ===================================================
-         TOP BAR
-    ==================================================== -->
-
- <div class="top">
-  <b>💵 Payments Received</b>
-</div>
-
-
-    <!-- ===================================================
-         SEARCH MEMBER
-
-         IMPORTANT:
-         This entire card is hidden after a member
-         is selected.
-    ==================================================== -->
-
-    <div
-      id="searchCard"
-      class="card">
-
-      <h3>
-        🔎 Search Member
-      </h3>
-
-
-      <div class="search">
-
-        <div>
-
-          <label>
-            Member ID or Name
-          </label>
-
-          <input
-            id="searchText"
-            placeholder="Search member">
-
-        </div>
-
-
-        <button
-          id="searchBtn"
-          onclick="searchMembers()">
-
-          Search
-
-        </button>
-
-      </div>
-
-
-      <div id="searchMsg"></div>
-
-      <div id="results"></div>
-
-    </div>
-
-
-    <!-- ===================================================
-         MEMBER PROFILE
-    ==================================================== -->
-
-    <div
-      id="profileCard"
-      class="card hidden">
-
-
-      <!-- BACK TO SEARCH -->
-
-      <div class="profile-actions">
-
-        <button
-          class="back"
-          onclick="backToSearch()">
-
-          ← Back to Search
-
-        </button>
-
-      </div>
-
-
-      <!-- MEMBER HEADER -->
-
-      <div class="profile">
-
-        <div class="photo-wrap">
-
-          <img
-            id="memberPhoto"
-            class="photo"
-            alt="">
-
-
-          <button
-            class="camera"
-            onclick="document.getElementById('photoInput').click()"
-            title="Upload photo">
-
-            📷
-
-          </button>
-
-
-          <input
-            id="photoInput"
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            capture="environment"
-            onchange="uploadPhoto(this)">
-
-        </div>
-
-
-        <div>
-
-          <div
-            id="memberName"
-            class="name">
-          </div>
-
-          <div
-            id="memberMeta"
-            class="sub">
-          </div>
-
-          <div id="photoMsg"></div>
-
-        </div>
-
-      </div>
-
-
-      <!-- ACCOUNTING -->
-
-      <div class="accounts">
-
-
-        <!-- MONTHLY MEMBERSHIP -->
-
-        <div class="account">
-
-          <b>
-            📅 Monthly Membership
-          </b>
-
-          <div class="line">
-
-            <span>
-              Year Due
-            </span>
-
-            <span id="annualDue"></span>
-
-          </div>
-
-
-          <div class="line">
-
-            <span>
-              Paid
-            </span>
-
-            <span id="monthlyPaid"></span>
-
-          </div>
-
-
-          <div class="line balance">
-
-            <span>
-              Balance
-            </span>
-
-            <span id="yearBalance"></span>
-
-          </div>
-
-        </div>
-
-
-        <!-- REGISTRATION -->
-
-        <div class="account">
-
-          <b>
-            🧾 Registration Fee
-          </b>
-
-          <div class="line">
-
-            <span>
-              Due
-            </span>
-
-            <span id="registrationDue"></span>
-
-          </div>
-
-
-          <div class="line">
-
-            <span>
-              Paid
-            </span>
-
-            <span id="registrationPaid"></span>
-
-          </div>
-
-
-          <div class="line balance">
-
-            <span>
-              Balance
-            </span>
-
-            <span id="registrationBalance"></span>
-
-          </div>
-
-        </div>
-
-
-        <!-- OTHER OBLIGATIONS -->
-
-        <div class="account">
-
-          <b>
-            📦 Other Obligations
-          </b>
-
-          <div class="line">
-
-            <span>
-              Due
-            </span>
-
-            <span id="otherDue"></span>
-
-          </div>
-
-
-          <div class="line">
-
-            <span>
-              Paid
-            </span>
-
-            <span id="otherPaid"></span>
-
-          </div>
-
-
-          <div class="line balance">
-
-            <span>
-              Balance
-            </span>
-
-            <span id="otherBalance"></span>
-
-          </div>
-
-        </div>
-
-
-      </div>
-
-    </div>
-
-
-    <!-- ===================================================
-         RECEIVE PAYMENT
-    ==================================================== -->
-
-    <div
-      id="paymentCard"
-      class="card hidden">
-
-      <h3>
-        💵 Receive Payment
-      </h3>
-
-
-      <label>
-        Payment Type
-      </label>
-
-
-      <select
-        id="paymentType"
-        onchange="paymentTypeChanged()">
-
-        <option value="">
-          Select payment type
-        </option>
-
-        <option>
-          Monthly Payment
-        </option>
-
-        <option>
-          Registration Fee
-        </option>
-
-        <option>
-          Other Obligation Payment
-        </option>
-
-      </select>
-
-
-      <!-- SPECIFIC OBLIGATION -->
-
-      <div
-        id="obligationWrap"
-        class="hidden">
-
-        <label>
-          Specific Obligation
-        </label>
-
-        <select
-          id="obligationId">
-
-        </select>
-
-      </div>
-
-
-      <label>
-        Amount Received
-      </label>
-
-      <input
-        id="amount"
-        type="number"
-        min="0.01"
-        step="0.01"
-        inputmode="decimal">
-
-
-      <label>
-        Remarks
-      </label>
-
-      <textarea
-        id="remarks">
-      </textarea>
-
+      <img
+        id="memberPhoto"
+        class="photo"
+        alt="Member photo">
 
       <button
-        id="saveBtn"
-        onclick="savePayment()">
+        class="camera"
+        onclick="document.getElementById('photoInput').click()"
+        title="Upload photo">
 
-        SAVE PAYMENT
+        📷
 
       </button>
 
+      <input
+        id="photoInput"
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        onchange="uploadPhoto(this)">
 
-      <div id="paymentMsg"></div>
+    </div>
 
-
-      <!-- SUCCESS BACK TO SEARCH -->
+    <div>
 
       <div
-        id="paymentSuccess"
-        class="payment-success hidden">
+        id="memberName"
+        class="name">
+      </div>
 
-        <div>
-          ✅ Payment successfully recorded.
-        </div>
+      <div
+        id="memberMeta"
+        class="sub">
+      </div>
 
-        <button
-          class="success-back"
-          onclick="backToSearch()">
+      <div id="photoMsg"></div>
 
-          ← Back to Search
+    </div>
 
-        </button>
+  </div>
+
+
+  <!-- ACCOUNTING -->
+
+  <div class="accounts">
+
+
+    <!-- MONTHLY MEMBERSHIP -->
+
+    <div class="account">
+
+      <b>
+        📅 Monthly Membership
+      </b>
+
+      <div class="line">
+
+        <span>
+          Year Due
+        </span>
+
+        <span id="annualDue"></span>
+
+      </div>
+
+      <div class="line">
+
+        <span>
+          Paid
+        </span>
+
+        <span id="monthlyPaid"></span>
+
+      </div>
+
+      <div class="line balance">
+
+        <span>
+          Balance
+        </span>
+
+        <span id="yearBalance"></span>
 
       </div>
 
     </div>
 
 
-    <!-- ===================================================
-         PAYMENT HISTORY
-    ==================================================== -->
+    <!-- REGISTRATION -->
 
-    <div
-      id="historyCard"
-      class="card hidden">
+    <div class="account">
 
-      <h3>
-        📋 Payment History
-      </h3>
+      <b>
+        🧾 Registration Fee
+      </b>
 
+      <div class="line">
 
-      <div class="scroll">
+        <span>
+          Due
+        </span>
 
-        <table>
+        <span id="registrationDue"></span>
 
-          <thead>
+      </div>
 
-            <tr>
+      <div class="line">
 
-              <th>
-                Date
-              </th>
+        <span>
+          Paid
+        </span>
 
-              <th>
-                Type
-              </th>
+        <span id="registrationPaid"></span>
 
-              <th>
-                Remarks
-              </th>
+      </div>
 
-              <th>
-                Amount
-              </th>
+      <div class="line balance">
 
-            </tr>
+        <span>
+          Balance
+        </span>
 
-          </thead>
-
-
-          <tbody
-            id="historyBody">
-          </tbody>
-
-        </table>
+        <span id="registrationBalance"></span>
 
       </div>
 
     </div>
 
+
+    <!-- OTHER OBLIGATIONS -->
+
+    <div class="account">
+
+      <b>
+        📦 Other Obligations
+      </b>
+
+      <div class="line">
+
+        <span>
+          Due
+        </span>
+
+        <span id="otherDue"></span>
+
+      </div>
+
+      <div class="line">
+
+        <span>
+          Paid
+        </span>
+
+        <span id="otherPaid"></span>
+
+      </div>
+
+      <div class="line balance">
+
+        <span>
+          Balance
+        </span>
+
+        <span id="otherBalance"></span>
+
+      </div>
+
+    </div>
 
   </div>
 
 </div>
+
+
+
+<!-- =====================================================
+     RECEIVE PAYMENT
+====================================================== -->
+
+<div
+  id="paymentCard"
+  class="card hidden">
+
+  <h3>
+    💵 Receive Payment
+  </h3>
+
+  <label>
+    Payment Type
+  </label>
+
+  <select
+    id="paymentType"
+    onchange="paymentTypeChanged()">
+
+    <option value="">
+      Select payment type
+    </option>
+
+    <option value="Monthly Payment">
+      Monthly Payment
+    </option>
+
+    <option value="Registration Fee">
+      Registration Fee
+    </option>
+
+    <option value="Other Obligation Payment">
+      Other Obligation Payment
+    </option>
+
+  </select>
+
+
+  <!-- SPECIFIC OBLIGATION -->
+
+  <div
+    id="obligationWrap"
+    class="hidden">
+
+    <label>
+      Specific Obligation
+    </label>
+
+    <select
+      id="obligationId">
+    </select>
+
+  </div>
+
+
+  <label>
+    Amount Received
+  </label>
+
+  <input
+    id="amount"
+    type="number"
+    min="0.01"
+    step="0.01"
+    inputmode="decimal">
+
+
+  <label>
+    Remarks
+  </label>
+
+  <textarea
+    id="remarks"></textarea>
+
+
+  <button
+    id="saveBtn"
+    onclick="savePayment()">
+
+    SAVE PAYMENT
+
+  </button>
+
+
+  <div id="paymentMsg"></div>
+
+
+  <!-- SUCCESS -->
+
+  <div
+    id="paymentSuccess"
+    class="payment-success hidden">
+
+    <div>
+      ✅ Payment successfully recorded.
+    </div>
+
+    <button
+      class="success-back"
+      onclick="backToSearch()">
+
+      ← Back to Search
+
+    </button>
+
+  </div>
+
+</div>
+
+
+
+<!-- =====================================================
+     PAYMENT HISTORY
+====================================================== -->
+
+<div
+  id="historyCard"
+  class="card hidden">
+
+  <h3>
+    📋 Payment History
+  </h3>
+
+  <div class="scroll">
+
+    <table>
+
+      <thead>
+
+        <tr>
+
+          <th>
+            Date
+          </th>
+
+          <th>
+            Type
+          </th>
+
+          <th>
+            Remarks
+          </th>
+
+          <th>
+            Amount
+          </th>
+
+        </tr>
+
+      </thead>
+
+      <tbody
+        id="historyBody">
+      </tbody>
+
+    </table>
+
+  </div>
+
+</div>
+
+
+</div>
+
+</div>
+
 
 
 <script>
 
 /************************************************************
  * API CONFIGURATION
+ *
+ * DIRECT POST
+ *
+ * GitHub Pages
+ *      ↓
+ * fetch()
+ *      ↓
+ * Apps Script doPost()
+ *      ↓
+ * TOFA backend
  ************************************************************/
 
 const API_URL =
   'https://script.google.com/macros/s/AKfycbynk1P7SnfHWOBnJYC2vhwdH7ONxEUj8FWMp--40YUpkcecjwWoigQG29pnc4YlU6l0zA/exec';
 
 
-/*
- * IMPORTANT:
- *
- * Apps Script uses a dynamic
- * script.googleusercontent.com origin.
- *
- * We capture the actual origin from
- * the READY message.
- */
-
-let API_BRIDGE_ORIGIN = '';
-
-/*
- * IMPORTANT:
- *
- * Capture the actual Window object that
- * sent the READY message.
- *
- * Do NOT use frame.contentWindow for
- * sending API requests.
- */
-
-let API_BRIDGE_WINDOW = null;
-
-
-const GITHUB_ORIGIN =
-  'https://brcc-tupoloeste.github.io';
-
+/************************************************************
+ * STATE
+ ************************************************************/
 
 let token = '';
 
 let selectedMember = null;
-
-let requestSeq = 0;
-
-let requestTimer = null;
-
-let apiReady = false;
-
-let pendingQueue = [];
 
 
 /************************************************************
  * SHOW PASSWORD
  ************************************************************/
 
-document.getElementById(
-  'showPass'
-).onchange = function(){
+document
+  .getElementById('showPass')
+  .addEventListener(
+    'change',
+    function(){
 
-  document.getElementById(
-    'password'
-  ).type =
-    this.checked
-      ? 'text'
-      : 'password';
+      document
+        .getElementById('password')
+        .type =
+          this.checked
+            ? 'text'
+            : 'password';
 
-};
+    }
+  );
 
 
 /************************************************************
@@ -1009,13 +1039,17 @@ function esc(v){
   )
   .replace(
     /[&<>"']/g,
-    m => ({
-      '&':'&amp;',
-      '<':'&lt;',
-      '>':'&gt;',
-      '"':'&quot;',
-      "'":'&#39;'
-    }[m])
+    function(m){
+
+      return {
+        '&':'&amp;',
+        '<':'&lt;',
+        '>':'&gt;',
+        '"':'&quot;',
+        "'":'&#39;'
+      }[m];
+
+    }
   );
 
 }
@@ -1035,9 +1069,13 @@ function js(v){
 
 function set(id,v){
 
-  document.getElementById(
-    id
-  ).textContent = v;
+  const el =
+    document.getElementById(id);
+
+  if(el){
+    el.textContent =
+      v == null ? '' : v;
+  }
 
 }
 
@@ -1063,9 +1101,13 @@ function msg(
   type
 ){
 
-  document.getElementById(
-    id
-  ).innerHTML =
+  const el =
+    document.getElementById(id);
+
+  if(!el)
+    return;
+
+  el.innerHTML =
     text
       ? '<div class="msg ' +
         (type || '') +
@@ -1082,68 +1124,59 @@ function showBusy(
   sub
 ){
 
-  document.getElementById(
-    'busyTitle'
-  ).textContent =
-    title;
+  document
+    .getElementById('busyTitle')
+    .textContent =
+      title || 'Please wait...';
 
+  document
+    .getElementById('busySub')
+    .textContent =
+      sub || 'Please wait';
 
-  document.getElementById(
-    'busySub'
-  ).textContent =
-    sub || 'Please wait';
+  document
+    .getElementById('busyOverlay')
+    .classList
+    .remove('hidden');
 
-
-  document.getElementById(
-    'busyOverlay'
-  ).classList.remove(
-    'hidden'
-  );
-
-
-  document.body.classList.add(
-    'busy'
-  );
+  document.body.classList.add('busy');
 
 }
 
 
 function hideBusy(){
 
-  document.getElementById(
-    'busyOverlay'
-  ).classList.add(
-    'hidden'
-  );
+  document
+    .getElementById('busyOverlay')
+    .classList
+    .add('hidden');
 
-
-  document.body.classList.remove(
-    'busy'
-  );
+  document.body.classList.remove('busy');
 
 }
 
 
 function lockSearch(v){
 
-  document.getElementById(
-    'searchText'
-  ).disabled = v;
+  document
+    .getElementById('searchText')
+    .disabled = v;
 
-
-  document.getElementById(
-    'searchBtn'
-  ).disabled = v;
-
+  document
+    .getElementById('searchBtn')
+    .disabled = v;
 
   document
     .querySelectorAll('.result')
     .forEach(
-      x =>
+      function(x){
+
         x.classList.toggle(
           'locked',
           v
-        )
+        );
+
+      }
     );
 
 }
@@ -1159,10 +1192,8 @@ function fail(
       ? e.message
       : String(e || 'Error');
 
-
   if(
-    m ===
-    'SESSION_EXPIRED'
+    m === 'SESSION_EXPIRED'
   ){
 
     token = '';
@@ -1176,7 +1207,6 @@ function fail(
     return;
   }
 
-
   msg(
     id || 'searchMsg',
     m,
@@ -1187,290 +1217,9 @@ function fail(
 
 
 /************************************************************
- * SEND API REQUEST
+ * DIRECT API
  *
- * IMPORTANT:
- * Uses API_BRIDGE_WINDOW captured from
- * ev.source when READY was received.
- ************************************************************/
-
-function sendApiRequest(
-  req
-){
-
-  if(
-    !API_BRIDGE_WINDOW
-  ){
-
-    console.log(
-      '[TOFA API] SEND FAILED: bridge window unavailable'
-    );
-
-
-    req.reject(
-      new Error(
-        'API bridge is not available.'
-      )
-    );
-
-
-    return;
-  }
-
-
-  console.log(
-    '[TOFA API] REQUEST SENT',
-    req.id,
-    req.action,
-    'target:',
-    API_BRIDGE_ORIGIN
-  );
-
-
-  API_BRIDGE_WINDOW.postMessage(
-
-    {
-      __onlineApiRequest:true,
-
-      id:req.id,
-
-      action:req.action,
-
-      payload:req.payload || {}
-
-    },
-
-    API_BRIDGE_ORIGIN
-
-  );
-
-}
-
-
-/************************************************************
- * MESSAGE HANDLER
- *
- * IMPORTANT:
- *
- * NO ev.source rejection here.
- *
- * We capture ev.source ONLY when the
- * trusted READY message arrives.
- ************************************************************/
-
-window.addEventListener(
-  'message',
-  function(ev){
-
-    const msgData =
-      ev.data || {};
-
-
-    console.log(
-      '[TOFA API] MESSAGE',
-      ev.origin,
-      msgData
-    );
-
-
-    /******************************************************
-     * BRIDGE READY
-     ******************************************************/
-
-    if(
-      msgData.__onlineBridgeReady
-    ){
-
-      API_BRIDGE_ORIGIN =
-        ev.origin;
-
-
-      API_BRIDGE_WINDOW =
-        ev.source;
-
-
-      console.log(
-        '[TOFA API] BRIDGE READY from',
-        API_BRIDGE_ORIGIN
-      );
-
-
-      console.log(
-        '[TOFA API] BRIDGE WINDOW CAPTURED',
-        !!API_BRIDGE_WINDOW
-      );
-
-
-      apiReady = true;
-
-
-      console.log(
-        '[TOFA API] apiReady = true'
-      );
-
-
-      while(
-        pendingQueue.length
-      ){
-
-        const req =
-          pendingQueue.shift();
-
-
-        console.log(
-          '[TOFA API] sending queued request',
-          req.id,
-          req.action
-        );
-
-
-        sendApiRequest(
-          req
-        );
-
-      }
-
-
-      return;
-    }
-
-
-    /******************************************************
-     * BRIDGE NOT ESTABLISHED
-     ******************************************************/
-
-    if(
-      !API_BRIDGE_ORIGIN
-    ){
-
-      console.log(
-        '[TOFA API] ignored: bridge origin not established'
-      );
-
-      return;
-    }
-
-
-    /******************************************************
-     * DYNAMIC ORIGIN VALIDATION
-     ******************************************************/
-
-    if(
-      ev.origin !==
-      API_BRIDGE_ORIGIN
-    ){
-
-      console.log(
-        '[TOFA API] ignored origin',
-        ev.origin,
-        'expected',
-        API_BRIDGE_ORIGIN
-      );
-
-      return;
-    }
-
-
-    /******************************************************
-     * API RESPONSE
-     ******************************************************/
-
-    if(
-      !msgData.__onlineApi
-    ){
-
-      console.log(
-        '[TOFA API] ignored: not API response'
-      );
-
-      return;
-    }
-
-
-    const pending =
-      window.__pendingApi;
-
-
-    if(!pending){
-
-      console.log(
-        '[TOFA API] ignored: no pending request'
-      );
-
-      return;
-    }
-
-
-    if(
-      msgData.id !==
-      pending.id
-    ){
-
-      console.log(
-        '[TOFA API] ignored: ID mismatch',
-        msgData.id,
-        pending.id
-      );
-
-      return;
-    }
-
-
-    console.log(
-      '[TOFA API] RESPONSE ACCEPTED',
-      msgData
-    );
-
-
-    clearTimeout(
-      requestTimer
-    );
-
-
-    window.__pendingApi =
-      null;
-
-
-    hideBusy();
-
-
-    if(
-      msgData.ok
-    ){
-
-      console.log(
-        '[TOFA API] REQUEST SUCCESS'
-      );
-
-
-      pending.resolve(
-        msgData.data
-      );
-
-
-    }else{
-
-      console.log(
-        '[TOFA API] REQUEST FAILED',
-        msgData.error
-      );
-
-
-      pending.reject(
-        new Error(
-          msgData.error ||
-          'Request failed.'
-        )
-      );
-
-    }
-
-  }
-);
-
-/************************************************************
- * API CALL — DIRECT POST
- * GitHub Pages → Apps Script doPost()
+ * SAME FLOW AS APPROVAL CENTER
  ************************************************************/
 
 async function api(
@@ -1481,13 +1230,9 @@ async function api(
 ){
 
   showBusy(
-    title ||
-      'Please wait...',
-
-    sub ||
-      'Processing request'
+    title || 'Please wait...',
+    sub || 'Processing request'
   );
-
 
   console.log(
     '[TOFA API] POST START',
@@ -1495,28 +1240,21 @@ async function api(
     payload
   );
 
-
-  try {
+  try{
 
     const response =
       await fetch(
         API_URL,
         {
-          method: 'POST',
+          method:'POST',
 
           body:
             JSON.stringify({
-
-              action:
-                action,
-
-              payload:
-                payload || {}
-
+              action:action,
+              payload:payload || {}
             }),
 
-          redirect:
-            'follow'
+          redirect:'follow'
         }
       );
 
@@ -1538,9 +1276,7 @@ async function api(
     );
 
 
-    if(
-      !responseText
-    ){
+    if(!responseText){
 
       throw new Error(
         'The server returned an empty response.'
@@ -1551,22 +1287,19 @@ async function api(
 
     let result;
 
-
-    try {
+    try{
 
       result =
         JSON.parse(
           responseText
         );
 
-    }
-    catch(parseError){
+    }catch(parseError){
 
       console.error(
         '[TOFA API] INVALID JSON RESPONSE',
         responseText
       );
-
 
       throw new Error(
         'The server returned an invalid response.'
@@ -1606,8 +1339,7 @@ async function api(
       result.result || {}
     );
 
-  }
-  catch(error){
+  }catch(error){
 
     console.error(
       '[TOFA API] ERROR',
@@ -1615,18 +1347,15 @@ async function api(
       error
     );
 
-
     throw error;
 
-  }
-  finally {
+  }finally{
 
     hideBusy();
 
   }
 
 }
-
 
 
 /************************************************************
@@ -1640,8 +1369,50 @@ async function login(){
       'loginBtn'
     );
 
+  const username =
+    document
+      .getElementById('username')
+      .value
+      .trim();
+
+  const password =
+    document
+      .getElementById('password')
+      .value;
+
+
+  if(!username){
+
+    msg(
+      'loginMsg',
+      'Enter username.',
+      'error'
+    );
+
+    return;
+  }
+
+
+  if(!password){
+
+    msg(
+      'loginMsg',
+      'Enter password.',
+      'error'
+    );
+
+    return;
+  }
+
 
   b.disabled = true;
+
+
+  msg(
+    'loginMsg',
+    '',
+    ''
+  );
 
 
   try{
@@ -1652,22 +1423,8 @@ async function login(){
         'login',
 
         {
-
-          username:
-            document
-              .getElementById(
-                'username'
-              )
-              .value
-              .trim(),
-
-          password:
-            document
-              .getElementById(
-                'password'
-              )
-              .value
-
+          username:username,
+          password:password
         },
 
         'Signing in...',
@@ -1677,37 +1434,61 @@ async function login(){
       );
 
 
+    console.log(
+      '[TOFA LOGIN] LOGIN RESULT',
+      r
+    );
+
+
+    if(
+      !r ||
+      !r.token
+    ){
+
+      throw new Error(
+        'Login succeeded but no session token was returned.'
+      );
+
+    }
+
+
     token =
       r.token;
 
 
-    document.getElementById(
-      'password'
-    ).value = '';
+    document
+      .getElementById('password')
+      .value = '';
 
 
-    document.getElementById(
-      'loginView'
-    ).classList.add(
-      'hidden'
-    );
+    document
+      .getElementById('loginView')
+      .classList
+      .add('hidden');
 
 
-    document.getElementById(
-      'appView'
-    ).classList.remove(
-      'hidden'
-    );
+    document
+      .getElementById('appView')
+      .classList
+      .remove('hidden');
 
 
-    msg(
-      'loginMsg',
-      '',
-      ''
+    document
+      .getElementById('searchText')
+      .focus();
+
+
+    console.log(
+      '[TOFA LOGIN] APPLICATION OPENED'
     );
 
 
   }catch(e){
+
+    console.error(
+      '[TOFA LOGIN] ERROR',
+      e
+    );
 
     fail(
       e,
@@ -1733,47 +1514,44 @@ async function logout(){
   const t =
     token;
 
-
   token = '';
 
-  selectedMember =
-    null;
+  selectedMember = null;
 
 
-  document.getElementById(
-    'appView'
-  ).classList.add(
-    'hidden'
-  );
+  document
+    .getElementById('appView')
+    .classList
+    .add('hidden');
 
 
-  document.getElementById(
-    'loginView'
-  ).classList.remove(
-    'hidden'
-  );
+  document
+    .getElementById('loginView')
+    .classList
+    .remove('hidden');
 
 
   [
-    'searchCard',
     'profileCard',
     'paymentCard',
     'historyCard'
-  ].forEach(
-    id =>
+  ]
+  .forEach(
+    function(id){
+
       document
         .getElementById(id)
-        .classList.add(
-          'hidden'
-        )
+        .classList
+        .add('hidden');
+
+    }
   );
 
 
-  document.getElementById(
-    'searchCard'
-  ).classList.remove(
-    'hidden'
-  );
+  document
+    .getElementById('searchCard')
+    .classList
+    .remove('hidden');
 
 
   if(t){
@@ -1782,12 +1560,21 @@ async function logout(){
 
       await api(
         'logout',
-        {token:t},
+        {
+          token:t
+        },
         'Signing out...',
         'Closing session'
       );
 
-    }catch(e){}
+    }catch(e){
+
+      console.error(
+        '[TOFA LOGOUT] ERROR',
+        e
+      );
+
+    }
 
   }
 
@@ -1806,9 +1593,7 @@ async function searchMembers(){
 
   const q =
     document
-      .getElementById(
-        'searchText'
-      )
+      .getElementById('searchText')
       .value
       .trim();
 
@@ -1828,9 +1613,16 @@ async function searchMembers(){
   lockSearch(true);
 
 
-  document.getElementById(
-    'results'
-  ).innerHTML = '';
+  document
+    .getElementById('results')
+    .innerHTML = '';
+
+
+  msg(
+    'searchMsg',
+    '',
+    ''
+  );
 
 
   try{
@@ -1841,11 +1633,8 @@ async function searchMembers(){
         'searchMembers',
 
         {
-
-          token,
-
+          token:token,
           searchText:q
-
         },
 
         'Searching Members...',
@@ -1890,66 +1679,67 @@ function renderResults(
     !rows.length
   ){
 
-    document.getElementById(
-      'results'
-    ).innerHTML =
-      '<div class="msg error">' +
-      'No member found.' +
-      '</div>';
+    document
+      .getElementById('results')
+      .innerHTML =
+        '<div class="msg error">' +
+        'No member found.' +
+        '</div>';
 
     return;
   }
 
 
-  document.getElementById(
-    'results'
-  ).innerHTML =
+  document
+    .getElementById('results')
+    .innerHTML =
 
-    rows
-      .map(
-        r =>
+      rows
+        .map(
+          function(r){
 
-          '<div class="result" ' +
+            return (
 
-          'data-id="' +
-          esc(r.id) +
-          '" ' +
+              '<div class="result" ' +
 
-          'onclick="openMember(\'' +
-          js(r.id) +
-          '\',this)">' +
+              'data-id="' +
+              esc(r.id) +
+              '" ' +
 
-          '<strong>' +
-          esc(r.name) +
-          '</strong>' +
+              'onclick="openMember(\'' +
+              js(r.id) +
+              '\',this)">' +
 
-          '<small>' +
+              '<strong>' +
+              esc(r.name) +
+              '</strong>' +
 
-          esc(r.id) +
+              '<small>' +
 
-          (
-            r.address
-              ? ' • ' +
-                esc(r.address)
-              : ''
-          ) +
+              esc(r.id) +
 
-          '</small>' +
+              (
+                r.address
+                  ? ' • ' +
+                    esc(r.address)
+                  : ''
+              ) +
 
-          '</div>'
+              '</small>' +
 
-      )
-      .join('');
+              '</div>'
+
+            );
+
+          }
+        )
+        .join('');
 
 }
 
 
 /************************************************************
  * OPEN MEMBER
- *
- * IMPORTANT UI CHANGE:
- *
- * Search card disappears after member selection.
  ************************************************************/
 
 async function openMember(
@@ -1981,11 +1771,8 @@ async function openMember(
         'getMemberProfile',
 
         {
-
-          token,
-
+          token:token,
           memberId:id
-
         },
 
         'Loading Profile...',
@@ -1993,6 +1780,15 @@ async function openMember(
         'Please wait while the member record is loaded'
 
       );
+
+
+    if(!p){
+
+      throw new Error(
+        'Member profile was not returned.'
+      );
+
+    }
 
 
     selectedMember =
@@ -2004,19 +1800,12 @@ async function openMember(
     );
 
 
-    /*
-     * Hide Search Member.
-     */
-    document.getElementById(
-      'searchCard'
-    ).classList.add(
-      'hidden'
-    );
+    document
+      .getElementById('searchCard')
+      .classList
+      .add('hidden');
 
 
-    /*
-     * Scroll to top.
-     */
     window.scrollTo({
       top:0,
       behavior:'smooth'
@@ -2052,35 +1841,29 @@ function renderProfile(
     'profileCard',
     'paymentCard',
     'historyCard'
-  ].forEach(
-    id =>
+  ]
+  .forEach(
+    function(id){
+
       document
         .getElementById(id)
-        .classList.remove(
-          'hidden'
-        )
+        .classList
+        .remove('hidden');
+
+    }
   );
 
 
-  /*
-   * Hide search.
-   */
-  document.getElementById(
-    'searchCard'
-  ).classList.add(
-    'hidden'
-  );
+  document
+    .getElementById('searchCard')
+    .classList
+    .add('hidden');
 
 
-  /*
-   * Hide old payment success message
-   * whenever profile is rendered again.
-   */
-  document.getElementById(
-    'paymentSuccess'
-  ).classList.add(
-    'hidden'
-  );
+  document
+    .getElementById('paymentSuccess')
+    .classList
+    .add('hidden');
 
 
   set(
@@ -2195,57 +1978,44 @@ function renderProfile(
 
 /************************************************************
  * BACK TO SEARCH
- *
- * Returns to the initial Search Member screen.
  ************************************************************/
 
 function backToSearch(){
 
-  selectedMember =
-    null;
+  selectedMember = null;
 
-
-  /*
-   * Hide profile/payment/history.
-   */
 
   [
     'profileCard',
     'paymentCard',
     'historyCard'
-  ].forEach(
-    id =>
+  ]
+  .forEach(
+    function(id){
+
       document
         .getElementById(id)
-        .classList.add(
-          'hidden'
-        )
+        .classList
+        .add('hidden');
+
+    }
   );
 
 
-  /*
-   * Show Search Member.
-   */
-
-  document.getElementById(
-    'searchCard'
-  ).classList.remove(
-    'hidden'
-  );
+  document
+    .getElementById('searchCard')
+    .classList
+    .remove('hidden');
 
 
-  /*
-   * Clear search state.
-   */
-
-  document.getElementById(
-    'searchText'
-  ).value = '';
+  document
+    .getElementById('searchText')
+    .value = '';
 
 
-  document.getElementById(
-    'results'
-  ).innerHTML = '';
+  document
+    .getElementById('results')
+    .innerHTML = '';
 
 
   msg(
@@ -2255,50 +2025,44 @@ function backToSearch(){
   );
 
 
-  /*
-   * Clear payment fields.
-   */
-
-  document.getElementById(
-    'paymentType'
-  ).value = '';
+  document
+    .getElementById('paymentType')
+    .value = '';
 
 
-  document.getElementById(
-    'obligationWrap'
-  ).classList.add(
-    'hidden'
-  );
+  document
+    .getElementById('obligationWrap')
+    .classList
+    .add('hidden');
 
 
-  document.getElementById(
-    'obligationId'
-  ).innerHTML =
-    '<option value="">' +
-    'Select obligation' +
-    '</option>';
+  document
+    .getElementById('obligationId')
+    .innerHTML =
+      '<option value="">' +
+      'Select obligation' +
+      '</option>';
 
 
-  document.getElementById(
-    'amount'
-  ).value = '';
+  document
+    .getElementById('amount')
+    .value = '';
 
 
-  document.getElementById(
-    'remarks'
-  ).value = '';
+  document
+    .getElementById('remarks')
+    .value = '';
 
 
-  document.getElementById(
-    'paymentMsg'
-  ).innerHTML = '';
+  document
+    .getElementById('paymentMsg')
+    .innerHTML = '';
 
 
-  document.getElementById(
-    'paymentSuccess'
-  ).classList.add(
-    'hidden'
-  );
+  document
+    .getElementById('paymentSuccess')
+    .classList
+    .add('hidden');
 
 
   window.scrollTo({
@@ -2328,41 +2092,49 @@ function fillObligations(
     'Select obligation' +
     '</option>' +
 
-    list
+    (list || [])
       .filter(
-        o =>
-          Number(
+        function(o){
+
+          return Number(
             o.balance || 0
-          ) > 0
+          ) > 0;
+
+        }
       )
       .map(
-        o =>
+        function(o){
 
-          '<option value="' +
+          return (
 
-          esc(
-            o.obligationId ||
-            o.id ||
-            ''
-          ) +
+            '<option value="' +
 
-          '">' +
+            esc(
+              o.obligationId ||
+              o.id ||
+              ''
+            ) +
 
-          esc(
+            '">' +
 
-            (o.description ||
-             'Obligation') +
+            esc(
 
-            ' — ' +
+              (o.description ||
+               'Obligation') +
 
-            money(
-              o.balance
-            )
+              ' — ' +
 
-          ) +
+              money(
+                o.balance
+              )
 
-          '</option>'
+            ) +
 
+            '</option>'
+
+          );
+
+        }
       )
       .join('');
 
@@ -2376,18 +2148,19 @@ function fillObligations(
 function paymentTypeChanged(){
 
   const type =
-    document.getElementById(
-      'paymentType'
-    ).value;
+    document
+      .getElementById('paymentType')
+      .value;
 
 
-  document.getElementById(
-    'obligationWrap'
-  ).classList.toggle(
-    'hidden',
-    type !==
-      'Other Obligation Payment'
-  );
+  document
+    .getElementById('obligationWrap')
+    .classList
+    .toggle(
+      'hidden',
+      type !==
+        'Other Obligation Payment'
+    );
 
 }
 
@@ -2400,44 +2173,49 @@ function fillHistory(
   list
 ){
 
-  document.getElementById(
-    'historyBody'
-  ).innerHTML =
+  document
+    .getElementById('historyBody')
+    .innerHTML =
 
-    (list || [])
-      .map(
-        x =>
+      (list || [])
+        .map(
+          function(x){
 
-          '<tr>' +
+            return (
 
-          '<td>' +
-          esc(x.date || '') +
-          '</td>' +
+              '<tr>' +
 
-          '<td>' +
-          esc(
-            x.type ||
-            x.transactionType ||
-            ''
-          ) +
-          '</td>' +
+              '<td>' +
+              esc(x.date || '') +
+              '</td>' +
 
-          '<td>' +
-          esc(
-            x.remarks || ''
-          ) +
-          '</td>' +
+              '<td>' +
+              esc(
+                x.type ||
+                x.transactionType ||
+                ''
+              ) +
+              '</td>' +
 
-          '<td>' +
-          money(
-            x.amount
-          ) +
-          '</td>' +
+              '<td>' +
+              esc(
+                x.remarks || ''
+              ) +
+              '</td>' +
 
-          '</tr>'
+              '<td>' +
+              money(
+                x.amount
+              ) +
+              '</td>' +
 
-      )
-      .join('');
+              '</tr>'
+
+            );
+
+          }
+        )
+        .join('');
 
 }
 
@@ -2453,23 +2231,23 @@ async function savePayment(){
 
 
   const type =
-    document.getElementById(
-      'paymentType'
-    ).value;
+    document
+      .getElementById('paymentType')
+      .value;
 
 
   const amount =
     Number(
-      document.getElementById(
-        'amount'
-      ).value || 0
+      document
+        .getElementById('amount')
+        .value || 0
     );
 
 
   const obligationId =
-    document.getElementById(
-      'obligationId'
-    ).value;
+    document
+      .getElementById('obligationId')
+      .value;
 
 
   if(!type){
@@ -2518,8 +2296,14 @@ async function savePayment(){
     );
 
 
-  saveBtn.disabled =
-    true;
+  saveBtn.disabled = true;
+
+
+  msg(
+    'paymentMsg',
+    '',
+    ''
+  );
 
 
   try{
@@ -2530,8 +2314,7 @@ async function savePayment(){
         'savePayment',
 
         {
-
-          token,
+          token:token,
 
           paymentData:{
 
@@ -2541,7 +2324,8 @@ async function savePayment(){
             transactionType:
               type,
 
-            amount,
+            amount:
+              amount,
 
             obligationId:
               type ===
@@ -2568,9 +2352,17 @@ async function savePayment(){
       );
 
 
-    /*
-     * Update profile/accounting.
-     */
+    if(
+      !r ||
+      !r.profile
+    ){
+
+      throw new Error(
+        'Payment was processed but updated profile was not returned.'
+      );
+
+    }
+
 
     selectedMember =
       r.profile;
@@ -2581,52 +2373,39 @@ async function savePayment(){
     );
 
 
-    /*
-     * Show normal server message.
-     */
-
     msg(
       'paymentMsg',
-      r.message,
+      r.message ||
+        'Payment successfully recorded.',
       'ok'
     );
 
 
-    /*
-     * Show success + Back to Search.
-     */
-
-    document.getElementById(
-      'paymentSuccess'
-    ).classList.remove(
-      'hidden'
-    );
+    document
+      .getElementById('paymentSuccess')
+      .classList
+      .remove('hidden');
 
 
-    /*
-     * Clear input fields.
-     */
-
-    document.getElementById(
-      'amount'
-    ).value = '';
+    document
+      .getElementById('amount')
+      .value = '';
 
 
-    document.getElementById(
-      'remarks'
-    ).value = '';
+    document
+      .getElementById('remarks')
+      .value = '';
 
 
-    document.getElementById(
-      'paymentType'
-    ).value = '';
+    document
+      .getElementById('paymentType')
+      .value = '';
 
 
-    document.getElementById(
-      'obligationWrap'
-    ).classList.add(
-      'hidden'
-    );
+    document
+      .getElementById('obligationWrap')
+      .classList
+      .add('hidden');
 
 
   }catch(e){
@@ -2639,8 +2418,7 @@ async function savePayment(){
 
   }finally{
 
-    saveBtn.disabled =
-      false;
+    saveBtn.disabled = false;
 
   }
 
@@ -2658,92 +2436,101 @@ function compressImage(
 ){
 
   return new Promise(
-    (resolve,reject)=>{
+    function(resolve,reject){
 
-      const r =
+      const reader =
         new FileReader();
 
 
-      r.onload = () => {
+      reader.onload =
+        function(){
 
-        const img =
-          new Image();
-
-
-        img.onload = () => {
-
-          const s =
-            Math.min(
-              1,
-              maxW / img.width
-            );
+          const img =
+            new Image();
 
 
-          const c =
-            document.createElement(
-              'canvas'
-            );
+          img.onload =
+            function(){
+
+              const scale =
+                Math.min(
+                  1,
+                  maxW /
+                    img.width
+                );
 
 
-          c.width =
-            Math.round(
-              img.width * s
-            );
+              const canvas =
+                document.createElement(
+                  'canvas'
+                );
 
 
-          c.height =
-            Math.round(
-              img.height * s
-            );
+              canvas.width =
+                Math.round(
+                  img.width *
+                  scale
+                );
 
 
-          c
-            .getContext('2d')
-            .drawImage(
-              img,
-              0,
-              0,
-              c.width,
-              c.height
-            );
+              canvas.height =
+                Math.round(
+                  img.height *
+                  scale
+                );
 
 
-          const data =
-            c
-              .toDataURL(
-                'image/jpeg',
-                quality
-              )
-              .split(',')[1];
+              const ctx =
+                canvas.getContext(
+                  '2d'
+                );
 
 
-          resolve({
+              ctx.drawImage(
+                img,
+                0,
+                0,
+                canvas.width,
+                canvas.height
+              );
 
-            base64:data,
 
-            mimeType:
-              'image/jpeg'
+              const data =
+                canvas
+                  .toDataURL(
+                    'image/jpeg',
+                    quality
+                  )
+                  .split(',')[1];
 
-          });
+
+              resolve({
+
+                base64:data,
+
+                mimeType:
+                  'image/jpeg'
+
+              });
+
+            };
+
+
+          img.onerror =
+            reject;
+
+
+          img.src =
+            reader.result;
 
         };
 
 
-        img.onerror =
-          reject;
-
-
-        img.src =
-          r.result;
-
-      };
-
-
-      r.onerror =
+      reader.onerror =
         reject;
 
 
-      r.readAsDataURL(
+      reader.readAsDataURL(
         file
       );
 
@@ -2795,7 +2582,7 @@ async function uploadPhoto(
 
         {
 
-          token,
+          token:token,
 
           photo:{
 
@@ -2821,18 +2608,25 @@ async function uploadPhoto(
 
     msg(
       'photoMsg',
-      r.message,
+      r.message ||
+        'Photo successfully uploaded.',
       'ok'
     );
 
 
-    selectedMember =
-      r.profile;
-
-
-    renderProfile(
+    if(
       r.profile
-    );
+    ){
+
+      selectedMember =
+        r.profile;
+
+
+      renderProfile(
+        r.profile
+      );
+
+    }
 
 
   }catch(e){
@@ -2851,7 +2645,49 @@ async function uploadPhoto(
 
 }
 
+
+/************************************************************
+ * ENTER KEY SUPPORT
+ ************************************************************/
+
+document
+  .getElementById('password')
+  .addEventListener(
+    'keydown',
+    function(e){
+
+      if(
+        e.key === 'Enter'
+      ){
+
+        login();
+
+      }
+
+    }
+  );
+
+
+document
+  .getElementById('searchText')
+  .addEventListener(
+    'keydown',
+    function(e){
+
+      if(
+        e.key === 'Enter'
+      ){
+
+        searchMembers();
+
+      }
+
+    }
+  );
+
+
 </script>
 
 </body>
+
 </html>
