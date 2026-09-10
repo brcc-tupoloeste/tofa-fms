@@ -3144,7 +3144,6 @@ async function openMemberList(){
     fail(e,'dashboardMsg');
   }
 }
-
 /* =========================================================
    OUTSTANDING MEMBERS
 ========================================================= */
@@ -3154,16 +3153,109 @@ async function openOutstandingList(){
   document.getElementById('searchTopBar').classList.remove('hidden');
   document.getElementById('outstandingBody').innerHTML='';
   document.getElementById('outstandingNote').textContent='Loading outstanding balances...';
+
   try{
-    const rows=await api('getOutstandingMembers',{token:token},'Loading Outstanding...','Calculating member balances');
-    const outstanding=(rows||[]).filter(r=>Number(r.totalOutstanding||0)>0);
-    document.getElementById('outstandingNote').textContent=outstanding.length+' member(s) with outstanding balance';
-    document.getElementById('outstandingBody').innerHTML=outstanding.map(r=>
-      '<tr><td>'+esc(r.id)+'</td><td><b>'+esc(r.name)+'</b></td><td>'+money(r.monthlyBalance)+'</td><td>'+money(r.registrationBalance)+'</td><td>'+money(r.otherBalance)+'</td><td><b>'+money(r.totalOutstanding)+'</b></td></tr>'
-    ).join('') || '<tr><td colspan="6">No outstanding balances.</td></tr>';
+
+    const rows = await api(
+      'getOutstandingMembers',
+      {token:token},
+      'Loading Outstanding...',
+      'Calculating member balances'
+    );
+
+    /*
+     * Backend returns an ARRAY directly.
+     *
+     * Correct backend field names:
+     *   memberId
+     *   name
+     *   monthlyBalance
+     *   registrationBalance
+     *   otherBalance
+     *   totalUncollected
+     */
+    const outstanding =
+      (Array.isArray(rows) ? rows : [])
+        .filter(function(r){
+          return Number(
+            r.totalUncollected || 0
+          ) > 0;
+        });
+
+
+    document.getElementById(
+      'outstandingNote'
+    ).textContent =
+      outstanding.length +
+      ' member(s) with outstanding balance';
+
+
+    document.getElementById(
+      'outstandingBody'
+    ).innerHTML =
+      outstanding.map(function(r){
+
+        return (
+          '<tr>' +
+
+            '<td>' +
+              esc(r.memberId || '') +
+            '</td>' +
+
+            '<td>' +
+              '<b>' +
+                esc(r.name || '') +
+              '</b>' +
+            '</td>' +
+
+            '<td>' +
+              money(
+                r.monthlyBalance || 0
+              ) +
+            '</td>' +
+
+            '<td>' +
+              money(
+                r.registrationBalance || 0
+              ) +
+            '</td>' +
+
+            '<td>' +
+              money(
+                r.otherBalance || 0
+              ) +
+            '</td>' +
+
+            '<td>' +
+              '<b>' +
+                money(
+                  r.totalUncollected || 0
+                ) +
+              '</b>' +
+            '</td>' +
+
+          '</tr>'
+        );
+
+      }).join('') ||
+
+      '<tr>' +
+        '<td colspan="6">' +
+          'No outstanding balances.' +
+        '</td>' +
+      '</tr>';
+
+
   }catch(e){
-    document.getElementById('outstandingNote').textContent='';
-    fail(e,'dashboardMsg');
+
+    document.getElementById(
+      'outstandingNote'
+    ).textContent='';
+
+    fail(
+      e,
+      'dashboardMsg'
+    );
   }
 }
 
