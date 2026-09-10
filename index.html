@@ -1627,15 +1627,6 @@ async function api(
 
 }
 
-/************************************************************
- * LOAD APPS SCRIPT IFRAME
- ************************************************************/
-
-const apiFrame =
-  document.getElementById(
-    'apiFrame'
-  );
-
 
 apiFrame.addEventListener(
   'load',
@@ -1656,10 +1647,6 @@ console.log(
 );
 
 
-apiFrame.src =
-  API_URL +
-  '?bridge=' +
-  Date.now();
 
 
 /************************************************************
