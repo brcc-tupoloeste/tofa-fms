@@ -656,7 +656,11 @@ td{
   .quick-grid{grid-template-columns:repeat(4,1fr)}
 }
 
-@media print{
+@page{
+      size:A4 portrait;
+      margin:12mm;
+    }
+    @media print{
   body{background:#fff!important}
   body *{visibility:hidden!important}
 
