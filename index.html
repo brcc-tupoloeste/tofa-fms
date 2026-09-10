@@ -1644,45 +1644,109 @@ function bridgeApi(
    MAIN API
 ============================================================ */
 
-async function api(
-  action,
-  payload,
-  title,
-  sub
-){
+function api(action,payload,title,sub){
+  return new Promise((resolve,reject)=>{
 
-  showBusy(
-    title ||
-      'Please wait...',
-    sub ||
-      'Processing request'
-  );
+    const id = 'r' + (++requestSeq);
 
+    window.__pendingApi = {
+      id: id,
+      resolve: resolve,
+      reject: reject
+    };
 
-  try{
-
-    return await bridgeApi(
-      action,
-      payload || {}
+    showBusy(
+      title || 'Please wait...',
+      sub || 'Processing request'
     );
 
-  }catch(e){
+    const frame =
+      document.getElementById('apiFrame');
 
-    console.error(
-      'TOFA Payments API:',
-      e
+    frame.name = 'apiFrame_' + id;
+
+    const form =
+      document.createElement('form');
+
+    form.method = 'POST';
+    form.action = API_URL;
+    form.target = frame.name;
+    form.style.display = 'none';
+    form.setAttribute(
+      'aria-hidden',
+      'true'
     );
 
-    throw e;
 
-  }finally{
+    /* ACTION */
+    const a =
+      document.createElement('input');
 
-    hideBusy();
+    a.type = 'hidden';
+    a.name = 'action';
+    a.value = action;
 
-  }
+    form.appendChild(a);
 
+
+    /* PAYLOAD */
+    const p =
+      document.createElement('input');
+
+    p.type = 'hidden';
+    p.name = 'payload';
+    p.value =
+      JSON.stringify(payload || {});
+
+    form.appendChild(p);
+
+
+    /* REQUEST ID
+       IMPORTANT:
+       Backend needs this to return the
+       response to the correct request.
+    */
+    const r =
+      document.createElement('input');
+
+    r.type = 'hidden';
+    r.name = 'requestId';
+    r.value = id;
+
+    form.appendChild(r);
+
+
+    document.body.appendChild(form);
+
+    form.submit();
+
+    form.remove();
+
+
+    requestTimer =
+      setTimeout(function(){
+
+        if (
+          window.__pendingApi &&
+          window.__pendingApi.id === id
+        ) {
+
+          window.__pendingApi = null;
+
+          hideBusy();
+
+          reject(
+            new Error(
+              'The server took too long to respond. Please try again.'
+            )
+          );
+
+        }
+
+      }, 45000);
+
+  });
 }
-
 
 /* ============================================================
    LOGIN
