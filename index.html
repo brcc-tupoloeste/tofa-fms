@@ -143,10 +143,7 @@ function fail(e,id){const m=e&&e.message?e.message:String(e||'Error');if(m==='SE
 function sendApiRequest(req){
   const frame=document.getElementById('apiFrame');
   if(!frame||!frame.contentWindow){req.reject(new Error('API bridge is not available.'));return;}
-  frame.contentWindow.postMessage(
-    {__onlineApiRequest:true,id:req.id,action:req.action,payload:req.payload||{}},
-    '*'
-  );
+  frame.contentWindow.postMessage({__onlineApiRequest:true,id:req.id,action:req.action,payload:req.payload||{}},'*');
 }
 
 window.addEventListener('message',function(ev){
