@@ -666,130 +666,6 @@ td{
   .report-table th,.report-table td{font-size:9pt;padding:5px}
 }
 
-  /* =========================================================
-   OUTSTANDING BALANCES PRINT
-========================================================= */
-
-.button-row{
-  display:flex;
-  gap:10px;
-  margin-top:10px;
-}
-
-.button-row button{
-  flex:1;
-}
-
-.outstanding-print-area{
-  display:none;
-}
-
-@media(max-width:619px){
-
-  .button-row{
-    flex-direction:column;
-  }
-
-}
-
-@media print{
-
-  body{
-    background:#fff!important;
-  }
-
-  body > *{
-    display:none!important;
-  }
-
-  #outstandingPrintArea{
-    display:block!important;
-    position:relative!important;
-    width:100%!important;
-    margin:0!important;
-    padding:0!important;
-    background:#fff!important;
-    color:#000!important;
-    font-family:Arial,sans-serif!important;
-  }
-
-  #outstandingPrintArea .print-header{
-    text-align:center;
-    margin-bottom:18px;
-  }
-
-  #outstandingPrintArea .print-header h1{
-    font-size:18pt;
-    margin:0 0 4px 0;
-    font-weight:800;
-  }
-
-  #outstandingPrintArea .print-header h2{
-    font-size:14pt;
-    margin:0 0 8px 0;
-    font-weight:700;
-  }
-
-  #outstandingPrintArea .print-header .print-date{
-    font-size:9pt;
-    margin-top:4px;
-  }
-
-  #outstandingPrintArea table{
-    width:100%!important;
-    border-collapse:collapse!important;
-    table-layout:auto!important;
-  }
-
-  #outstandingPrintArea th{
-    background:#e5e7eb!important;
-    border:1px solid #333!important;
-    padding:6px 5px!important;
-    font-size:8.5pt!important;
-    font-weight:800!important;
-    text-align:left!important;
-  }
-
-  #outstandingPrintArea td{
-    border:1px solid #555!important;
-    padding:5px!important;
-    font-size:8.5pt!important;
-    vertical-align:top!important;
-  }
-
-  #outstandingPrintArea th:nth-child(3),
-  #outstandingPrintArea th:nth-child(4),
-  #outstandingPrintArea th:nth-child(5),
-  #outstandingPrintArea th:nth-child(6),
-
-  #outstandingPrintArea td:nth-child(3),
-  #outstandingPrintArea td:nth-child(4),
-  #outstandingPrintArea td:nth-child(5),
-  #outstandingPrintArea td:nth-child(6){
-    text-align:right!important;
-    white-space:nowrap!important;
-  }
-
-  #outstandingPrintArea .grand-total{
-    margin-top:10px;
-    text-align:right;
-    font-size:11pt;
-    font-weight:800;
-  }
-
-  #outstandingPrintArea .print-footer{
-    margin-top:28px;
-    font-size:8pt;
-    text-align:center;
-  }
-
-  @page{
-    size:A4 portrait;
-    margin:12mm;
-  }
-
-}
-
 </style>
 
 </head>
@@ -1000,7 +876,7 @@ td{
     </div>
 
     <div>
-      <label>Address</label>
+      <label>Address / Sitio</label>
       <input id="newMemberAddress">
     </div>
 
@@ -1027,13 +903,17 @@ td{
     </div>
 
     <div>
-      <label>Registration Fee</label>
+      <label>Registration Date</label>
       <input
-        id="newMemberFee"
-        type="number"
-        min="0"
-        step="0.01"
-        inputmode="decimal">
+        id="newMemberRegistrationDate"
+        type="date">
+    </div>
+
+    <div>
+      <label>Date of Birth</label>
+      <input
+        id="newMemberDateOfBirth"
+        type="date">
     </div>
 
     <div class="full">
@@ -1070,7 +950,7 @@ td{
   <div class="panel-note" id="memberListNote">Loading members...</div>
   <div class="table-wrap">
     <table class="member-table">
-      <thead><tr><th>Member ID</th><th>Full Name</th><th>Address</th><th>Contact</th><th>Status</th></tr></thead>
+      <thead><tr><th>Member ID</th><th>Full Name</th><th>Address / Sitio</th><th>Contact</th><th>Status</th></tr></thead>
       <tbody id="memberListBody"></tbody>
     </table>
   </div>
@@ -1081,49 +961,15 @@ td{
      OUTSTANDING MEMBERS
 ======================================================= -->
 <div id="outstandingPanel" class="card hidden">
-
   <h3 class="panel-title">📌 Outstanding Balances</h3>
-
-  <div class="panel-note" id="outstandingNote">
-    Loading outstanding balances...
-  </div>
-
+  <div class="panel-note" id="outstandingNote">Loading outstanding balances...</div>
   <div class="table-wrap">
     <table class="member-table">
-      <thead>
-        <tr>
-          <th>Member ID</th>
-          <th>Full Name</th>
-          <th>Monthly Balance</th>
-          <th>Registration</th>
-          <th>Other</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-
+      <thead><tr><th>Member ID</th><th>Full Name</th><th>Monthly Balance</th><th>Registration</th><th>Other</th><th>Total</th></tr></thead>
       <tbody id="outstandingBody"></tbody>
-
     </table>
   </div>
-
-  <div class="button-row">
-
-    <button
-      type="button"
-      class="print-btn"
-      onclick="printOutstandingList()">
-      🖨 Print Outstanding List
-    </button>
-
-    <button
-      type="button"
-      class="alt"
-      onclick="backToDashboard()">
-      ← Back to Dashboard
-    </button>
-
-  </div>
-
+  <button class="alt" onclick="backToDashboard()">← Back to Dashboard</button>
 </div>
 
 <!-- =======================================================
@@ -3256,6 +3102,17 @@ function openAddMember(){
   document.getElementById('addMemberPanel').classList.remove('hidden');
   document.getElementById('searchTopBar').classList.remove('hidden');
   msg('addMemberMsg','','');
+
+  /* Default Registration Date to today. */
+  const registrationDate = document.getElementById('newMemberRegistrationDate');
+  if(registrationDate && !registrationDate.value){
+    const now = new Date();
+    registrationDate.value =
+      now.getFullYear() + '-' +
+      String(now.getMonth()+1).padStart(2,'0') + '-' +
+      String(now.getDate()).padStart(2,'0');
+  }
+
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -3266,20 +3123,60 @@ async function saveNewMember(){
     contact:document.getElementById('newMemberContact').value.trim(),
     rsba:document.getElementById('newMemberRSBA').value.trim(),
     area:Number(document.getElementById('newMemberArea').value||0),
+    registrationDate:document.getElementById('newMemberRegistrationDate').value,
+    dateOfBirth:document.getElementById('newMemberDateOfBirth').value,
     farm:document.getElementById('newMemberFarm').value.trim(),
-    fee:Number(document.getElementById('newMemberFee').value||0),
     remarks:document.getElementById('newMemberRemarks').value.trim()
   };
-  if(!data.name){msg('addMemberMsg','Full Name is required.','error');return;}
+
+  if(!data.name){
+    msg('addMemberMsg','Full Name is required.','error');
+    return;
+  }
+
+  if(!data.registrationDate){
+    msg('addMemberMsg','Registration Date is required.','error');
+    return;
+  }
+
   const b=document.querySelector('#addMemberPanel .form-actions-row button:first-child');
   b.disabled=true;
+
   try{
-    const r=await api('addMember',{token:token,memberData:data},'Saving Member...','Creating member record');
-    msg('addMemberMsg','Member successfully added. Member ID: '+r.memberId,'ok');
-    ['newMemberName','newMemberAddress','newMemberContact','newMemberRSBA','newMemberArea','newMemberFarm','newMemberFee','newMemberRemarks'].forEach(id=>document.getElementById(id).value='');
+    const r=await api(
+      'addMember',
+      {token:token,memberData:data},
+      'Saving Member...',
+      'Creating member record'
+    );
+
+    msg(
+      'addMemberMsg',
+      'Member successfully added. Member ID: '+r.memberId,
+      'ok'
+    );
+
+    [
+      'newMemberName',
+      'newMemberAddress',
+      'newMemberContact',
+      'newMemberRSBA',
+      'newMemberArea',
+      'newMemberRegistrationDate',
+      'newMemberDateOfBirth',
+      'newMemberFarm',
+      'newMemberRemarks'
+    ].forEach(function(id){
+      const el=document.getElementById(id);
+      if(el) el.value='';
+    });
+
     await loadDashboard();
-  }catch(e){fail(e,'addMemberMsg');}
-  finally{b.disabled=false;}
+  }catch(e){
+    fail(e,'addMemberMsg');
+  }finally{
+    b.disabled=false;
+  }
 }
 
 /* =========================================================
@@ -3416,176 +3313,7 @@ async function openOutstandingList(){
     );
   }
 }
-/* =========================================================
-   PRINT OUTSTANDING BALANCES
-========================================================= */
 
-function printOutstandingList(){
-
-  const body =
-    document.getElementById('outstandingBody');
-
-  if(!body){
-    alert('Outstanding list is not available.');
-    return;
-  }
-
-  const rows = body.querySelectorAll('tr');
-
-  if(!rows.length){
-    alert('There are no outstanding balances to print.');
-    return;
-  }
-
-  let totalOutstanding = 0;
-
-  rows.forEach(function(row){
-
-    const cells = row.querySelectorAll('td');
-
-    if(cells.length >= 6){
-
-      const totalText =
-        cells[5].textContent
-          .replace(/[₱,\s]/g,'')
-          .trim();
-
-      const total =
-        Number(totalText) || 0;
-
-      totalOutstanding += total;
-
-    }
-
-  });
-
-  const today =
-    new Date().toLocaleDateString(
-      'en-PH',
-      {
-        year:'numeric',
-        month:'long',
-        day:'numeric'
-      }
-    );
-
-  const note =
-    document.getElementById(
-      'outstandingNote'
-    )?.textContent || '';
-
-  const printArea =
-    document.createElement('div');
-
-  printArea.id =
-    'outstandingPrintArea';
-
-  printArea.className =
-    'outstanding-print-area';
-
-  printArea.innerHTML =
-
-    '<div class="print-header">' +
-
-      '<h1>TUPOL OESTE FARMER\'S ASSOCIATION</h1>' +
-
-      '<h2>OUTSTANDING BALANCES</h2>' +
-
-      '<div class="print-date">' +
-        'As of ' + escapeHtmlPrint_(today) +
-      '</div>' +
-
-      '<div class="print-date">' +
-        escapeHtmlPrint_(note) +
-      '</div>' +
-
-    '</div>' +
-
-    '<table>' +
-
-      '<thead>' +
-        '<tr>' +
-          '<th>Member ID</th>' +
-          '<th>Full Name</th>' +
-          '<th>Monthly Balance</th>' +
-          '<th>Registration</th>' +
-          '<th>Other</th>' +
-          '<th>Total</th>' +
-        '</tr>' +
-      '</thead>' +
-
-      '<tbody>' +
-
-        body.innerHTML +
-
-      '</tbody>' +
-
-    '</table>' +
-
-    '<div class="grand-total">' +
-      'GRAND TOTAL: ' +
-      formatPrintMoney_(totalOutstanding) +
-    '</div>' +
-
-    '<div class="print-footer">' +
-      'This is a computer-generated outstanding balance report.' +
-    '</div>';
-
-  document.body.appendChild(printArea);
-
-  window.setTimeout(function(){
-
-    window.print();
-
-  },200);
-
-  window.onafterprint = function(){
-
-    const el =
-      document.getElementById(
-        'outstandingPrintArea'
-      );
-
-    if(el){
-      el.remove();
-    }
-
-    window.onafterprint = null;
-
-  };
-
-}
-
-
-/* =========================================================
-   PRINT HELPERS
-========================================================= */
-
-function formatPrintMoney_(value){
-
-  return '₱' +
-    Number(value || 0).toLocaleString(
-      'en-PH',
-      {
-        minimumFractionDigits:2,
-        maximumFractionDigits:2
-      }
-    );
-
-}
-
-
-function escapeHtmlPrint_(value){
-
-  return String(value || '')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#039;');
-
-}
-  
 /* =========================================================
    FINANCIAL REPORT
 ========================================================= */
