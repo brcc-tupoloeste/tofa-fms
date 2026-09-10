@@ -49,6 +49,12 @@ table{width:100%;border-collapse:collapse;min-width:500px}th,td{padding:8px;bord
 </style>
 </head>
 <body>
+<script>
+/* API bridge is intentionally hidden. Never navigate the top-level GitHub page. */
+if (window.top !== window.self) {
+  // The API response iframe is allowed to communicate via postMessage.
+}
+</script>
 <div id="busyOverlay" class="busy-overlay hidden">
   <div class="busy-box">
     <div class="spinner"></div>
@@ -152,6 +158,7 @@ function api(action,payload,title,sub){
     frame.name='apiFrame_'+id;
     const form=document.createElement('form');
     form.method='POST';form.action=API_URL;form.target=frame.name;form.style.display='none';
+    form.setAttribute('aria-hidden','true');
     const a=document.createElement('input');a.name='action';a.value=action;form.appendChild(a);
     const p=document.createElement('input');p.name='payload';p.value=JSON.stringify(payload||{});form.appendChild(p);
     document.body.appendChild(form);form.submit();form.remove();
