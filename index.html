@@ -5,216 +5,2175 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1f4e78">
 <title>Tupol Oeste Farmer's Association - Payments Received</title>
+
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;font-family:Arial,sans-serif;background:#f3f6f8;color:#1f2937}
+html,body{
+  margin:0;
+  min-height:100%;
+  font-family:Arial,sans-serif;
+  background:#f3f6f8;
+  color:#1f2937
+}
 body.busy{overflow:hidden}
-.wrap{width:100%;max-width:760px;margin:auto;padding:12px}
-.brand{text-align:center;padding:14px 8px 8px}
-.brand h1{margin:0;font-size:20px}.brand p{margin:5px 0 0;color:#6b7280}
-.card{background:#fff;border-radius:16px;padding:15px;margin-bottom:12px;box-shadow:0 2px 10px rgba(0,0,0,.07)}
+.wrap{
+  width:100%;
+  max-width:760px;
+  margin:auto;
+  padding:12px
+}
+.brand{
+  text-align:center;
+  padding:14px 8px 8px
+}
+.brand h1{
+  margin:0;
+  font-size:20px
+}
+.brand p{
+  margin:5px 0 0;
+  color:#6b7280
+}
+.card{
+  background:#fff;
+  border-radius:16px;
+  padding:15px;
+  margin-bottom:12px;
+  box-shadow:0 2px 10px rgba(0,0,0,.07)
+}
 .hidden{display:none!important}
-label{display:block;font-size:13px;font-weight:700;margin:11px 0 6px}
-input,select,textarea,button{width:100%;font:inherit}
-input,select,textarea{padding:12px;border:1px solid #ccd4dc;border-radius:10px;background:#fff}
+label{
+  display:block;
+  font-size:13px;
+  font-weight:700;
+  margin:11px 0 6px
+}
+input,select,textarea,button{
+  width:100%;
+  font:inherit
+}
+input,select,textarea{
+  padding:12px;
+  border:1px solid #ccd4dc;
+  border-radius:10px;
+  background:#fff
+}
 textarea{min-height:70px}
-button{padding:12px;border:0;border-radius:10px;background:#1f4e78;color:#fff;font-weight:700;margin-top:10px}
-button.alt{background:#64748b}button.danger{background:#991b1b;width:auto;margin:0}
-button:disabled,input:disabled,select:disabled,textarea:disabled{opacity:.55;cursor:not-allowed}
-.msg{padding:10px;margin-top:10px;border-radius:9px;font-size:13px}
-.error{background:#fee2e2;color:#991b1b}.ok{background:#dcfce7;color:#166534}
-.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.search{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}.search button{width:auto}
-.result{padding:11px;border:1px solid #e5e7eb;border-radius:10px;margin-top:8px;cursor:pointer;background:#fff}
-.result:active{transform:scale(.995)}.result strong,.result small{display:block}
-.result small{color:#6b7280;margin-top:3px}
-.result.locked{opacity:.5;pointer-events:none}.result.selected{border-color:#1f4e78;background:#f4f8fb}
-.profile{display:flex;align-items:center;gap:12px}
-.photo-wrap{position:relative;width:74px;height:74px;flex:0 0 74px}
-.photo{width:74px;height:74px;border-radius:50%;object-fit:cover;background:#e5e7eb;border:1px solid #d1d5db}
-.camera{position:absolute;right:-3px;bottom:-3px;width:31px;height:31px;border-radius:50%;padding:0;margin:0;font-size:15px;background:#1f4e78}
-#photoInput{display:none}.name{font-weight:800;font-size:18px}.sub{font-size:12px;color:#6b7280;margin-top:3px}
-.accounts{display:grid;grid-template-columns:1fr;gap:9px;margin-top:14px}
-.account{border:1px solid #e5e7eb;border-radius:11px;padding:11px}.account b{display:block;margin-bottom:6px}
-.line{display:flex;justify-content:space-between;padding:4px 0;font-size:13px}
-.balance{border-top:1px solid #e5e7eb;margin-top:5px;padding-top:7px;font-weight:800}
-table{width:100%;border-collapse:collapse;min-width:500px}th,td{padding:8px;border-bottom:1px solid #e5e7eb;font-size:12px;text-align:left}.scroll{overflow:auto}
-.busy-overlay{position:fixed;inset:0;background:rgba(243,246,248,.82);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;z-index:9999}
-.busy-box{background:#fff;border-radius:16px;padding:22px 26px;text-align:center;min-width:220px;box-shadow:0 8px 30px rgba(0,0,0,.16)}
-.spinner{width:36px;height:36px;margin:0 auto 12px;border:4px solid #dbe3ea;border-top-color:#1f4e78;border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.busy-title{font-weight:800}.busy-sub{font-size:12px;color:#6b7280;margin-top:5px}
-.api-frame{position:absolute;width:1px;height:1px;border:0;left:-10000px;top:-10000px}
-@media(min-width:620px){.accounts{grid-template-columns:repeat(3,1fr)}}
+button{
+  padding:12px;
+  border:0;
+  border-radius:10px;
+  background:#1f4e78;
+  color:#fff;
+  font-weight:700;
+  margin-top:10px
+}
+button.alt{background:#64748b}
+button.danger{
+  background:#991b1b;
+  width:auto;
+  margin:0
+}
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled{
+  opacity:.55;
+  cursor:not-allowed
+}
+.msg{
+  padding:10px;
+  margin-top:10px;
+  border-radius:9px;
+  font-size:13px
+}
+.error{
+  background:#fee2e2;
+  color:#991b1b
+}
+.ok{
+  background:#dcfce7;
+  color:#166534
+}
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px
+}
+.search{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+  align-items:end
+}
+.search button{width:auto}
+.result{
+  padding:11px;
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+  margin-top:8px;
+  cursor:pointer;
+  background:#fff
+}
+.result:active{transform:scale(.995)}
+.result strong,
+.result small{
+  display:block
+}
+.result small{
+  color:#6b7280;
+  margin-top:3px
+}
+.result.locked{
+  opacity:.5;
+  pointer-events:none
+}
+.result.selected{
+  border-color:#1f4e78;
+  background:#f4f8fb
+}
+.profile{
+  display:flex;
+  align-items:center;
+  gap:12px
+}
+.photo-wrap{
+  position:relative;
+  width:74px;
+  height:74px;
+  flex:0 0 74px
+}
+.photo{
+  width:74px;
+  height:74px;
+  border-radius:50%;
+  object-fit:cover;
+  background:#e5e7eb;
+  border:1px solid #d1d5db
+}
+.camera{
+  position:absolute;
+  right:-3px;
+  bottom:-3px;
+  width:31px;
+  height:31px;
+  border-radius:50%;
+  padding:0;
+  margin:0;
+  font-size:15px;
+  background:#1f4e78
+}
+#photoInput{display:none}
+.name{
+  font-weight:800;
+  font-size:18px
+}
+.sub{
+  font-size:12px;
+  color:#6b7280;
+  margin-top:3px
+}
+.accounts{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:9px;
+  margin-top:14px
+}
+.account{
+  border:1px solid #e5e7eb;
+  border-radius:11px;
+  padding:11px
+}
+.account b{
+  display:block;
+  margin-bottom:6px
+}
+.line{
+  display:flex;
+  justify-content:space-between;
+  padding:4px 0;
+  font-size:13px
+}
+.balance{
+  border-top:1px solid #e5e7eb;
+  margin-top:5px;
+  padding-top:7px;
+  font-weight:800
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:500px
+}
+th,td{
+  padding:8px;
+  border-bottom:1px solid #e5e7eb;
+  font-size:12px;
+  text-align:left
+}
+.scroll{overflow:auto}
+.busy-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(243,246,248,.82);
+  backdrop-filter:blur(2px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9999
+}
+.busy-box{
+  background:#fff;
+  border-radius:16px;
+  padding:22px 26px;
+  text-align:center;
+  min-width:220px;
+  box-shadow:0 8px 30px rgba(0,0,0,.16)
+}
+.spinner{
+  width:36px;
+  height:36px;
+  margin:0 auto 12px;
+  border:4px solid #dbe3ea;
+  border-top-color:#1f4e78;
+  border-radius:50%;
+  animation:spin .8s linear infinite
+}
+@keyframes spin{
+  to{transform:rotate(360deg)}
+}
+.busy-title{font-weight:800}
+.busy-sub{
+  font-size:12px;
+  color:#6b7280;
+  margin-top:5px
+}
+.api-frame{
+  position:absolute;
+  width:1px;
+  height:1px;
+  border:0;
+  left:-10000px;
+  top:-10000px
+}
+@media(min-width:620px){
+  .accounts{
+    grid-template-columns:repeat(3,1fr)
+  }
+}
 </style>
 </head>
+
 <body>
-<script>
-/* API bridge is intentionally hidden. Never navigate the top-level GitHub page. */
-if (window.top !== window.self) {
-  // The API response iframe is allowed to communicate via postMessage.
-}
-</script>
+
 <div id="busyOverlay" class="busy-overlay hidden">
   <div class="busy-box">
     <div class="spinner"></div>
-    <div id="busyTitle" class="busy-title">Please wait...</div>
-    <div id="busySub" class="busy-sub">Processing request</div>
+    <div id="busyTitle" class="busy-title">
+      Please wait...
+    </div>
+    <div id="busySub" class="busy-sub">
+      Processing request
+    </div>
   </div>
 </div>
-<iframe id="apiFrame" class="api-frame" name="apiFrame"></iframe>
+
+<iframe
+  id="apiFrame"
+  class="api-frame"
+  name="apiFrame">
+</iframe>
 
 <div class="wrap">
+
   <div class="brand">
     <h1>Tupol Oeste Farmer's Association</h1>
     <p>Payments Received</p>
   </div>
 
   <div id="loginView" class="card">
+
     <h2>🔐 Admin Login</h2>
-    <label>Username</label><input id="username" value="admin" autocomplete="username">
-    <label>Password</label><input id="password" type="password" autocomplete="current-password">
-    <label style="font-weight:400"><input id="showPass" type="checkbox" style="width:auto"> Show password</label>
-    <button id="loginBtn" onclick="login()">LOGIN</button>
+
+    <label>Username</label>
+    <input
+      id="username"
+      value="admin"
+      autocomplete="username">
+
+    <label>Password</label>
+    <input
+      id="password"
+      type="password"
+      autocomplete="current-password">
+
+    <label style="font-weight:400">
+      <input
+        id="showPass"
+        type="checkbox"
+        style="width:auto">
+      Show password
+    </label>
+
+    <button id="loginBtn" onclick="login()">
+      LOGIN
+    </button>
+
     <div id="loginMsg"></div>
+
   </div>
+
 
   <div id="appView" class="hidden">
-    <div class="top"><b>💵 Payments Received</b><button class="danger" onclick="logout()">Logout</button></div>
+
+    <div class="top">
+      <b>💵 Payments Received</b>
+      <button
+        class="danger"
+        onclick="logout()">
+        Logout
+      </button>
+    </div>
+
 
     <div class="card">
+
       <h3>🔎 Search Member</h3>
+
       <div class="search">
-        <div><label>Member ID or Name</label><input id="searchText" placeholder="Search member"></div>
-        <button id="searchBtn" onclick="searchMembers()">Search</button>
+
+        <div>
+          <label>Member ID or Name</label>
+
+          <input
+            id="searchText"
+            placeholder="Search member">
+        </div>
+
+        <button
+          id="searchBtn"
+          onclick="searchMembers()">
+          Search
+        </button>
+
       </div>
-      <div id="searchMsg"></div><div id="results"></div>
+
+      <div id="searchMsg"></div>
+      <div id="results"></div>
+
     </div>
+
 
     <div id="profileCard" class="card hidden">
+
       <div class="profile">
+
         <div class="photo-wrap">
-          <img id="memberPhoto" class="photo" alt="">
-          <button class="camera" onclick="document.getElementById('photoInput').click()" title="Upload photo">📷</button>
-          <input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onchange="uploadPhoto(this)">
+
+          <img
+            id="memberPhoto"
+            class="photo"
+            alt="">
+
+          <button
+            class="camera"
+            onclick="document.getElementById('photoInput').click()"
+            title="Upload photo">
+            📷
+          </button>
+
+          <input
+            id="photoInput"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            capture="environment"
+            onchange="uploadPhoto(this)">
+
         </div>
-        <div><div id="memberName" class="name"></div><div id="memberMeta" class="sub"></div><div id="photoMsg"></div></div>
+
+        <div>
+
+          <div
+            id="memberName"
+            class="name">
+          </div>
+
+          <div
+            id="memberMeta"
+            class="sub">
+          </div>
+
+          <div id="photoMsg"></div>
+
+        </div>
+
       </div>
+
+
       <div class="accounts">
-        <div class="account"><b>📅 Monthly Membership</b><div class="line"><span>Year Due</span><span id="annualDue"></span></div><div class="line"><span>Paid</span><span id="monthlyPaid"></span></div><div class="line balance"><span>Balance</span><span id="yearBalance"></span></div></div>
-        <div class="account"><b>🧾 Registration Fee</b><div class="line"><span>Due</span><span id="registrationDue"></span></div><div class="line"><span>Paid</span><span id="registrationPaid"></span></div><div class="line balance"><span>Balance</span><span id="registrationBalance"></span></div></div>
-        <div class="account"><b>📦 Other Obligations</b><div class="line"><span>Due</span><span id="otherDue"></span></div><div class="line"><span>Paid</span><span id="otherPaid"></span></div><div class="line balance"><span>Balance</span><span id="otherBalance"></span></div></div>
+
+        <div class="account">
+
+          <b>📅 Monthly Membership</b>
+
+          <div class="line">
+            <span>Year Due</span>
+            <span id="annualDue"></span>
+          </div>
+
+          <div class="line">
+            <span>Paid</span>
+            <span id="monthlyPaid"></span>
+          </div>
+
+          <div class="line balance">
+            <span>Balance</span>
+            <span id="yearBalance"></span>
+          </div>
+
+        </div>
+
+
+        <div class="account">
+
+          <b>🧾 Registration Fee</b>
+
+          <div class="line">
+            <span>Due</span>
+            <span id="registrationDue"></span>
+          </div>
+
+          <div class="line">
+            <span>Paid</span>
+            <span id="registrationPaid"></span>
+          </div>
+
+          <div class="line balance">
+            <span>Balance</span>
+            <span id="registrationBalance"></span>
+          </div>
+
+        </div>
+
+
+        <div class="account">
+
+          <b>📦 Other Obligations</b>
+
+          <div class="line">
+            <span>Due</span>
+            <span id="otherDue"></span>
+          </div>
+
+          <div class="line">
+            <span>Paid</span>
+            <span id="otherPaid"></span>
+          </div>
+
+          <div class="line balance">
+            <span>Balance</span>
+            <span id="otherBalance"></span>
+          </div>
+
+        </div>
+
       </div>
+
     </div>
+
 
     <div id="paymentCard" class="card hidden">
+
       <h3>💵 Receive Payment</h3>
+
       <label>Payment Type</label>
-      <select id="paymentType" onchange="paymentTypeChanged()"><option value="">Select payment type</option><option>Monthly Payment</option><option>Registration Fee</option><option>Other Obligation Payment</option></select>
-      <div id="obligationWrap" class="hidden"><label>Specific Obligation</label><select id="obligationId"></select></div>
-      <label>Amount Received</label><input id="amount" type="number" min="0.01" step="0.01" inputmode="decimal">
-      <label>Remarks</label><textarea id="remarks"></textarea>
-      <button id="saveBtn" onclick="savePayment()">SAVE PAYMENT</button><div id="paymentMsg"></div>
+
+      <select
+        id="paymentType"
+        onchange="paymentTypeChanged()">
+
+        <option value="">
+          Select payment type
+        </option>
+
+        <option>
+          Monthly Payment
+        </option>
+
+        <option>
+          Registration Fee
+        </option>
+
+        <option>
+          Other Obligation Payment
+        </option>
+
+      </select>
+
+
+      <div
+        id="obligationWrap"
+        class="hidden">
+
+        <label>Specific Obligation</label>
+
+        <select id="obligationId">
+        </select>
+
+      </div>
+
+
+      <label>Amount Received</label>
+
+      <input
+        id="amount"
+        type="number"
+        min="0.01"
+        step="0.01"
+        inputmode="decimal">
+
+
+      <label>Remarks</label>
+
+      <textarea id="remarks"></textarea>
+
+
+      <button
+        id="saveBtn"
+        onclick="savePayment()">
+        SAVE PAYMENT
+      </button>
+
+      <div id="paymentMsg"></div>
+
     </div>
+
 
     <div id="historyCard" class="card hidden">
-      <h3>📋 Payment History</h3><div class="scroll"><table><thead><tr><th>Date</th><th>Type</th><th>Remarks</th><th>Amount</th></tr></thead><tbody id="historyBody"></tbody></table></div>
+
+      <h3>📋 Payment History</h3>
+
+      <div class="scroll">
+
+        <table>
+
+          <thead>
+
+            <tr>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Remarks</th>
+              <th>Amount</th>
+            </tr>
+
+          </thead>
+
+          <tbody id="historyBody">
+          </tbody>
+
+        </table>
+
+      </div>
+
     </div>
+
   </div>
+
 </div>
 
-<script>
-const API_URL='https://script.google.com/macros/s/AKfycbynk1P7SnfHWOBnJYC2vhwdH7ONxEUj8FWMp--40YUpkcecjwWoigQG29pnc4YlU6l0zA/exec';
-const API_ORIGINS=['https://script.google.com','https://script.googleusercontent.com'];
-let API_BRIDGE_ORIGIN='';
-const GITHUB_ORIGIN='https://brcc-tupoloeste.github.io';
-let token='',selectedMember=null,requestSeq=0,requestTimer=null,apiReady=false,pendingQueue=[];
 
-document.getElementById('showPass').onchange=function(){document.getElementById('password').type=this.checked?'text':'password';};
-function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-function js(v){return String(v==null?'':v).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\r?\n/g,' ');}
-function set(id,v){document.getElementById(id).textContent=v;}
-function money(v){return '₱'+Number(v||0).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});}
-function msg(id,text,type){document.getElementById(id).innerHTML=text?'<div class="msg '+(type||'')+'">'+esc(text)+'</div>':'';}
-function showBusy(title,sub){document.getElementById('busyTitle').textContent=title;document.getElementById('busySub').textContent=sub||'Please wait';document.getElementById('busyOverlay').classList.remove('hidden');document.body.classList.add('busy');}
-function hideBusy(){document.getElementById('busyOverlay').classList.add('hidden');document.body.classList.remove('busy');}
-function lockSearch(v){document.getElementById('searchText').disabled=v;document.getElementById('searchBtn').disabled=v;document.querySelectorAll('.result').forEach(x=>x.classList.toggle('locked',v));}
-function fail(e,id){const m=e&&e.message?e.message:String(e||'Error');if(m==='SESSION_EXPIRED'){token='';alert('Session expired. Please login again.');location.reload();return;}msg(id||'searchMsg',m,'error');}
+<script>
+
+/************************************************************
+ * API CONFIG
+ ************************************************************/
+
+const API_URL =
+  'https://script.google.com/macros/s/AKfycbynk1P7SnfHWOBnJYC2vhwdH7ONxEUj8FWMp--40YUpkcecjwWoigQG29pnc4YlU6l0zA/exec';
+
+
+/*
+ * IMPORTANT:
+ *
+ * DO NOT hard-code:
+ *
+ * https://script.googleusercontent.com
+ *
+ * Apps Script can use a dynamic googleusercontent.com
+ * subdomain.
+ *
+ * We learn the real origin from the READY message.
+ */
+
+let API_BRIDGE_ORIGIN = '';
+
+const GITHUB_ORIGIN =
+  'https://brcc-tupoloeste.github.io';
+
+
+let token = '';
+let selectedMember = null;
+let requestSeq = 0;
+let requestTimer = null;
+let apiReady = false;
+let pendingQueue = [];
+
+
+/************************************************************
+ * SHOW PASSWORD
+ ************************************************************/
+
+document.getElementById('showPass').onchange =
+  function(){
+
+    document.getElementById('password').type =
+      this.checked
+        ? 'text'
+        : 'password';
+
+  };
+
+
+/************************************************************
+ * HELPERS
+ ************************************************************/
+
+function esc(v){
+
+  return String(v == null ? '' : v)
+    .replace(/[&<>"']/g,m => ({
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      '"':'&quot;',
+      "'":'&#39;'
+    }[m]));
+
+}
+
+
+function js(v){
+
+  return String(v == null ? '' : v)
+    .replace(/\\/g,'\\\\')
+    .replace(/'/g,"\\'")
+    .replace(/\r?\n/g,' ');
+
+}
+
+
+function set(id,v){
+
+  document.getElementById(id).textContent =
+    v;
+
+}
+
+
+function money(v){
+
+  return '₱' +
+    Number(v || 0)
+      .toLocaleString(
+        'en-PH',
+        {
+          minimumFractionDigits:2,
+          maximumFractionDigits:2
+        }
+      );
+
+}
+
+
+function msg(id,text,type){
+
+  document.getElementById(id).innerHTML =
+    text
+      ? '<div class="msg ' +
+        (type || '') +
+        '">' +
+        esc(text) +
+        '</div>'
+      : '';
+
+}
+
+
+function showBusy(title,sub){
+
+  document.getElementById(
+    'busyTitle'
+  ).textContent =
+    title;
+
+  document.getElementById(
+    'busySub'
+  ).textContent =
+    sub || 'Please wait';
+
+  document.getElementById(
+    'busyOverlay'
+  ).classList.remove('hidden');
+
+  document.body.classList.add('busy');
+
+}
+
+
+function hideBusy(){
+
+  document.getElementById(
+    'busyOverlay'
+  ).classList.add('hidden');
+
+  document.body.classList.remove('busy');
+
+}
+
+
+function lockSearch(v){
+
+  document.getElementById(
+    'searchText'
+  ).disabled = v;
+
+  document.getElementById(
+    'searchBtn'
+  ).disabled = v;
+
+  document
+    .querySelectorAll('.result')
+    .forEach(
+      x =>
+        x.classList.toggle(
+          'locked',
+          v
+        )
+    );
+
+}
+
+
+function fail(e,id){
+
+  const m =
+    e && e.message
+      ? e.message
+      : String(e || 'Error');
+
+
+  if(m === 'SESSION_EXPIRED'){
+
+    token = '';
+
+    alert(
+      'Session expired. Please login again.'
+    );
+
+    location.reload();
+
+    return;
+  }
+
+
+  msg(
+    id || 'searchMsg',
+    m,
+    'error'
+  );
+
+}
+
+
+/************************************************************
+ * SEND REQUEST TO APPS SCRIPT BRIDGE
+ ************************************************************/
 
 function sendApiRequest(req){
-  const frame=document.getElementById('apiFrame');
-  if(!frame||!frame.contentWindow){req.reject(new Error('API bridge is not available.'));return;}
-  console.log('[TOFA API] SEND', req);
-  frame.contentWindow.postMessage({__onlineApiRequest:true,id:req.id,action:req.action,payload:req.payload||{}},API_BRIDGE_ORIGIN||'*');
+
+  const frame =
+    document.getElementById(
+      'apiFrame'
+    );
+
+
+  if(
+    !frame ||
+    !frame.contentWindow
+  ){
+
+    console.log(
+      '[TOFA API] SEND FAILED: iframe unavailable'
+    );
+
+    req.reject(
+      new Error(
+        'API bridge is not available.'
+      )
+    );
+
+    return;
+  }
+
+
+  console.log(
+    '[TOFA API] REQUEST SENT',
+    req.id,
+    req.action,
+    'target:',
+    API_BRIDGE_ORIGIN || '*'
+  );
+
+
+  frame.contentWindow.postMessage(
+
+    {
+      __onlineApiRequest:true,
+      id:req.id,
+      action:req.action,
+      payload:req.payload || {}
+    },
+
+    /*
+     * After READY we use the exact dynamic
+     * origin received from Apps Script.
+     */
+    API_BRIDGE_ORIGIN || '*'
+
+  );
+
 }
 
-window.addEventListener('message',function(ev){
-  const msgData=ev.data||{};
-  console.log('[TOFA API] MESSAGE', ev.origin, msgData);
-  const frame=document.getElementById('apiFrame');
-  if(!frame || ev.source !== frame.contentWindow){
-    console.log('[TOFA API] ignored: message source is not API iframe');
-    return;
-  }
-  if(msgData.__onlineBridgeReady){
-    API_BRIDGE_ORIGIN=ev.origin;
-    console.log('[TOFA API] BRIDGE READY from',ev.origin);
-    apiReady=true;
-    while(pendingQueue.length)sendApiRequest(pendingQueue.shift());
-    return;
-  }
-  if(!API_BRIDGE_ORIGIN){console.log('[TOFA API] ignored: bridge origin not established');return;}
-  if(ev.origin!==API_BRIDGE_ORIGIN){console.log('[TOFA API] ignored origin',ev.origin);return;}
-  if(!msgData.__onlineApi)return;
-  const pending=window.__pendingApi;
-  if(!pending||msgData.id!==pending.id)return;
-  clearTimeout(requestTimer);window.__pendingApi=null;hideBusy();
-  if(msgData.ok)pending.resolve(msgData.data);else pending.reject(new Error(msgData.error||'Request failed.'));
-});
 
-function api(action,payload,title,sub){
-  return new Promise((resolve,reject)=>{
-    const id='r'+(++requestSeq);
-    const req={id,action,payload,resolve,reject};
-    window.__pendingApi={id,resolve,reject};
-    console.log('[TOFA API] REQUEST',id,action,payload);
-    showBusy(title||'Please wait...',sub||'Processing request');
-    if(apiReady)sendApiRequest(req);else pendingQueue.push(req);
-    requestTimer=setTimeout(()=>{
-      if(window.__pendingApi&&window.__pendingApi.id===id){
-        window.__pendingApi=null;
-        pendingQueue=pendingQueue.filter(x=>x.id!==id);
-        hideBusy();
-        reject(new Error('The server took too long to respond. Please try again.'));
+/************************************************************
+ * MESSAGE HANDLER
+ *
+ * IMPORTANT:
+ *
+ * NO event.source CHECK.
+ *
+ * Apps Script HtmlService may wrap the page
+ * in another internal frame.
+ ************************************************************/
+
+window.addEventListener(
+  'message',
+  function(ev){
+
+    const msgData =
+      ev.data || {};
+
+
+    console.log(
+      '[TOFA API] MESSAGE',
+      ev.origin,
+      msgData
+    );
+
+
+    /******************************************************
+     * BRIDGE READY
+     ******************************************************/
+
+    if(
+      msgData.__onlineBridgeReady
+    ){
+
+      /*
+       * Capture the actual Apps Script origin.
+       *
+       * Example:
+       *
+       * https://n-xxxxxxxx.script.googleusercontent.com
+       */
+
+      API_BRIDGE_ORIGIN =
+        ev.origin;
+
+
+      console.log(
+        '[TOFA API] BRIDGE READY from',
+        API_BRIDGE_ORIGIN
+      );
+
+
+      apiReady = true;
+
+
+      console.log(
+        '[TOFA API] apiReady = true'
+      );
+
+
+      while(
+        pendingQueue.length
+      ){
+
+        const req =
+          pendingQueue.shift();
+
+
+        console.log(
+          '[TOFA API] sending queued request',
+          req.id,
+          req.action
+        );
+
+
+        sendApiRequest(
+          req
+        );
+
       }
-    },15000);
-  });
+
+
+      return;
+    }
+
+
+    /******************************************************
+     * WAIT UNTIL BRIDGE ORIGIN EXISTS
+     ******************************************************/
+
+    if(
+      !API_BRIDGE_ORIGIN
+    ){
+
+      console.log(
+        '[TOFA API] ignored: bridge origin not established'
+      );
+
+      return;
+    }
+
+
+    /******************************************************
+     * DYNAMIC ORIGIN VALIDATION
+     ******************************************************/
+
+    if(
+      ev.origin !==
+      API_BRIDGE_ORIGIN
+    ){
+
+      console.log(
+        '[TOFA API] ignored origin',
+        ev.origin,
+        'expected',
+        API_BRIDGE_ORIGIN
+      );
+
+      return;
+    }
+
+
+    /******************************************************
+     * API RESPONSE
+     ******************************************************/
+
+    if(
+      !msgData.__onlineApi
+    ){
+
+      console.log(
+        '[TOFA API] ignored: not API response'
+      );
+
+      return;
+    }
+
+
+    const pending =
+      window.__pendingApi;
+
+
+    if(!pending){
+
+      console.log(
+        '[TOFA API] ignored: no pending request'
+      );
+
+      return;
+    }
+
+
+    if(
+      msgData.id !==
+      pending.id
+    ){
+
+      console.log(
+        '[TOFA API] ignored: ID mismatch',
+        msgData.id,
+        pending.id
+      );
+
+      return;
+    }
+
+
+    console.log(
+      '[TOFA API] RESPONSE ACCEPTED',
+      msgData
+    );
+
+
+    clearTimeout(
+      requestTimer
+    );
+
+    window.__pendingApi =
+      null;
+
+    hideBusy();
+
+
+    if(msgData.ok){
+
+      console.log(
+        '[TOFA API] REQUEST SUCCESS'
+      );
+
+      pending.resolve(
+        msgData.data
+      );
+
+    }else{
+
+      console.log(
+        '[TOFA API] REQUEST FAILED',
+        msgData.error
+      );
+
+      pending.reject(
+        new Error(
+          msgData.error ||
+          'Request failed.'
+        )
+      );
+
+    }
+
+  }
+);
+
+
+/************************************************************
+ * API CALL
+ ************************************************************/
+
+function api(
+  action,
+  payload,
+  title,
+  sub
+){
+
+  return new Promise(
+    function(resolve,reject){
+
+      const id =
+        'r' +
+        (++requestSeq);
+
+
+      const req = {
+        id,
+        action,
+        payload,
+        resolve,
+        reject
+      };
+
+
+      window.__pendingApi = {
+        id,
+        resolve,
+        reject
+      };
+
+
+      console.log(
+        '[TOFA API] REQUEST',
+        id,
+        action,
+        payload
+      );
+
+
+      showBusy(
+        title || 'Please wait...',
+        sub || 'Processing request'
+      );
+
+
+      if(apiReady){
+
+        sendApiRequest(
+          req
+        );
+
+      }else{
+
+        console.log(
+          '[TOFA API] bridge not ready - queueing',
+          id
+        );
+
+        pendingQueue.push(
+          req
+        );
+
+      }
+
+
+      requestTimer =
+        setTimeout(
+          function(){
+
+            if(
+              window.__pendingApi &&
+              window.__pendingApi.id === id
+            ){
+
+              console.log(
+                '[TOFA API] TIMEOUT',
+                id,
+                action
+              );
+
+
+              window.__pendingApi =
+                null;
+
+              pendingQueue =
+                pendingQueue.filter(
+                  x =>
+                    x.id !== id
+                );
+
+              hideBusy();
+
+
+              reject(
+                new Error(
+                  'The server took too long to respond. Please try again.'
+                )
+              );
+
+            }
+
+          },
+          15000
+        );
+
+    }
+  );
+
 }
 
-const apiFrame=document.getElementById('apiFrame');
-apiFrame.addEventListener('load',function(){console.log('[TOFA API] iframe LOAD', apiFrame.src);});
-console.log('[TOFA API] loading iframe',API_URL);
-apiFrame.src=API_URL;
+
+/************************************************************
+ * LOAD APPS SCRIPT IFRAME
+ ************************************************************/
+
+const apiFrame =
+  document.getElementById(
+    'apiFrame'
+  );
+
+
+apiFrame.addEventListener(
+  'load',
+  function(){
+
+    console.log(
+      '[TOFA API] iframe LOAD',
+      apiFrame.src
+    );
+
+  }
+);
+
+
+console.log(
+  '[TOFA API] loading iframe',
+  API_URL
+);
+
+
+apiFrame.src =
+  API_URL;
+
+
+/************************************************************
+ * LOGIN
+ ************************************************************/
 
 async function login(){
-  const b=document.getElementById('loginBtn');b.disabled=true;
+
+  const b =
+    document.getElementById(
+      'loginBtn'
+    );
+
+
+  b.disabled = true;
+
+
   try{
-    const r=await api('login',{username:document.getElementById('username').value.trim(),password:document.getElementById('password').value},'Signing in...','Checking administrator access');
-    token=r.token;document.getElementById('password').value='';
-    document.getElementById('loginView').classList.add('hidden');document.getElementById('appView').classList.remove('hidden');msg('loginMsg','','');
-  }catch(e){fail(e,'loginMsg');}finally{b.disabled=false;}
+
+    const r =
+      await api(
+
+        'login',
+
+        {
+          username:
+            document
+              .getElementById(
+                'username'
+              )
+              .value
+              .trim(),
+
+          password:
+            document
+              .getElementById(
+                'password'
+              )
+              .value
+        },
+
+        'Signing in...',
+
+        'Checking administrator access'
+
+      );
+
+
+    token =
+      r.token;
+
+
+    document.getElementById(
+      'password'
+    ).value = '';
+
+
+    document.getElementById(
+      'loginView'
+    ).classList.add(
+      'hidden'
+    );
+
+
+    document.getElementById(
+      'appView'
+    ).classList.remove(
+      'hidden'
+    );
+
+
+    msg(
+      'loginMsg',
+      '',
+      ''
+    );
+
+
+  }catch(e){
+
+    fail(
+      e,
+      'loginMsg'
+    );
+
+
+  }finally{
+
+    b.disabled = false;
+
+  }
+
 }
-async function logout(){const t=token;token='';selectedMember=null;document.getElementById('appView').classList.add('hidden');document.getElementById('loginView').classList.remove('hidden');['profileCard','paymentCard','historyCard'].forEach(id=>document.getElementById(id).classList.add('hidden'));if(t){try{await api('logout',{token:t},'Signing out...','Closing session');}catch(e){}}}
-async function searchMembers(){if(!token)return;const q=document.getElementById('searchText').value.trim();if(!q){msg('searchMsg','Enter Member ID or name.','error');return;}lockSearch(true);document.getElementById('results').innerHTML='';try{const rows=await api('searchMembers',{token,searchText:q},'Searching Members...','Finding matching members');renderResults(rows);}catch(e){fail(e,'searchMsg');}finally{lockSearch(false);}}
-function renderResults(rows){if(!rows||!rows.length){document.getElementById('results').innerHTML='<div class="msg error">No member found.</div>';return;}document.getElementById('results').innerHTML=rows.map(r=>'<div class="result" data-id="'+esc(r.id)+'" onclick="openMember(\''+js(r.id)+'\',this)"><strong>'+esc(r.name)+'</strong><small>'+esc(r.id)+(r.address?' • '+esc(r.address):'')+'</small></div>').join('');}
-async function openMember(id,el){if(!token)return;if(el)el.classList.add('selected');lockSearch(true);try{const p=await api('getMemberProfile',{token,memberId:id},'Loading Profile...','Please wait while the member record is loaded');selectedMember=p;renderProfile(p);window.scrollTo({top:0,behavior:'smooth'});}catch(e){fail(e,'searchMsg');}finally{lockSearch(false);}}
-function renderProfile(p){['profileCard','paymentCard','historyCard'].forEach(id=>document.getElementById(id).classList.remove('hidden'));set('memberName',p.name||'');set('memberMeta',(p.id||'')+(p.address?' • '+p.address:''));const im=document.getElementById('memberPhoto');if(p.photo){im.src=p.photo;im.style.visibility='visible';}else{im.removeAttribute('src');im.style.visibility='hidden';}set('annualDue',money(p.annualDue));set('monthlyPaid',money(p.monthlyPaid));set('yearBalance',money(p.yearBalance));set('registrationDue',money(p.registrationDue));set('registrationPaid',money(p.registrationPaid));set('registrationBalance',money(p.registrationBalance));set('otherDue',money(p.otherDue));set('otherPaid',money(p.otherPaid));set('otherBalance',money(p.otherBalance));fillObligations(p.otherObligations||[]);fillHistory(p.paymentHistory||[]);}
-function fillObligations(list){const s=document.getElementById('obligationId');s.innerHTML='<option value="">Select obligation</option>'+list.filter(o=>Number(o.balance||0)>0).map(o=>'<option value="'+esc(o.obligationId||o.id||'')+'">'+esc((o.description||'Obligation')+' — '+money(o.balance))+'</option>').join('');}
-function paymentTypeChanged(){document.getElementById('obligationWrap').classList.toggle('hidden',document.getElementById('paymentType').value!=='Other Obligation Payment');}
-function fillHistory(list){document.getElementById('historyBody').innerHTML=(list||[]).map(x=>'<tr><td>'+esc(x.date||'')+'</td><td>'+esc(x.type||x.transactionType||'')+'</td><td>'+esc(x.remarks||'')+'</td><td>'+money(x.amount)+'</td></tr>').join('');}
-async function savePayment(){if(!selectedMember)return;const type=document.getElementById('paymentType').value,amount=Number(document.getElementById('amount').value||0),obligationId=document.getElementById('obligationId').value;if(!type){msg('paymentMsg','Select payment type.','error');return;}if(amount<=0){msg('paymentMsg','Enter a valid amount.','error');return;}if(type==='Other Obligation Payment'&&!obligationId){msg('paymentMsg','Select the specific obligation.','error');return;}try{const r=await api('savePayment',{token,paymentData:{memberId:selectedMember.id,transactionType:type,amount,obligationId:type==='Other Obligation Payment'?obligationId:'',remarks:document.getElementById('remarks').value.trim()}},'Saving Payment...','Please wait');renderProfile(r.profile);msg('paymentMsg',r.message,'ok');document.getElementById('amount').value='';document.getElementById('remarks').value='';}catch(e){fail(e,'paymentMsg');}}
-function compressImage(file,maxW=1400,quality=.82){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const s=Math.min(1,maxW/img.width),c=document.createElement('canvas');c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);c.getContext('2d').drawImage(img,0,0,c.width,c.height);const data=c.toDataURL('image/jpeg',quality).split(',')[1];resolve({base64:data,mimeType:'image/jpeg'});};img.onerror=reject;img.src=r.result;};r.onerror=reject;r.readAsDataURL(file);});}
-async function uploadPhoto(input){if(!selectedMember||!input.files||!input.files[0])return;const file=input.files[0];try{msg('photoMsg','Preparing photo...','');const photo=await compressImage(file);const r=await api('uploadPhoto',{token,photo:{memberId:selectedMember.id,base64:photo.base64,mimeType:photo.mimeType}},'Uploading Photo...','Saving member photo');msg('photoMsg',r.message,'ok');selectedMember=r.profile;renderProfile(r.profile);}catch(e){fail(e,'photoMsg');}finally{input.value='';}}
+
+
+/************************************************************
+ * LOGOUT
+ ************************************************************/
+
+async function logout(){
+
+  const t =
+    token;
+
+
+  token = '';
+
+  selectedMember =
+    null;
+
+
+  document.getElementById(
+    'appView'
+  ).classList.add(
+    'hidden'
+  );
+
+
+  document.getElementById(
+    'loginView'
+  ).classList.remove(
+    'hidden'
+  );
+
+
+  [
+    'profileCard',
+    'paymentCard',
+    'historyCard'
+  ].forEach(
+    id =>
+      document
+        .getElementById(id)
+        .classList.add(
+          'hidden'
+        )
+  );
+
+
+  if(t){
+
+    try{
+
+      await api(
+        'logout',
+        {token:t},
+        'Signing out...',
+        'Closing session'
+      );
+
+    }catch(e){}
+
+  }
+
+}
+
+
+/************************************************************
+ * SEARCH MEMBERS
+ ************************************************************/
+
+async function searchMembers(){
+
+  if(!token)
+    return;
+
+
+  const q =
+    document
+      .getElementById(
+        'searchText'
+      )
+      .value
+      .trim();
+
+
+  if(!q){
+
+    msg(
+      'searchMsg',
+      'Enter Member ID or name.',
+      'error'
+    );
+
+    return;
+  }
+
+
+  lockSearch(true);
+
+
+  document.getElementById(
+    'results'
+  ).innerHTML = '';
+
+
+  try{
+
+    const rows =
+      await api(
+
+        'searchMembers',
+
+        {
+          token,
+          searchText:q
+        },
+
+        'Searching Members...',
+
+        'Finding matching members'
+
+      );
+
+
+    renderResults(
+      rows
+    );
+
+
+  }catch(e){
+
+    fail(
+      e,
+      'searchMsg'
+    );
+
+
+  }finally{
+
+    lockSearch(false);
+
+  }
+
+}
+
+
+/************************************************************
+ * RENDER SEARCH RESULTS
+ ************************************************************/
+
+function renderResults(
+  rows
+){
+
+  if(
+    !rows ||
+    !rows.length
+  ){
+
+    document.getElementById(
+      'results'
+    ).innerHTML =
+      '<div class="msg error">' +
+      'No member found.' +
+      '</div>';
+
+    return;
+  }
+
+
+  document.getElementById(
+    'results'
+  ).innerHTML =
+
+    rows
+      .map(
+        r =>
+
+          '<div class="result" ' +
+
+          'data-id="' +
+          esc(r.id) +
+          '" ' +
+
+          'onclick="openMember(\'' +
+          js(r.id) +
+          '\',this)">' +
+
+          '<strong>' +
+          esc(r.name) +
+          '</strong>' +
+
+          '<small>' +
+          esc(r.id) +
+
+          (
+            r.address
+              ? ' • ' +
+                esc(r.address)
+              : ''
+          ) +
+
+          '</small>' +
+
+          '</div>'
+
+      )
+      .join('');
+
+}
+
+
+/************************************************************
+ * OPEN MEMBER
+ ************************************************************/
+
+async function openMember(
+  id,
+  el
+){
+
+  if(!token)
+    return;
+
+
+  if(el)
+    el.classList.add(
+      'selected'
+    );
+
+
+  lockSearch(true);
+
+
+  try{
+
+    const p =
+      await api(
+
+        'getMemberProfile',
+
+        {
+          token,
+          memberId:id
+        },
+
+        'Loading Profile...',
+
+        'Please wait while the member record is loaded'
+
+      );
+
+
+    selectedMember =
+      p;
+
+
+    renderProfile(
+      p
+    );
+
+
+    window.scrollTo({
+      top:0,
+      behavior:'smooth'
+    });
+
+
+  }catch(e){
+
+    fail(
+      e,
+      'searchMsg'
+    );
+
+
+  }finally{
+
+    lockSearch(false);
+
+  }
+
+}
+
+
+/************************************************************
+ * RENDER PROFILE
+ ************************************************************/
+
+function renderProfile(
+  p
+){
+
+  [
+    'profileCard',
+    'paymentCard',
+    'historyCard'
+  ].forEach(
+    id =>
+      document
+        .getElementById(id)
+        .classList.remove(
+          'hidden'
+        )
+  );
+
+
+  set(
+    'memberName',
+    p.name || ''
+  );
+
+
+  set(
+    'memberMeta',
+    (p.id || '') +
+    (
+      p.address
+        ? ' • ' +
+          p.address
+        : ''
+    )
+  );
+
+
+  const im =
+    document.getElementById(
+      'memberPhoto'
+    );
+
+
+  if(p.photo){
+
+    im.src =
+      p.photo;
+
+    im.style.visibility =
+      'visible';
+
+  }else{
+
+    im.removeAttribute(
+      'src'
+    );
+
+    im.style.visibility =
+      'hidden';
+
+  }
+
+
+  set(
+    'annualDue',
+    money(p.annualDue)
+  );
+
+  set(
+    'monthlyPaid',
+    money(p.monthlyPaid)
+  );
+
+  set(
+    'yearBalance',
+    money(p.yearBalance)
+  );
+
+
+  set(
+    'registrationDue',
+    money(p.registrationDue)
+  );
+
+  set(
+    'registrationPaid',
+    money(p.registrationPaid)
+  );
+
+  set(
+    'registrationBalance',
+    money(p.registrationBalance)
+  );
+
+
+  set(
+    'otherDue',
+    money(p.otherDue)
+  );
+
+  set(
+    'otherPaid',
+    money(p.otherPaid)
+  );
+
+  set(
+    'otherBalance',
+    money(p.otherBalance)
+  );
+
+
+  fillObligations(
+    p.otherObligations || []
+  );
+
+
+  fillHistory(
+    p.paymentHistory || []
+  );
+
+}
+
+
+/************************************************************
+ * OBLIGATIONS
+ ************************************************************/
+
+function fillObligations(
+  list
+){
+
+  const s =
+    document.getElementById(
+      'obligationId'
+    );
+
+
+  s.innerHTML =
+    '<option value="">' +
+    'Select obligation' +
+    '</option>' +
+
+    list
+      .filter(
+        o =>
+          Number(
+            o.balance || 0
+          ) > 0
+      )
+      .map(
+        o =>
+
+          '<option value="' +
+          esc(
+            o.obligationId ||
+            o.id ||
+            ''
+          ) +
+          '">' +
+
+          esc(
+            (o.description ||
+             'Obligation') +
+
+            ' — ' +
+
+            money(
+              o.balance
+            )
+          ) +
+
+          '</option>'
+
+      )
+      .join('');
+
+}
+
+
+/************************************************************
+ * PAYMENT TYPE
+ ************************************************************/
+
+function paymentTypeChanged(){
+
+  document.getElementById(
+    'obligationWrap'
+  ).classList.toggle(
+    'hidden',
+    document.getElementById(
+      'paymentType'
+    ).value !==
+      'Other Obligation Payment'
+  );
+
+}
+
+
+/************************************************************
+ * PAYMENT HISTORY
+ ************************************************************/
+
+function fillHistory(
+  list
+){
+
+  document.getElementById(
+    'historyBody'
+  ).innerHTML =
+
+    (list || [])
+      .map(
+        x =>
+
+          '<tr>' +
+
+          '<td>' +
+          esc(x.date || '') +
+          '</td>' +
+
+          '<td>' +
+          esc(
+            x.type ||
+            x.transactionType ||
+            ''
+          ) +
+          '</td>' +
+
+          '<td>' +
+          esc(x.remarks || '') +
+          '</td>' +
+
+          '<td>' +
+          money(x.amount) +
+          '</td>' +
+
+          '</tr>'
+
+      )
+      .join('');
+
+}
+
+
+/************************************************************
+ * SAVE PAYMENT
+ ************************************************************/
+
+async function savePayment(){
+
+  if(!selectedMember)
+    return;
+
+
+  const type =
+    document.getElementById(
+      'paymentType'
+    ).value;
+
+
+  const amount =
+    Number(
+      document.getElementById(
+        'amount'
+      ).value || 0
+    );
+
+
+  const obligationId =
+    document.getElementById(
+      'obligationId'
+    ).value;
+
+
+  if(!type){
+
+    msg(
+      'paymentMsg',
+      'Select payment type.',
+      'error'
+    );
+
+    return;
+  }
+
+
+  if(amount <= 0){
+
+    msg(
+      'paymentMsg',
+      'Enter a valid amount.',
+      'error'
+    );
+
+    return;
+  }
+
+
+  if(
+    type ===
+      'Other Obligation Payment' &&
+    !obligationId
+  ){
+
+    msg(
+      'paymentMsg',
+      'Select the specific obligation.',
+      'error'
+    );
+
+    return;
+  }
+
+
+  try{
+
+    const r =
+      await api(
+
+        'savePayment',
+
+        {
+          token,
+
+          paymentData:{
+
+            memberId:
+              selectedMember.id,
+
+            transactionType:
+              type,
+
+            amount,
+
+            obligationId:
+              type ===
+              'Other Obligation Payment'
+                ? obligationId
+                : '',
+
+            remarks:
+              document
+                .getElementById(
+                  'remarks'
+                )
+                .value
+                .trim()
+
+          }
+
+        },
+
+        'Saving Payment...',
+
+        'Please wait'
+
+      );
+
+
+    renderProfile(
+      r.profile
+    );
+
+
+    msg(
+      'paymentMsg',
+      r.message,
+      'ok'
+    );
+
+
+    document.getElementById(
+      'amount'
+    ).value = '';
+
+
+    document.getElementById(
+      'remarks'
+    ).value = '';
+
+
+  }catch(e){
+
+    fail(
+      e,
+      'paymentMsg'
+    );
+
+  }
+
+}
+
+
+/************************************************************
+ * IMAGE COMPRESSION
+ ************************************************************/
+
+function compressImage(
+  file,
+  maxW=1400,
+  quality=.82
+){
+
+  return new Promise(
+    (resolve,reject)=>{
+
+      const r =
+        new FileReader();
+
+
+      r.onload = () => {
+
+        const img =
+          new Image();
+
+
+        img.onload = () => {
+
+          const s =
+            Math.min(
+              1,
+              maxW / img.width
+            );
+
+
+          const c =
+            document.createElement(
+              'canvas'
+            );
+
+
+          c.width =
+            Math.round(
+              img.width * s
+            );
+
+
+          c.height =
+            Math.round(
+              img.height * s
+            );
+
+
+          c
+            .getContext('2d')
+            .drawImage(
+              img,
+              0,
+              0,
+              c.width,
+              c.height
+            );
+
+
+          const data =
+            c
+              .toDataURL(
+                'image/jpeg',
+                quality
+              )
+              .split(',')[1];
+
+
+          resolve({
+            base64:data,
+            mimeType:'image/jpeg'
+          });
+
+        };
+
+
+        img.onerror =
+          reject;
+
+
+        img.src =
+          r.result;
+
+      };
+
+
+      r.onerror =
+        reject;
+
+
+      r.readAsDataURL(
+        file
+      );
+
+    }
+  );
+
+}
+
+
+/************************************************************
+ * UPLOAD MEMBER PHOTO
+ ************************************************************/
+
+async function uploadPhoto(
+  input
+){
+
+  if(
+    !selectedMember ||
+    !input.files ||
+    !input.files[0]
+  )
+    return;
+
+
+  const file =
+    input.files[0];
+
+
+  try{
+
+    msg(
+      'photoMsg',
+      'Preparing photo...',
+      ''
+    );
+
+
+    const photo =
+      await compressImage(
+        file
+      );
+
+
+    const r =
+      await api(
+
+        'uploadPhoto',
+
+        {
+          token,
+
+          photo:{
+            memberId:
+              selectedMember.id,
+
+            base64:
+              photo.base64,
+
+            mimeType:
+              photo.mimeType
+          }
+        },
+
+        'Uploading Photo...',
+
+        'Saving member photo'
+
+      );
+
+
+    msg(
+      'photoMsg',
+      r.message,
+      'ok'
+    );
+
+
+    selectedMember =
+      r.profile;
+
+
+    renderProfile(
+      r.profile
+    );
+
+
+  }catch(e){
+
+    fail(
+      e,
+      'photoMsg'
+    );
+
+
+  }finally{
+
+    input.value = '';
+
+  }
+
+}
+
 </script>
+
 </body>
 </html>
