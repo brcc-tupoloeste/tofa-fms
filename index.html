@@ -4,184 +4,1454 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1f4e78">
+
 <title>Tupol Oeste Farmer's Association - Payments Received</title>
+
 <style>
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;font-family:Arial,sans-serif;background:#f3f6f8;color:#1f2937}
-.wrap{width:100%;max-width:760px;margin:auto;padding:12px}
-.brand{text-align:center;padding:14px 8px 8px}.brand h1{margin:0;font-size:20px}.brand p{margin:5px 0 0;color:#6b7280}
-.card{background:#fff;border-radius:16px;padding:15px;margin-bottom:12px;box-shadow:0 2px 10px rgba(0,0,0,.07)}
-.hidden{display:none!important}label{display:block;font-size:13px;font-weight:700;margin:11px 0 6px}
-input,select,textarea,button{width:100%;font:inherit}
-input,select,textarea{padding:12px;border:1px solid #ccd4dc;border-radius:10px;background:#fff}
-button{padding:12px;border:0;border-radius:10px;background:#1f4e78;color:#fff;font-weight:700;margin-top:10px}
-button:disabled,input:disabled,select:disabled,textarea:disabled{opacity:.55;cursor:not-allowed}
-.msg{padding:10px;margin-top:10px;border-radius:9px;font-size:13px}.error{background:#fee2e2;color:#991b1b}.ok{background:#dcfce7;color:#166534}
-.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}button.danger{background:#991b1b;width:auto;margin:0}
-.search{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}.search button{width:auto}
-.result{padding:11px;border:1px solid #e5e7eb;border-radius:10px;margin-top:8px;cursor:pointer;background:#fff}
-.result strong,.result small{display:block}.result small{font-size:12px;color:#6b7280;margin-top:3px}.result.locked{opacity:.5;pointer-events:none}.result.selected{border-color:#1f4e78;background:#f4f8fb}
-.profile{display:flex;align-items:center;gap:12px}.photo-wrap{position:relative;width:74px;height:74px;flex:0 0 74px}
-.photo{width:74px;height:74px;border-radius:50%;object-fit:cover;background:#e5e7eb;border:1px solid #d1d5db}
-.camera{position:absolute;right:-3px;bottom:-3px;width:31px;height:31px;border-radius:50%;padding:0;margin:0;font-size:15px}
-#photoInput{display:none}.name{font-weight:800;font-size:18px}.sub{font-size:12px;color:#6b7280;margin-top:3px}
-.accounts{display:grid;grid-template-columns:1fr;gap:9px;margin-top:14px}.account{border:1px solid #e5e7eb;border-radius:11px;padding:11px}
-.account b{display:block;margin-bottom:6px}.line{display:flex;justify-content:space-between;padding:4px 0;font-size:13px}
-.balance{border-top:1px solid #e5e7eb;margin-top:5px;padding-top:7px;font-weight:800}
-.payment-grid{display:grid;grid-template-columns:1fr;gap:9px}
-textarea{min-height:78px;resize:vertical}
-.obligation-box{padding:10px;border:1px solid #e5e7eb;border-radius:10px;background:#fafafa;margin-top:8px;font-size:13px}
-table{width:100%;border-collapse:collapse;min-width:500px}th,td{padding:8px;border-bottom:1px solid #e5e7eb;font-size:12px;text-align:left}.scroll{overflow:auto}
-.busy-overlay{position:fixed;inset:0;background:rgba(243,246,248,.84);backdrop-filter:blur(2px);display:flex;align-items:center;justify-content:center;z-index:9999}
-.busy-box{background:#fff;border-radius:16px;padding:22px 26px;text-align:center;min-width:230px;box-shadow:0 8px 30px rgba(0,0,0,.16)}
-.spinner{width:36px;height:36px;margin:0 auto 12px;border:4px solid #dbe3ea;border-top-color:#1f4e78;border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}.busy-title{font-weight:800}.busy-sub{font-size:12px;color:#6b7280;margin-top:5px}
-@media(min-width:620px){.accounts{grid-template-columns:repeat(3,1fr)}.payment-grid{grid-template-columns:repeat(2,1fr)}}
+*{
+  box-sizing:border-box
+}
+
+html,
+body{
+  margin:0;
+  min-height:100%;
+  font-family:Arial,sans-serif;
+  background:#f3f6f8;
+  color:#1f2937
+}
+
+.wrap{
+  width:100%;
+  max-width:760px;
+  margin:auto;
+  padding:12px
+}
+
+.brand{
+  text-align:center;
+  padding:14px 8px 8px
+}
+
+.brand h1{
+  margin:0;
+  font-size:20px
+}
+
+.brand p{
+  margin:5px 0 0;
+  color:#6b7280
+}
+
+.card{
+  background:#fff;
+  border-radius:16px;
+  padding:15px;
+  margin-bottom:12px;
+  box-shadow:0 2px 10px rgba(0,0,0,.07)
+}
+
+.hidden{
+  display:none!important
+}
+
+label{
+  display:block;
+  font-size:13px;
+  font-weight:700;
+  margin:11px 0 6px
+}
+
+input,
+select,
+textarea,
+button{
+  width:100%;
+  font:inherit
+}
+
+input,
+select,
+textarea{
+  padding:12px;
+  border:1px solid #ccd4dc;
+  border-radius:10px;
+  background:#fff
+}
+
+button{
+  padding:12px;
+  border:0;
+  border-radius:10px;
+  background:#1f4e78;
+  color:#fff;
+  font-weight:700;
+  margin-top:10px
+}
+
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled{
+  opacity:.55;
+  cursor:not-allowed
+}
+
+.msg{
+  padding:10px;
+  margin-top:10px;
+  border-radius:9px;
+  font-size:13px
+}
+
+.error{
+  background:#fee2e2;
+  color:#991b1b
+}
+
+.ok{
+  background:#dcfce7;
+  color:#166534
+}
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:10px
+}
+
+button.danger{
+  background:#991b1b;
+  width:auto;
+  margin:0
+}
+
+.search{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:8px;
+  align-items:end
+}
+
+.search button{
+  width:auto
+}
+
+.result{
+  padding:11px;
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+  margin-top:8px;
+  cursor:pointer;
+  background:#fff
+}
+
+.result strong,
+.result small{
+  display:block
+}
+
+.result small{
+  font-size:12px;
+  color:#6b7280;
+  margin-top:3px
+}
+
+.result.locked{
+  opacity:.5;
+  pointer-events:none
+}
+
+.result.selected{
+  border-color:#1f4e78;
+  background:#f4f8fb
+}
+
+.profile{
+  display:flex;
+  align-items:center;
+  gap:12px
+}
+
+.photo-wrap{
+  position:relative;
+  width:74px;
+  height:74px;
+  flex:0 0 74px
+}
+
+.photo{
+  width:74px;
+  height:74px;
+  border-radius:50%;
+  object-fit:cover;
+  background:#e5e7eb;
+  border:1px solid #d1d5db
+}
+
+.camera{
+  position:absolute;
+  right:-3px;
+  bottom:-3px;
+  width:31px;
+  height:31px;
+  border-radius:50%;
+  padding:0;
+  margin:0;
+  font-size:15px
+}
+
+#photoInput{
+  display:none
+}
+
+.name{
+  font-weight:800;
+  font-size:18px
+}
+
+.sub{
+  font-size:12px;
+  color:#6b7280;
+  margin-top:3px
+}
+
+.accounts{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:9px;
+  margin-top:14px
+}
+
+.account{
+  border:1px solid #e5e7eb;
+  border-radius:11px;
+  padding:11px
+}
+
+.account b{
+  display:block;
+  margin-bottom:6px
+}
+
+.line{
+  display:flex;
+  justify-content:space-between;
+  padding:4px 0;
+  font-size:13px
+}
+
+.balance{
+  border-top:1px solid #e5e7eb;
+  margin-top:5px;
+  padding-top:7px;
+  font-weight:800
+}
+
+.payment-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:9px
+}
+
+textarea{
+  min-height:78px;
+  resize:vertical
+}
+
+.obligation-box{
+  padding:10px;
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+  background:#fafafa;
+  margin-top:8px;
+  font-size:13px
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:500px
+}
+
+th,
+td{
+  padding:8px;
+  border-bottom:1px solid #e5e7eb;
+  font-size:12px;
+  text-align:left
+}
+
+.scroll{
+  overflow:auto
+}
+
+.busy-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(243,246,248,.84);
+  backdrop-filter:blur(2px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:9999
+}
+
+.busy-box{
+  background:#fff;
+  border-radius:16px;
+  padding:22px 26px;
+  text-align:center;
+  min-width:230px;
+  box-shadow:0 8px 30px rgba(0,0,0,.16)
+}
+
+.spinner{
+  width:36px;
+  height:36px;
+  margin:0 auto 12px;
+  border:4px solid #dbe3ea;
+  border-top-color:#1f4e78;
+  border-radius:50%;
+  animation:spin .8s linear infinite
+}
+
+@keyframes spin{
+  to{
+    transform:rotate(360deg)
+  }
+}
+
+.busy-title{
+  font-weight:800
+}
+
+.busy-sub{
+  font-size:12px;
+  color:#6b7280;
+  margin-top:5px
+}
+
+@media(min-width:620px){
+
+  .accounts{
+    grid-template-columns:repeat(3,1fr)
+  }
+
+  .payment-grid{
+    grid-template-columns:repeat(2,1fr)
+  }
+}
 </style>
 </head>
+
 <body>
-<div id="busyOverlay" class="busy-overlay hidden"><div class="busy-box"><div class="spinner"></div><div id="busyTitle" class="busy-title">Please wait...</div><div id="busySub" class="busy-sub">Processing request</div></div></div>
+
+<!-- =========================================================
+     BUSY OVERLAY
+========================================================= -->
+
+<div id="busyOverlay" class="busy-overlay hidden">
+
+  <div class="busy-box">
+
+    <div class="spinner"></div>
+
+    <div id="busyTitle" class="busy-title">
+      Please wait...
+    </div>
+
+    <div id="busySub" class="busy-sub">
+      Processing request
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================================
+     MAIN WRAPPER
+========================================================= -->
 
 <div class="wrap">
-<div class="brand"><h1>Tupol Oeste Farmer's Association</h1><p>Payments Received</p></div>
 
-<div id="loginView" class="card">
-<h2>🔐 Admin Login</h2>
-<label>Username</label><input id="username" value="admin" autocomplete="username">
-<label>Password</label><input id="password" type="password" autocomplete="current-password">
-<label style="font-weight:400"><input id="showPass" type="checkbox" style="width:auto"> Show password</label>
-<button id="loginBtn" onclick="login()">LOGIN</button><div id="loginMsg"></div>
+
+  <!-- =======================================================
+       BRAND
+  ======================================================== -->
+
+  <div class="brand">
+
+    <h1>
+      Tupol Oeste Farmer's Association
+    </h1>
+
+    <p>
+      Payments Received
+    </p>
+
+  </div>
+
+
+  <!-- =======================================================
+       LOGIN
+  ======================================================== -->
+
+  <div id="loginView" class="card">
+
+    <h2>
+      🔐 Admin Login
+    </h2>
+
+    <label>
+      Username
+    </label>
+
+    <input
+      id="username"
+      value="admin"
+      autocomplete="username"
+    >
+
+
+    <label>
+      Password
+    </label>
+
+    <input
+      id="password"
+      type="password"
+      autocomplete="current-password"
+    >
+
+
+    <label style="font-weight:400">
+
+      <input
+        id="showPass"
+        type="checkbox"
+        style="width:auto"
+      >
+
+      Show password
+
+    </label>
+
+
+    <button
+      id="loginBtn"
+      onclick="login()"
+    >
+      LOGIN
+    </button>
+
+
+    <div id="loginMsg"></div>
+
+  </div>
+
+
+  <!-- =======================================================
+       APPLICATION
+  ======================================================== -->
+
+  <div id="appView" class="hidden">
+
+
+    <!-- TOP BAR -->
+
+    <div class="top">
+
+      <b>
+        💵 Payments Received
+      </b>
+
+      <button
+        class="danger"
+        onclick="logout()"
+      >
+        Logout
+      </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         SEARCH MEMBER
+    ====================================================== -->
+
+    <div class="card">
+
+      <h3>
+        🔎 Search Member
+      </h3>
+
+      <div class="search">
+
+        <div>
+
+          <label>
+            Member ID or Name
+          </label>
+
+          <input
+            id="searchText"
+            placeholder="Search member"
+          >
+
+        </div>
+
+
+        <button
+          id="searchBtn"
+          onclick="searchMembers()"
+        >
+          Search
+        </button>
+
+      </div>
+
+
+      <div id="searchMsg"></div>
+
+      <div id="results"></div>
+
+    </div>
+
+
+    <!-- =====================================================
+         MEMBER PROFILE
+    ====================================================== -->
+
+    <div
+      id="profileCard"
+      class="card hidden"
+    >
+
+      <div class="profile">
+
+
+        <!-- PHOTO -->
+
+        <div class="photo-wrap">
+
+          <img
+            id="memberPhoto"
+            class="photo"
+            alt=""
+          >
+
+
+          <button
+            class="camera"
+            onclick="document.getElementById('photoInput').click()"
+            title="Upload photo"
+          >
+            📷
+          </button>
+
+
+          <input
+            id="photoInput"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            capture="environment"
+            onchange="uploadPhoto(this)"
+          >
+
+        </div>
+
+
+        <!-- MEMBER INFO -->
+
+        <div>
+
+          <div
+            id="memberName"
+            class="name"
+          ></div>
+
+
+          <div
+            id="memberMeta"
+            class="sub"
+          ></div>
+
+
+          <div id="photoMsg"></div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ===================================================
+           ACCOUNT SUMMARY
+      ==================================================== -->
+
+      <div class="accounts">
+
+
+        <!-- MONTHLY MEMBERSHIP -->
+
+        <div class="account">
+
+          <b>
+            📅 Monthly Membership
+          </b>
+
+          <div class="line">
+
+            <span>
+              Year Due
+            </span>
+
+            <span id="annualDue"></span>
+
+          </div>
+
+
+          <div class="line">
+
+            <span>
+              Paid
+            </span>
+
+            <span id="monthlyPaid"></span>
+
+          </div>
+
+
+          <div class="line balance">
+
+            <span>
+              Balance
+            </span>
+
+            <span id="yearBalance"></span>
+
+          </div>
+
+        </div>
+
+
+        <!-- REGISTRATION -->
+
+        <div class="account">
+
+          <b>
+            🧾 Registration Fee
+          </b>
+
+          <div class="line">
+
+            <span>
+              Due
+            </span>
+
+            <span id="registrationDue"></span>
+
+          </div>
+
+
+          <div class="line">
+
+            <span>
+              Paid
+            </span>
+
+            <span id="registrationPaid"></span>
+
+          </div>
+
+
+          <div class="line balance">
+
+            <span>
+              Balance
+            </span>
+
+            <span id="registrationBalance"></span>
+
+          </div>
+
+        </div>
+
+
+        <!-- OTHER OBLIGATIONS -->
+
+        <div class="account">
+
+          <b>
+            📦 Other Obligations
+          </b>
+
+          <div class="line">
+
+            <span>
+              Due
+            </span>
+
+            <span id="otherDue"></span>
+
+          </div>
+
+
+          <div class="line">
+
+            <span>
+              Paid
+            </span>
+
+            <span id="otherPaid"></span>
+
+          </div>
+
+
+          <div class="line balance">
+
+            <span>
+              Balance
+            </span>
+
+            <span id="otherBalance"></span>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         RECEIVE PAYMENT
+    ====================================================== -->
+
+    <div
+      id="paymentCard"
+      class="card hidden"
+    >
+
+      <h3>
+        💵 Receive Payment
+      </h3>
+
+
+      <div class="payment-grid">
+
+
+        <!-- PAYMENT TYPE -->
+
+        <div>
+
+          <label>
+            Payment Type
+          </label>
+
+          <select
+            id="paymentType"
+            onchange="paymentTypeChanged()"
+          >
+
+            <option value="Monthly Membership">
+              Monthly Membership
+            </option>
+
+            <option value="Registration Fee">
+              Registration Fee
+            </option>
+
+            <option value="Other Obligation">
+              Other Obligation
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <!-- AMOUNT -->
+
+        <div>
+
+          <label>
+            Amount Received
+          </label>
+
+          <input
+            id="paymentAmount"
+            type="number"
+            inputmode="decimal"
+            min="0.01"
+            step="0.01"
+            placeholder="0.00"
+          >
+
+        </div>
+
+      </div>
+
+
+      <!-- ===================================================
+           OBLIGATION SELECTOR
+      ==================================================== -->
+
+      <div
+        id="obligationBox"
+        class="obligation-box hidden"
+      >
+
+        <label>
+          Obligation
+        </label>
+
+
+        <select
+          id="obligationSelect"
+        ></select>
+
+
+        <div
+          id="obligationInfo"
+          style="margin-top:6px;color:#6b7280"
+        ></div>
+
+      </div>
+
+
+      <!-- REMARKS -->
+
+      <label>
+        Remarks / Purpose
+      </label>
+
+      <textarea
+        id="paymentRemarks"
+        placeholder="Enter remarks or payment purpose"
+      ></textarea>
+
+
+      <!-- SAVE -->
+
+      <button
+        id="savePaymentBtn"
+        onclick="savePayment()"
+      >
+        💾 SAVE PAYMENT
+      </button>
+
+
+      <div id="paymentMsg"></div>
+
+    </div>
+
+
+    <!-- =====================================================
+         PAYMENT HISTORY
+    ====================================================== -->
+
+    <div
+      id="historyCard"
+      class="card hidden"
+    >
+
+      <h3>
+        📋 Payment History
+      </h3>
+
+
+      <div class="scroll">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>
+                Date
+              </th>
+
+              <th>
+                Type
+              </th>
+
+              <th>
+                Remarks
+              </th>
+
+              <th>
+                Amount
+              </th>
+
+            </tr>
+
+          </thead>
+
+
+          <tbody
+            id="historyBody"
+          ></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+
+  </div>
+
 </div>
 
-<div id="appView" class="hidden">
-<div class="top"><b>💵 Payments Received</b><button class="danger" onclick="logout()">Logout</button></div>
 
-<div class="card">
-<h3>🔎 Search Member</h3>
-<div class="search"><div><label>Member ID or Name</label><input id="searchText" placeholder="Search member"></div><button id="searchBtn" onclick="searchMembers()">Search</button></div>
-<div id="searchMsg"></div><div id="results"></div>
-</div>
-
-<div id="profileCard" class="card hidden">
-<div class="profile">
-<div class="photo-wrap"><img id="memberPhoto" class="photo" alt="">
-<button class="camera" onclick="document.getElementById('photoInput').click()" title="Upload photo">📷</button>
-<input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" onchange="uploadPhoto(this)"></div>
-<div><div id="memberName" class="name"></div><div id="memberMeta" class="sub"></div><div id="photoMsg"></div></div>
-</div>
-<div class="accounts">
-<div class="account"><b>📅 Monthly Membership</b><div class="line"><span>Year Due</span><span id="annualDue"></span></div><div class="line"><span>Paid</span><span id="monthlyPaid"></span></div><div class="line balance"><span>Balance</span><span id="yearBalance"></span></div></div>
-<div class="account"><b>🧾 Registration Fee</b><div class="line"><span>Due</span><span id="registrationDue"></span></div><div class="line"><span>Paid</span><span id="registrationPaid"></span></div><div class="line balance"><span>Balance</span><span id="registrationBalance"></span></div></div>
-<div class="account"><b>📦 Other Obligations</b><div class="line"><span>Due</span><span id="otherDue"></span></div><div class="line"><span>Paid</span><span id="otherPaid"></span></div><div class="line balance"><span>Balance</span><span id="otherBalance"></span></div></div>
-</div>
-</div>
-
-<div id="paymentCard" class="card hidden">
-<h3>💵 Receive Payment</h3>
-<div class="payment-grid">
-<div><label>Payment Type</label>
-<select id="paymentType" onchange="paymentTypeChanged()">
-<option value="Monthly Membership">Monthly Membership</option>
-<option value="Registration Fee">Registration Fee</option>
-<option value="Other Obligation">Other Obligation</option>
-</select></div>
-<div><label>Amount Received</label><input id="paymentAmount" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="0.00"></div>
-</div>
-<div id="obligationBox" class="obligation-box hidden">
-<label>Obligation</label>
-<select id="obligationSelect"></select>
-<div id="obligationInfo" style="margin-top:6px;color:#6b7280"></div>
-</div>
-<label>Remarks / Purpose</label>
-<textarea id="paymentRemarks" placeholder="Enter remarks or payment purpose"></textarea>
-<button id="savePaymentBtn" onclick="savePayment()">💾 SAVE PAYMENT</button>
-<div id="paymentMsg"></div>
-</div>
-
-<div id="historyCard" class="card hidden">
-<h3>📋 Payment History</h3><div class="scroll"><table><thead><tr><th>Date</th><th>Type</th><th>Remarks</th><th>Amount</th></tr></thead><tbody id="historyBody"></tbody></table></div>
-</div>
-</div>
-</div>
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
 
 <script>
-const PROXY_URL = 'https://script.google.com/macros/s/AKfycbynk1P7SnfHWOBnJYC2vhwdH7ONxEUj8FWMp--40YUpkcecjwWoigQG29pnc4YlU6l0zA/exec';
-let token='', selectedMember=null, busy=false;
 
-document.getElementById('showPass').onchange=function(){document.getElementById('password').type=this.checked?'text':'password';};
+/* ============================================================
+   APPS SCRIPT BRIDGE URL
+============================================================ */
 
-function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-function set(id,v){document.getElementById(id).textContent=v;}
-function money(v){return '₱'+Number(v||0).toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});}
-function msg(id,text,type){document.getElementById(id).innerHTML=text?'<div class="msg '+(type||'')+'">'+esc(text)+'</div>':'';}
-function showBusy(t,s){document.getElementById('busyTitle').textContent=t;document.getElementById('busySub').textContent=s||'Please wait';document.getElementById('busyOverlay').classList.remove('hidden');}
-function hideBusy(){document.getElementById('busyOverlay').classList.add('hidden');}
-function lock(v){
-  busy=v;
-  document.querySelectorAll('button,input,select,textarea').forEach(x=>{
-    if(x.id!=='showPass'||v)x.disabled=v;
-  });
-  document.querySelectorAll('.result').forEach(x=>x.classList.toggle('locked',v));
+const BRIDGE_URL =
+  'https://script.google.com/macros/s/AKfycbynk1P7SnfHWOBnJYC2vhwdH7ONxEUj8FWMp--40YUpkcecjwWoigQG29pnc4YlU6l0zA/exec?bridge=1';
+
+
+/* ============================================================
+   GLOBAL VARIABLES
+============================================================ */
+
+let token = '';
+
+let selectedMember = null;
+
+let busy = false;
+
+let bridgeFrame = null;
+
+let bridgeReady = false;
+
+let bridgeQueue = [];
+
+let bridgeRequests = {};
+
+
+/* ============================================================
+   SHOW / HIDE PASSWORD
+============================================================ */
+
+document
+  .getElementById('showPass')
+  .onchange = function(){
+
+    document
+      .getElementById('password')
+      .type = this.checked
+        ? 'text'
+        : 'password';
+
+  };
+
+
+/* ============================================================
+   ESCAPE HTML
+============================================================ */
+
+function esc(v){
+
+  return String(
+    v == null ? '' : v
+  ).replace(
+    /[&<>"']/g,
+    function(m){
+
+      return {
+        '&':'&amp;',
+        '<':'&lt;',
+        '>':'&gt;',
+        '"':'&quot;',
+        "'":'&#39;'
+      }[m];
+
+    }
+  );
+
 }
-function fail(e,id){msg(id||'loginMsg',e&&e.message?e.message:String(e||'Request failed'),'error');}
 
-async function api(action,payload,title,sub){
+
+/* ============================================================
+   SET TEXT
+============================================================ */
+
+function set(id,v){
+
+  document
+    .getElementById(id)
+    .textContent = v;
+
+}
+
+
+/* ============================================================
+   MONEY
+============================================================ */
+
+function money(v){
+
+  return '₱' +
+    Number(v || 0)
+      .toLocaleString(
+        'en-PH',
+        {
+          minimumFractionDigits:2,
+          maximumFractionDigits:2
+        }
+      );
+
+}
+
+
+/* ============================================================
+   MESSAGE
+============================================================ */
+
+function msg(id,text,type){
+
+  document
+    .getElementById(id)
+    .innerHTML =
+      text
+        ? '<div class="msg ' +
+          (type || '') +
+          '">' +
+          esc(text) +
+          '</div>'
+        : '';
+
+}
+
+
+/* ============================================================
+   BUSY
+============================================================ */
+
+function showBusy(t,s){
+
+  document
+    .getElementById('busyTitle')
+    .textContent =
+      t || 'Please wait...';
+
+
+  document
+    .getElementById('busySub')
+    .textContent =
+      s || 'Processing request';
+
+
+  document
+    .getElementById('busyOverlay')
+    .classList
+    .remove('hidden');
+
+}
+
+
+function hideBusy(){
+
+  document
+    .getElementById('busyOverlay')
+    .classList
+    .add('hidden');
+
+}
+
+
+/* ============================================================
+   LOCK UI
+============================================================ */
+
+function lock(v){
+
+  busy = v;
+
+  document
+    .querySelectorAll(
+      'button,input,select,textarea'
+    )
+    .forEach(function(x){
+
+      if(
+        x.id !== 'showPass' ||
+        v
+      ){
+
+        x.disabled = v;
+
+      }
+
+    });
+
+
+  document
+    .querySelectorAll('.result')
+    .forEach(function(x){
+
+      x.classList
+        .toggle(
+          'locked',
+          v
+        );
+
+    });
+
+}
+
+
+/* ============================================================
+   ERROR
+============================================================ */
+
+function fail(e,id){
+
+  msg(
+    id || 'loginMsg',
+    e && e.message
+      ? e.message
+      : String(
+          e || 'Request failed.'
+        ),
+    'error'
+  );
+
+}
+
+
+/* ============================================================
+   INITIALIZE BRIDGE
+============================================================ */
+
+function initBridge(){
+
+  if(bridgeFrame){
+    return;
+  }
+
+
+  bridgeFrame =
+    document.createElement('iframe');
+
+
+  bridgeFrame.style.display =
+    'none';
+
+
+  bridgeFrame.src =
+    BRIDGE_URL;
+
+
+  document.body.appendChild(
+    bridgeFrame
+  );
+
+}
+
+
+/* ============================================================
+   RECEIVE BRIDGE MESSAGE
+============================================================ */
+
+window.addEventListener(
+  'message',
+  function(event){
+
+    /*
+     * Apps Script may return either
+     * script.google.com or
+     * script.googleusercontent.com
+     */
+    const allowedOrigins = [
+
+      'https://script.google.com',
+
+      'https://script.googleusercontent.com'
+
+    ];
+
+
+    if(
+      allowedOrigins.indexOf(
+        event.origin
+      ) === -1
+    ){
+
+      return;
+
+    }
+
+
+    const data =
+      event.data || {};
+
+
+    /* ---------------------------------------------
+       BRIDGE READY
+    --------------------------------------------- */
+
+    if(
+      data.type ===
+      'TOFA_BRIDGE_READY'
+    ){
+
+      bridgeReady = true;
+
+
+      while(
+        bridgeQueue.length
+      ){
+
+        const item =
+          bridgeQueue.shift();
+
+
+        sendBridgeRequest_(
+          item.action,
+          item.payload,
+          item.resolve,
+          item.reject
+        );
+
+      }
+
+
+      return;
+
+    }
+
+
+    /* ---------------------------------------------
+       API RESPONSE
+    --------------------------------------------- */
+
+    if(
+      data.type !==
+      'TOFA_API_RESPONSE'
+    ){
+
+      return;
+
+    }
+
+
+    const request =
+      bridgeRequests[
+        data.requestId
+      ];
+
+
+    if(!request){
+      return;
+    }
+
+
+    delete bridgeRequests[
+      data.requestId
+    ];
+
+
+    if(data.ok){
+
+      request.resolve(
+        data.data
+      );
+
+    }else{
+
+      request.reject(
+        new Error(
+          data.error ||
+          'Payments backend request failed.'
+        )
+      );
+
+    }
+
+  }
+);
+
+
+/* ============================================================
+   SEND REQUEST TO BRIDGE
+============================================================ */
+
+function sendBridgeRequest_(
+  action,
+  payload,
+  resolve,
+  reject
+){
+
+  const requestId =
+    'REQ_' +
+    Date.now() +
+    '_' +
+    Math.random()
+      .toString(36)
+      .slice(2);
+
+
+  bridgeRequests[
+    requestId
+  ] = {
+
+    resolve:resolve,
+
+    reject:reject
+
+  };
+
+
+  bridgeFrame
+    .contentWindow
+    .postMessage(
+      {
+        type:
+          'TOFA_API_REQUEST',
+
+        requestId:
+          requestId,
+
+        action:
+          action,
+
+        payload:
+          payload || {}
+      },
+
+      '*'
+    );
+
+
+  /*
+   * Timeout protection
+   */
+  setTimeout(
+    function(){
+
+      const request =
+        bridgeRequests[
+          requestId
+        ];
+
+
+      if(!request){
+        return;
+      }
+
+
+      delete bridgeRequests[
+        requestId
+      ];
+
+
+      request.reject(
+        new Error(
+          'Payments backend timed out.'
+        )
+      );
+
+    },
+    30000
+  );
+
+}
+
+
+/* ============================================================
+   BRIDGE API
+============================================================ */
+
+function bridgeApi(
+  action,
+  payload
+){
+
+  return new Promise(
+    function(resolve,reject){
+
+      if(!bridgeReady){
+
+        bridgeQueue.push({
+
+          action:
+            action,
+
+          payload:
+            payload || {},
+
+          resolve:
+            resolve,
+
+          reject:
+            reject
+
+        });
+
+        return;
+
+      }
+
+
+      sendBridgeRequest_(
+        action,
+        payload || {},
+        resolve,
+        reject
+      );
+
+    }
+  );
+
+}
+
+
+/* ============================================================
+   MAIN API FUNCTION
+============================================================ */
+
+async function api(
+  action,
+  payload,
+  title,
+  sub
+){
+
   showBusy(
     title || 'Please wait...',
     sub || 'Processing request'
   );
 
+
   try{
 
-    const r = await fetch(PROXY_URL,{
-      method:'POST',
-
-      // IMPORTANT:
-      // text/plain avoids the browser CORS preflight
-      headers:{
-        'Content-Type':'text/plain;charset=utf-8'
-      },
-
-      body:JSON.stringify({
-        action:action,
-        payload:payload || {}
-      })
-    });
-
-    const text = await r.text();
-
-    let data;
-
-    try{
-      data = JSON.parse(text);
-    }catch(e){
-      throw new Error(
-        'Invalid response from Payments backend.'
-      );
-    }
-
-    if(!r.ok || !data.ok){
-      throw new Error(
-        data && data.error
-          ? data.error
-          : 'Request failed.'
-      );
-    }
-
-    return data.data;
+    return await bridgeApi(
+      action,
+      payload || {}
+    );
 
   }catch(e){
 
-    console.error('Payments API error:',e);
+    console.error(
+      'TOFA Payments API:',
+      e
+    );
 
-    if(
-      e.name === 'TypeError' ||
-      String(e.message || '').toLowerCase().includes('fetch')
-    ){
-      throw new Error(
-        'Unable to reach the Payments backend.'
-      );
-    }
 
     throw e;
 
@@ -190,173 +1460,1422 @@ async function api(action,payload,title,sub){
     hideBusy();
 
   }
+
 }
+
+
+/* ============================================================
+   LOGIN
+============================================================ */
 
 async function login(){
-  if(busy)return;
-  const u=document.getElementById('username').value.trim(),p=document.getElementById('password').value;
-  if(!u||!p){msg('loginMsg','Enter username and password.','error');return;}
+
+  if(busy){
+    return;
+  }
+
+
+  const u =
+    document
+      .getElementById('username')
+      .value
+      .trim();
+
+
+  const p =
+    document
+      .getElementById('password')
+      .value;
+
+
+  if(!u || !p){
+
+    msg(
+      'loginMsg',
+      'Enter username and password.',
+      'error'
+    );
+
+    return;
+
+  }
+
+
   lock(true);
+
+
   try{
-    const r=await api('login',{username:u,password:p},'Signing in...','Checking administrator access');
-    token=r.token;
-    document.getElementById('password').value='';
-    document.getElementById('loginView').classList.add('hidden');
-    document.getElementById('appView').classList.remove('hidden');
-  }catch(e){fail(e,'loginMsg');}finally{lock(false);}
+
+    const r =
+      await api(
+        'login',
+        {
+          username:u,
+          password:p
+        },
+        'Signing in...',
+        'Checking administrator access'
+      );
+
+
+    if(
+      !r ||
+      !r.token
+    ){
+
+      throw new Error(
+        'Login failed. No session token was returned.'
+      );
+
+    }
+
+
+    token =
+      r.token;
+
+
+    document
+      .getElementById('password')
+      .value = '';
+
+
+    document
+      .getElementById('loginView')
+      .classList
+      .add('hidden');
+
+
+    document
+      .getElementById('appView')
+      .classList
+      .remove('hidden');
+
+
+    msg(
+      'loginMsg',
+      '',
+      ''
+    );
+
+
+  }catch(e){
+
+    fail(
+      e,
+      'loginMsg'
+    );
+
+  }finally{
+
+    lock(false);
+
+  }
+
 }
+
+
+/* ============================================================
+   LOGOUT
+============================================================ */
 
 async function logout(){
-  const t=token;token='';selectedMember=null;
-  document.getElementById('appView').classList.add('hidden');
-  document.getElementById('loginView').classList.remove('hidden');
-  if(t){try{await api('logout',{token:t},'Signing out...','Closing session');}catch(e){}}
+
+  const t =
+    token;
+
+
+  token = '';
+
+  selectedMember = null;
+
+
+  document
+    .getElementById('appView')
+    .classList
+    .add('hidden');
+
+
+  document
+    .getElementById('loginView')
+    .classList
+    .remove('hidden');
+
+
+  document
+    .getElementById('results')
+    .innerHTML = '';
+
+
+  document
+    .getElementById('searchText')
+    .value = '';
+
+
+  [
+    'profileCard',
+    'paymentCard',
+    'historyCard'
+  ].forEach(function(id){
+
+    document
+      .getElementById(id)
+      .classList
+      .add('hidden');
+
+  });
+
+
+  if(t){
+
+    try{
+
+      await api(
+        'logout',
+        {
+          token:t
+        },
+        'Signing out...',
+        'Closing session'
+      );
+
+    }catch(e){
+
+      /*
+       * Ignore logout errors.
+       * Local session is already cleared.
+       */
+
+    }
+
+  }
+
 }
+
+
+/* ============================================================
+   SEARCH MEMBERS
+============================================================ */
 
 async function searchMembers(){
-  if(!token||busy)return;
-  const q=document.getElementById('searchText').value.trim();
-  if(!q){msg('searchMsg','Enter Member ID or name.','error');return;}
-  lock(true);document.getElementById('results').innerHTML='';msg('searchMsg','','');
+
+  if(
+    !token ||
+    busy
+  ){
+
+    return;
+
+  }
+
+
+  const q =
+    document
+      .getElementById('searchText')
+      .value
+      .trim();
+
+
+  if(!q){
+
+    msg(
+      'searchMsg',
+      'Enter Member ID or name.',
+      'error'
+    );
+
+    return;
+
+  }
+
+
+  lock(true);
+
+
+  document
+    .getElementById('results')
+    .innerHTML = '';
+
+
+  msg(
+    'searchMsg',
+    '',
+    ''
+  );
+
+
   try{
-    const rows=await api('searchMembers',{token:token,searchText:q},'Searching Members...','Finding matching members');
-    renderResults(rows);
-  }catch(e){fail(e,'searchMsg');}finally{lock(false);}
+
+    const rows =
+      await api(
+        'searchMembers',
+        {
+          token:token,
+          searchText:q
+        },
+        'Searching Members...',
+        'Finding matching members'
+      );
+
+
+    renderResults(
+      rows
+    );
+
+  }catch(e){
+
+    fail(
+      e,
+      'searchMsg'
+    );
+
+  }finally{
+
+    lock(false);
+
+  }
+
 }
+
+
+/* ============================================================
+   RENDER SEARCH RESULTS
+============================================================ */
 
 function renderResults(rows){
-  if(!rows||!rows.length){document.getElementById('results').innerHTML='<div class="msg error">No member found.</div>';return;}
-  document.getElementById('results').innerHTML=rows.map(r=>'<div class="result" data-id="'+esc(r.id)+'"><strong>'+esc(r.name)+'</strong><small>'+esc(r.id)+(r.address?' • '+esc(r.address):'')+'</small></div>').join('');
-  document.querySelectorAll('.result').forEach(el=>el.addEventListener('click',()=>openMember(el.dataset.id,el)));
+
+  if(
+    !rows ||
+    !rows.length
+  ){
+
+    document
+      .getElementById('results')
+      .innerHTML =
+        '<div class="msg error">' +
+        'No member found.' +
+        '</div>';
+
+    return;
+
+  }
+
+
+  document
+    .getElementById('results')
+    .innerHTML =
+      rows
+        .map(function(r){
+
+          return (
+
+            '<div class="result" data-id="' +
+            esc(r.id) +
+            '">' +
+
+            '<strong>' +
+            esc(r.name) +
+            '</strong>' +
+
+            '<small>' +
+            esc(r.id) +
+
+            (
+              r.address
+                ? ' • ' +
+                  esc(r.address)
+                : ''
+            ) +
+
+            '</small>' +
+
+            '</div>'
+
+          );
+
+        })
+        .join('');
+
+
+  document
+    .querySelectorAll('.result')
+    .forEach(function(el){
+
+      el.addEventListener(
+        'click',
+        function(){
+
+          openMember(
+            el.dataset.id,
+            el
+          );
+
+        }
+      );
+
+    });
+
 }
 
-async function openMember(id,el){
-  if(!token||busy)return;
-  if(el)el.classList.add('selected');
+
+/* ============================================================
+   OPEN MEMBER
+============================================================ */
+
+async function openMember(
+  id,
+  el
+){
+
+  if(
+    !token ||
+    busy
+  ){
+
+    return;
+
+  }
+
+
+  if(el){
+
+    el.classList
+      .add('selected');
+
+  }
+
+
   lock(true);
+
+
   try{
-    const p=await api('getMemberProfile',{token:token,memberId:id},'Loading Profile...','Please wait while the member record is loaded');
-    selectedMember=p;renderProfile(p);window.scrollTo({top:0,behavior:'smooth'});
-  }catch(e){fail(e,'searchMsg');}finally{lock(false);}
+
+    const p =
+      await api(
+        'getMemberProfile',
+        {
+          token:token,
+          memberId:id
+        },
+        'Loading Profile...',
+        'Please wait while the member record is loaded'
+      );
+
+
+    if(!p){
+
+      throw new Error(
+        'Member profile was not returned.'
+      );
+
+    }
+
+
+    selectedMember =
+      p;
+
+
+    renderProfile(
+      p
+    );
+
+
+    window.scrollTo({
+      top:0,
+      behavior:'smooth'
+    });
+
+
+  }catch(e){
+
+    fail(
+      e,
+      'searchMsg'
+    );
+
+  }finally{
+
+    lock(false);
+
+  }
+
 }
+
+
+/* ============================================================
+   RENDER PROFILE
+============================================================ */
 
 function renderProfile(p){
-  ['profileCard','paymentCard','historyCard'].forEach(id=>document.getElementById(id).classList.remove('hidden'));
-  set('memberName',p.name||'');set('memberMeta',(p.id||'')+(p.address?' • '+p.address:''));
-  const im=document.getElementById('memberPhoto');
-  if(p.photo){im.src=p.photo;im.style.visibility='visible';}else{im.removeAttribute('src');im.style.visibility='hidden';}
-  set('annualDue',money(p.annualDue));set('monthlyPaid',money(p.monthlyPaid));set('yearBalance',money(p.yearBalance));
-  set('registrationDue',money(p.registrationDue));set('registrationPaid',money(p.registrationPaid));set('registrationBalance',money(p.registrationBalance));
-  set('otherDue',money(p.otherDue));set('otherPaid',money(p.otherPaid));set('otherBalance',money(p.otherBalance));
-  document.getElementById('historyBody').innerHTML=(p.paymentHistory||[]).map(x=>'<tr><td>'+esc(x.date||'')+'</td><td>'+esc(x.type||x.transactionType||'')+'</td><td>'+esc(x.remarks||'')+'</td><td>'+money(x.amount)+'</td></tr>').join('');
-  renderObligations(p);
-  document.getElementById('paymentType').value='Monthly Membership';
+
+  [
+    'profileCard',
+    'paymentCard',
+    'historyCard'
+  ].forEach(function(id){
+
+    document
+      .getElementById(id)
+      .classList
+      .remove('hidden');
+
+  });
+
+
+  set(
+    'memberName',
+    p.name || ''
+  );
+
+
+  set(
+    'memberMeta',
+    (p.id || '') +
+    (
+      p.address
+        ? ' • ' +
+          p.address
+        : ''
+    )
+  );
+
+
+  const im =
+    document
+      .getElementById('memberPhoto');
+
+
+  if(p.photo){
+
+    im.src =
+      p.photo;
+
+    im.style.visibility =
+      'visible';
+
+  }else{
+
+    im.removeAttribute(
+      'src'
+    );
+
+    im.style.visibility =
+      'hidden';
+
+  }
+
+
+  /* ---------------------------------------------
+     MONTHLY MEMBERSHIP
+  --------------------------------------------- */
+
+  set(
+    'annualDue',
+    money(p.annualDue)
+  );
+
+
+  set(
+    'monthlyPaid',
+    money(p.monthlyPaid)
+  );
+
+
+  set(
+    'yearBalance',
+    money(p.yearBalance)
+  );
+
+
+  /* ---------------------------------------------
+     REGISTRATION
+  --------------------------------------------- */
+
+  set(
+    'registrationDue',
+    money(p.registrationDue)
+  );
+
+
+  set(
+    'registrationPaid',
+    money(p.registrationPaid)
+  );
+
+
+  set(
+    'registrationBalance',
+    money(p.registrationBalance)
+  );
+
+
+  /* ---------------------------------------------
+     OTHER OBLIGATIONS
+  --------------------------------------------- */
+
+  set(
+    'otherDue',
+    money(p.otherDue)
+  );
+
+
+  set(
+    'otherPaid',
+    money(p.otherPaid)
+  );
+
+
+  set(
+    'otherBalance',
+    money(p.otherBalance)
+  );
+
+
+  /* ---------------------------------------------
+     PAYMENT HISTORY
+  --------------------------------------------- */
+
+  document
+    .getElementById('historyBody')
+    .innerHTML =
+      (p.paymentHistory || [])
+        .map(function(x){
+
+          return (
+
+            '<tr>' +
+
+            '<td>' +
+            esc(x.date || '') +
+            '</td>' +
+
+            '<td>' +
+            esc(
+              x.type ||
+              x.transactionType ||
+              ''
+            ) +
+            '</td>' +
+
+            '<td>' +
+            esc(
+              x.remarks || ''
+            ) +
+            '</td>' +
+
+            '<td>' +
+            money(x.amount) +
+            '</td>' +
+
+            '</tr>'
+
+          );
+
+        })
+        .join('');
+
+
+  renderObligations(
+    p
+  );
+
+
+  document
+    .getElementById('paymentType')
+    .value =
+      'Monthly Membership';
+
+
   paymentTypeChanged();
-  msg('paymentMsg','','');msg('photoMsg','','');
+
+
+  msg(
+    'paymentMsg',
+    '',
+    ''
+  );
+
+
+  msg(
+    'photoMsg',
+    '',
+    ''
+  );
+
 }
+
+
+/* ============================================================
+   GET OBLIGATIONS
+============================================================ */
 
 function getObligations(p){
-  return p.obligations||p.otherObligations||p.collectionObligations||[];
+
+  return (
+    p.obligations ||
+    p.otherObligations ||
+    p.collectionObligations ||
+    []
+  );
+
 }
+
+
+/* ============================================================
+   RENDER OBLIGATIONS
+============================================================ */
 
 function renderObligations(p){
-  const list=getObligations(p);
-  const sel=document.getElementById('obligationSelect');
-  sel.innerHTML='';
-  list.forEach(o=>{
-    const id=o.obligationId||o.id||o.obligationID||'';
-    const desc=o.description||o.remarks||o.type||'Other Obligation';
-    const due=Number(o.remainingBalance!=null?o.remainingBalance:(o.balance!=null?o.balance:(o.dueAmount||0)));
-    const opt=document.createElement('option');
-    opt.value=id;opt.textContent=desc+' — '+money(due);
-    opt.dataset.description=desc;opt.dataset.balance=due;
-    sel.appendChild(opt);
+
+  const list =
+    getObligations(p);
+
+
+  const sel =
+    document
+      .getElementById(
+        'obligationSelect'
+      );
+
+
+  sel.innerHTML = '';
+
+
+  list.forEach(function(o){
+
+    const id =
+      o.obligationId ||
+      o.id ||
+      o.obligationID ||
+      '';
+
+
+    const desc =
+      o.description ||
+      o.remarks ||
+      o.type ||
+      'Other Obligation';
+
+
+    const due =
+      Number(
+        o.remainingBalance != null
+          ? o.remainingBalance
+          : (
+              o.balance != null
+                ? o.balance
+                : (
+                    o.dueAmount ||
+                    0
+                  )
+            )
+      );
+
+
+    const opt =
+      document.createElement(
+        'option'
+      );
+
+
+    opt.value =
+      id;
+
+
+    opt.textContent =
+      desc +
+      ' — ' +
+      money(due);
+
+
+    opt.dataset.description =
+      desc;
+
+
+    opt.dataset.balance =
+      due;
+
+
+    sel.appendChild(
+      opt
+    );
+
   });
+
+
   if(!list.length){
-    const opt=document.createElement('option');opt.value='';opt.textContent='No open obligations';sel.appendChild(opt);
+
+    const opt =
+      document.createElement(
+        'option'
+      );
+
+
+    opt.value = '';
+
+
+    opt.textContent =
+      'No open obligations';
+
+
+    sel.appendChild(
+      opt
+    );
+
   }
+
+
   updateObligationInfo();
+
 }
+
+
+/* ============================================================
+   OBLIGATION INFO
+============================================================ */
+
 function updateObligationInfo(){
-  const s=document.getElementById('obligationSelect'),o=s.options[s.selectedIndex];
-  set('obligationInfo',o&&o.value?'Remaining balance: '+money(o.dataset.balance):'No open obligation available.');
+
+  const s =
+    document
+      .getElementById(
+        'obligationSelect'
+      );
+
+
+  const o =
+    s.options[
+      s.selectedIndex
+    ];
+
+
+  set(
+    'obligationInfo',
+    o && o.value
+      ? 'Remaining balance: ' +
+        money(
+          o.dataset.balance
+        )
+      : 'No open obligation available.'
+  );
+
 }
-document.getElementById('obligationSelect').onchange=updateObligationInfo;
+
+
+/* ============================================================
+   OBLIGATION CHANGE
+============================================================ */
+
+document
+  .getElementById(
+    'obligationSelect'
+  )
+  .onchange =
+    updateObligationInfo;
+
+
+/* ============================================================
+   PAYMENT TYPE
+============================================================ */
+
 function paymentTypeChanged(){
-  const other=document.getElementById('paymentType').value==='Other Obligation';
-  document.getElementById('obligationBox').classList.toggle('hidden',!other);
-  if(other)updateObligationInfo();
+
+  const other =
+    document
+      .getElementById(
+        'paymentType'
+      )
+      .value ===
+      'Other Obligation';
+
+
+  document
+    .getElementById(
+      'obligationBox'
+    )
+    .classList
+    .toggle(
+      'hidden',
+      !other
+    );
+
+
+  if(other){
+
+    updateObligationInfo();
+
+  }
+
 }
+
+
+/* ============================================================
+   SAVE PAYMENT
+============================================================ */
 
 async function savePayment(){
-  if(!token||!selectedMember||busy)return;
-  const type=document.getElementById('paymentType').value;
-  const amount=Number(document.getElementById('paymentAmount').value);
-  const remarks=document.getElementById('paymentRemarks').value.trim();
-  if(!amount||amount<=0){msg('paymentMsg','Enter a valid payment amount.','error');return;}
-  let obligationId='';
-  if(type==='Other Obligation'){
-    obligationId=document.getElementById('obligationSelect').value;
-    if(!obligationId){msg('paymentMsg','Select an open obligation.','error');return;}
+
+  if(
+    !token ||
+    !selectedMember ||
+    busy
+  ){
+
+    return;
+
   }
-  const paymentData={
-    memberId:selectedMember.id,
-    memberName:selectedMember.name||'',
-    paymentType:type,
-    amount:amount,
-    remarks:remarks,
-    obligationId:obligationId
+
+
+  const type =
+    document
+      .getElementById(
+        'paymentType'
+      )
+      .value;
+
+
+  const amount =
+    Number(
+      document
+        .getElementById(
+          'paymentAmount'
+        )
+        .value
+    );
+
+
+  const remarks =
+    document
+      .getElementById(
+        'paymentRemarks'
+      )
+      .value
+      .trim();
+
+
+  if(
+    !amount ||
+    amount <= 0
+  ){
+
+    msg(
+      'paymentMsg',
+      'Enter a valid payment amount.',
+      'error'
+    );
+
+    return;
+
+  }
+
+
+  let obligationId =
+    '';
+
+
+  if(
+    type ===
+    'Other Obligation'
+  ){
+
+    obligationId =
+      document
+        .getElementById(
+          'obligationSelect'
+        )
+        .value;
+
+
+    if(!obligationId){
+
+      msg(
+        'paymentMsg',
+        'Select an open obligation.',
+        'error'
+      );
+
+      return;
+
+    }
+
+  }
+
+
+  const paymentData = {
+
+    memberId:
+      selectedMember.id,
+
+    memberName:
+      selectedMember.name || '',
+
+    paymentType:
+      type,
+
+    amount:
+      amount,
+
+    remarks:
+      remarks,
+
+    obligationId:
+      obligationId
+
   };
+
+
   lock(true);
+
+
   try{
-    const r=await api('savePayment',{token:token,paymentData:paymentData},'Saving Payment...','Recording the received payment');
-    if(r&&r.profile){selectedMember=r.profile;renderProfile(r.profile);}
-    document.getElementById('paymentAmount').value='';
-    document.getElementById('paymentRemarks').value='';
-    msg('paymentMsg',(r&&r.message)||'Payment successfully recorded.','ok');
-  }catch(e){fail(e,'paymentMsg');}finally{lock(false);}
+
+    const r =
+      await api(
+        'savePayment',
+        {
+          token:token,
+          paymentData:paymentData
+        },
+        'Saving Payment...',
+        'Recording the received payment'
+      );
+
+
+    if(
+      r &&
+      r.profile
+    ){
+
+      selectedMember =
+        r.profile;
+
+
+      renderProfile(
+        r.profile
+      );
+
+    }
+
+
+    document
+      .getElementById(
+        'paymentAmount'
+      )
+      .value = '';
+
+
+    document
+      .getElementById(
+        'paymentRemarks'
+      )
+      .value = '';
+
+
+    msg(
+      'paymentMsg',
+      (
+        r &&
+        r.message
+      ) ||
+      'Payment successfully recorded.',
+      'ok'
+    );
+
+
+  }catch(e){
+
+    fail(
+      e,
+      'paymentMsg'
+    );
+
+  }finally{
+
+    lock(false);
+
+  }
+
 }
 
-function resizeImage(file,maxSize,quality){
-  return new Promise((resolve,reject)=>{
-    const reader=new FileReader();
-    reader.onload=e=>{
-      const img=new Image();
-      img.onload=()=>{
-        let w=img.width,h=img.height;
-        if(w>maxSize||h>maxSize){
-          const scale=Math.min(maxSize/w,maxSize/h);w=Math.round(w*scale);h=Math.round(h*scale);
-        }
-        const c=document.createElement('canvas');c.width=w;c.height=h;
-        c.getContext('2d').drawImage(img,0,0,w,h);
-        c.toBlob(blob=>{
-          if(!blob)return reject(new Error('Unable to prepare photo.'));
-          const fr=new FileReader();
-          fr.onload=()=>resolve({base64:fr.result.split(',')[1],mimeType:'image/jpeg'});
-          fr.onerror=()=>reject(new Error('Unable to read prepared photo.'));
-          fr.readAsDataURL(blob);
-        },'image/jpeg',quality);
-      };
-      img.onerror=()=>reject(new Error('Invalid image.'));
-      img.src=e.target.result;
-    };
-    reader.onerror=()=>reject(new Error('Unable to read photo.'));
-    reader.readAsDataURL(file);
-  });
+
+/* ============================================================
+   RESIZE / COMPRESS IMAGE
+============================================================ */
+
+function resizeImage(
+  file,
+  maxSize,
+  quality
+){
+
+  return new Promise(
+    function(resolve,reject){
+
+      const reader =
+        new FileReader();
+
+
+      reader.onload =
+        function(e){
+
+          const img =
+            new Image();
+
+
+          img.onload =
+            function(){
+
+              let w =
+                img.width;
+
+
+              let h =
+                img.height;
+
+
+              if(
+                w > maxSize ||
+                h > maxSize
+              ){
+
+                const scale =
+                  Math.min(
+                    maxSize / w,
+                    maxSize / h
+                  );
+
+
+                w =
+                  Math.round(
+                    w * scale
+                  );
+
+
+                h =
+                  Math.round(
+                    h * scale
+                  );
+
+              }
+
+
+              const c =
+                document.createElement(
+                  'canvas'
+                );
+
+
+              c.width =
+                w;
+
+
+              c.height =
+                h;
+
+
+              c
+                .getContext('2d')
+                .drawImage(
+                  img,
+                  0,
+                  0,
+                  w,
+                  h
+                );
+
+
+              c.toBlob(
+                function(blob){
+
+                  if(!blob){
+
+                    reject(
+                      new Error(
+                        'Unable to prepare photo.'
+                      )
+                    );
+
+                    return;
+
+                  }
+
+
+                  const fr =
+                    new FileReader();
+
+
+                  fr.onload =
+                    function(){
+
+                      resolve({
+
+                        base64:
+                          fr.result
+                            .split(',')[1],
+
+                        mimeType:
+                          'image/jpeg'
+
+                      });
+
+                    };
+
+
+                  fr.onerror =
+                    function(){
+
+                      reject(
+                        new Error(
+                          'Unable to read prepared photo.'
+                        )
+                      );
+
+                    };
+
+
+                  fr.readAsDataURL(
+                    blob
+                  );
+
+                },
+                'image/jpeg',
+                quality
+              );
+
+            };
+
+
+          img.onerror =
+            function(){
+
+              reject(
+                new Error(
+                  'Invalid image.'
+                )
+              );
+
+            };
+
+
+          img.src =
+            e.target.result;
+
+        };
+
+
+      reader.onerror =
+        function(){
+
+          reject(
+            new Error(
+              'Unable to read photo.'
+            )
+          );
+
+        };
+
+
+      reader.readAsDataURL(
+        file
+      );
+
+    }
+  );
+
 }
 
-async function uploadPhoto(input){
-  if(!selectedMember||!input.files||!input.files[0]||busy)return;
-  const file=input.files[0];input.value='';
-  if(file.size>10*1024*1024){msg('photoMsg','Photo is too large. Please choose a smaller image.','error');return;}
+
+/* ============================================================
+   UPLOAD MEMBER PHOTO
+============================================================ */
+
+async function uploadPhoto(
+  input
+){
+
+  if(
+    !selectedMember ||
+    !input.files ||
+    !input.files[0] ||
+    busy
+  ){
+
+    return;
+
+  }
+
+
+  const file =
+    input.files[0];
+
+
+  input.value = '';
+
+
+  if(
+    file.size >
+    10 * 1024 * 1024
+  ){
+
+    msg(
+      'photoMsg',
+      'Photo is too large. Please choose a smaller image.',
+      'error'
+    );
+
+    return;
+
+  }
+
+
   lock(true);
+
+
   try{
-    const prepared=await resizeImage(file,1200,.75);
-    const r=await api('uploadMemberPhoto',{token:token,payload:{memberId:selectedMember.id,base64:prepared.base64,mimeType:prepared.mimeType}},'Uploading Photo...','Saving the member photo');
-    if(r&&r.profile){selectedMember=r.profile;renderProfile(r.profile);}
-    msg('photoMsg',(r&&r.message)||'Member photo uploaded successfully.','ok');
-  }catch(e){fail(e,'photoMsg');}finally{lock(false);}
+
+    const prepared =
+      await resizeImage(
+        file,
+        1200,
+        .75
+      );
+
+
+    const r =
+      await api(
+        'uploadMemberPhoto',
+        {
+          token:token,
+
+          payload:{
+
+            memberId:
+              selectedMember.id,
+
+            base64:
+              prepared.base64,
+
+            mimeType:
+              prepared.mimeType
+
+          }
+
+        },
+        'Uploading Photo...',
+        'Saving the member photo'
+      );
+
+
+    if(
+      r &&
+      r.profile
+    ){
+
+      selectedMember =
+        r.profile;
+
+
+      renderProfile(
+        r.profile
+      );
+
+    }
+
+
+    msg(
+      'photoMsg',
+      (
+        r &&
+        r.message
+      ) ||
+      'Member photo uploaded successfully.',
+      'ok'
+    );
+
+
+  }catch(e){
+
+    fail(
+      e,
+      'photoMsg'
+    );
+
+  }finally{
+
+    lock(false);
+
+  }
+
 }
+
+
+/* ============================================================
+   START BRIDGE
+============================================================ */
+
+window.addEventListener(
+  'load',
+  function(){
+
+    initBridge();
+
+  }
+);
+
+
+/* ============================================================
+   ENTER KEY - SEARCH
+============================================================ */
+
+document
+  .getElementById(
+    'searchText'
+  )
+  .addEventListener(
+    'keydown',
+    function(e){
+
+      if(
+        e.key ===
+        'Enter'
+      ){
+
+        e.preventDefault();
+
+        searchMembers();
+
+      }
+
+    }
+  );
+
+
+/* ============================================================
+   ENTER KEY - LOGIN
+============================================================ */
+
+document
+  .getElementById(
+    'password'
+  )
+  .addEventListener(
+    'keydown',
+    function(e){
+
+      if(
+        e.key ===
+        'Enter'
+      ){
+
+        e.preventDefault();
+
+        login();
+
+      }
+
+    }
+  );
+
 </script>
+
 </body>
 </html>
