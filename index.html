@@ -155,10 +155,8 @@ function api(action,payload,title,sub){
     const id='r'+(++requestSeq);
     window.__pendingApi={id,resolve,reject};
     showBusy(title||'Please wait...',sub||'Processing request');
-    const frame=document.getElementById('apiFrame');
-    frame.name='apiFrame_'+id;
     const form=document.createElement('form');
-    form.method='POST';form.action=API_URL;form.target=frame.name;form.style.display='none';
+    form.method='POST';form.action=API_URL;form.target='apiFrame';form.style.display='none';
     form.setAttribute('aria-hidden','true');
     const a=document.createElement('input');a.name='action';a.value=action;form.appendChild(a);
     const p=document.createElement('input');p.name='payload';p.value=JSON.stringify(payload||{});form.appendChild(p);
