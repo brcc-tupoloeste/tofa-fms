@@ -542,6 +542,71 @@ td{
 
 }
 
+
+
+/* =========================================================
+   DASHBOARD
+========================================================= */
+.dashboard{margin-bottom:12px}
+.dashboard-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.dashboard-title{font-size:16px;font-weight:800;color:#0f172a}
+.dashboard-period{font-size:11px;color:#64748b;text-align:right}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:10px}
+.stat{border:1px solid #e5e7eb;border-radius:10px;padding:9px 7px;background:#fff;min-width:0}
+.stat-label{font-size:10px;line-height:1.2;color:#64748b;font-weight:700;min-height:25px}
+.stat-value{font-size:14px;line-height:1.25;font-weight:800;color:#0f172a;margin-top:4px;word-break:break-word}
+.stat-value.small{font-size:12px}
+.quick-title{font-size:14px;font-weight:800;margin:4px 0 7px}
+.quick-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.quick-btn{margin:0!important;padding:10px 8px!important;font-size:12px!important;background:#f8fafc!important;color:#1f2937!important;border:1px solid #dbe3ea!important}
+.quick-btn:hover{background:#eef4f8!important}
+.dashboard-loading{font-size:12px;color:#64748b;padding:5px 0}
+.panel-title{margin:0 0 10px;font-size:16px}
+.panel-note{font-size:12px;color:#64748b;margin:4px 0 10px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.form-grid .full{grid-column:1/-1}
+.form-actions-row{display:flex;gap:8px;margin-top:12px}
+.form-actions-row button{margin:0}
+.table-wrap{overflow:auto;-webkit-overflow-scrolling:touch;border:1px solid #e5e7eb;border-radius:10px}
+.member-table,.report-table{width:100%;border-collapse:collapse;min-width:620px}
+.member-table th,.member-table td,.report-table th,.report-table td{padding:8px;border-bottom:1px solid #e5e7eb;font-size:11px;text-align:left;vertical-align:top}
+.member-table th,.report-table th{background:#f1f5f9;font-weight:800}
+.member-table tr:last-child td,.report-table tr:last-child td{border-bottom:0}
+.report-controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.report-controls label{margin-top:0}
+.report-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:10px 0}
+.report-kpi{border:1px solid #e5e7eb;border-radius:9px;padding:8px;background:#fff}
+.report-kpi b{display:block;font-size:10px;color:#64748b}
+.report-kpi span{display:block;font-size:13px;font-weight:800;margin-top:3px}
+.report-section{margin-top:14px}
+.report-section h4{margin:0 0 7px;font-size:13px}
+.print-btn{background:#166534!important}
+
+@media(max-width:619px){
+  .stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+  .stat{padding:8px 5px}
+  .stat-value{font-size:12px}
+  .stat-label{font-size:9px;min-height:24px}
+  .quick-grid{gap:6px}
+  .quick-btn{font-size:11px!important;padding:9px 6px!important}
+  .form-grid,.report-controls{grid-template-columns:1fr}
+  .report-summary{grid-template-columns:repeat(2,1fr)}
+}
+
+@media(min-width:620px){
+  .quick-grid{grid-template-columns:repeat(4,1fr)}
+}
+
+@media print{
+  body{background:#fff!important}
+  body *{visibility:hidden!important}
+  #reportPanel,#reportPanel *{visibility:visible!important}
+  #reportPanel{position:absolute!important;left:0;top:0;width:100%;box-shadow:none!important;border:0!important;margin:0!important;padding:0!important}
+  #reportControls,#reportActions{display:none!important}
+  .report-table{min-width:0!important}
+  .report-table th,.report-table td{font-size:9pt;padding:5px}
+}
+
 </style>
 
 </head>
@@ -696,9 +761,112 @@ td{
      SEARCH MEMBER
 ======================================================= -->
 
+<!-- =======================================================
+     DASHBOARD
+======================================================= -->
+<div id="dashboardView" class="card dashboard">
+  <div class="dashboard-head">
+    <div class="dashboard-title">Financial Overview</div>
+    <div id="dashboardPeriod" class="dashboard-period">Loading...</div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="stat-label">Association Balance</div><div id="statAssociation" class="stat-value">...</div></div>
+    <div class="stat"><div class="stat-label">Bank Balance</div><div id="statBank" class="stat-value">...</div></div>
+    <div class="stat"><div class="stat-label">Cash on Hand</div><div id="statCash" class="stat-value">...</div></div>
+    <div class="stat"><div class="stat-label">Current Month Collections</div><div id="statCurrent" class="stat-value">...</div></div>
+    <div class="stat"><div class="stat-label">Previous Month Collections</div><div id="statPrevious" class="stat-value">...</div></div>
+    <button type="button" class="stat stat-button" onclick="openOutstandingList()"><div class="stat-label">Uncollected Amount</div><div id="statUncollected" class="stat-value">...</div></button>
+  </div>
+  <div class="quick-title">Quick Actions</div>
+  <div class="quick-grid">
+    <button class="quick-btn" onclick="openSearch()">🔎 Search Member</button>
+    <button class="quick-btn" onclick="openAddMember()">➕ Add Member</button>
+    <button class="quick-btn" onclick="openFinancialReportPanel()">📑 Financial Report</button>
+    <button class="quick-btn" onclick="openMemberList()">👥 Member List</button>
+  </div>
+  <div id="dashboardMsg"></div>
+</div>
+
+<!-- =======================================================
+     ADD MEMBER
+======================================================= -->
+<div id="addMemberPanel" class="card hidden">
+  <h3 class="panel-title">➕ Add Member</h3>
+  <div class="panel-note">Enter the member information below.</div>
+  <div class="form-grid">
+    <div class="full"><label>Full Name</label><input id="newMemberName" autocomplete="off"></div>
+    <div><label>Address / Sitio</label><input id="newMemberAddress"></div>
+    <div><label>Contact No.</label><input id="newMemberContact" inputmode="tel"></div>
+    <div><label>RSBA No.</label><input id="newMemberRSBA"></div>
+    <div><label>Rice Area (ha)</label><input id="newMemberArea" type="number" min="0" step="0.01" inputmode="decimal"></div>
+    <div><label>Registration Fee</label><input id="newMemberFee" type="number" min="0" step="0.01" inputmode="decimal"></div>
+    <div class="full"><label>Farm Information</label><input id="newMemberFarm"></div>
+    <div class="full"><label>Remarks</label><textarea id="newMemberRemarks"></textarea></div>
+  </div>
+  <div class="form-actions-row">
+    <button onclick="saveNewMember()">SAVE MEMBER</button>
+    <button class="alt" onclick="backToDashboard()">CANCEL</button>
+  </div>
+  <div id="addMemberMsg"></div>
+</div>
+
+<!-- =======================================================
+     MEMBER LIST
+======================================================= -->
+<div id="memberListPanel" class="card hidden">
+  <h3 class="panel-title">👥 Member List</h3>
+  <div class="panel-note" id="memberListNote">Loading members...</div>
+  <div class="table-wrap">
+    <table class="member-table">
+      <thead><tr><th>Member ID</th><th>Full Name</th><th>Address / Sitio</th><th>Contact</th><th>Status</th></tr></thead>
+      <tbody id="memberListBody"></tbody>
+    </table>
+  </div>
+  <button class="alt" onclick="backToDashboard()">← Back to Dashboard</button>
+</div>
+
+<!-- =======================================================
+     OUTSTANDING MEMBERS
+======================================================= -->
+<div id="outstandingPanel" class="card hidden">
+  <h3 class="panel-title">📌 Outstanding Balances</h3>
+  <div class="panel-note" id="outstandingNote">Loading outstanding balances...</div>
+  <div class="table-wrap">
+    <table class="member-table">
+      <thead><tr><th>Member ID</th><th>Full Name</th><th>Monthly Balance</th><th>Registration</th><th>Other</th><th>Total</th></tr></thead>
+      <tbody id="outstandingBody"></tbody>
+    </table>
+  </div>
+  <button class="alt" onclick="backToDashboard()">← Back to Dashboard</button>
+</div>
+
+<!-- =======================================================
+     FINANCIAL REPORT
+======================================================= -->
+<div id="reportPanel" class="card hidden">
+  <h3 class="panel-title">📑 Financial Report</h3>
+  <div id="reportControls">
+    <div class="report-controls">
+      <div><label>Year</label><select id="reportYear"></select></div>
+      <div><label>From Month</label><select id="reportFromMonth"></select></div>
+      <div><label>To Month</label><select id="reportToMonth"></select></div>
+    </div>
+    <div class="form-actions-row">
+      <button onclick="generateOnlineFinancialReport()">GENERATE REPORT</button>
+      <button class="alt" onclick="backToDashboard()">CANCEL</button>
+    </div>
+  </div>
+  <div id="reportMsg"></div>
+  <div id="reportOutput" class="hidden"></div>
+  <div id="reportActions" class="form-actions-row hidden">
+    <button class="print-btn" onclick="window.print()">🖨️ PRINT A4</button>
+    <button class="alt" onclick="backToDashboard()">← Dashboard</button>
+  </div>
+</div>
+
 <div
   id="searchCard"
-  class="card">
+  class="card hidden">
 
   <h3>
     🔎 Search Member
@@ -1540,43 +1708,10 @@ async function login(){
       .remove('hidden');
 
 
-    /* Always start on Search Member */
+    /* Always start on Dashboard */
 
-    document
-      .getElementById('searchTopBar')
-      .classList
-      .remove('hidden');
-
-
-    document
-      .getElementById('searchCard')
-      .classList
-      .remove('hidden');
-
-
-    document
-      .getElementById('profileCard')
-      .classList
-      .add('hidden');
-
-
-    document
-      .getElementById('paymentCard')
-      .classList
-      .add('hidden');
-
-
-    document
-      .getElementById('historyCard')
-      .classList
-      .add('hidden');
-
-
-    msg(
-      'loginMsg',
-      '',
-      ''
-    );
+    showDashboard();
+    loadDashboard();
 
 
   }catch(e){
@@ -1629,30 +1764,15 @@ async function logout(){
 
   /* Reset screen */
 
-  document
-    .getElementById('searchTopBar')
-    .classList
-    .remove('hidden');
+  document.getElementById('searchTopBar').classList.remove('hidden');
 
+  ['dashboardView','searchCard','profileCard','paymentCard','historyCard','addMemberPanel','memberListPanel','outstandingPanel','reportPanel']
+    .forEach(function(id){
+      const el=document.getElementById(id);
+      if(el) el.classList.add('hidden');
+    });
 
-  document
-    .getElementById('searchCard')
-    .classList
-    .remove('hidden');
-
-
-  [
-    'profileCard',
-    'paymentCard',
-    'historyCard'
-  ].forEach(
-    id =>
-      document
-        .getElementById(id)
-        .classList
-        .add('hidden')
-  );
-
+  document.getElementById('dashboardView').classList.remove('hidden');
 
   document
     .getElementById('searchText')
@@ -2163,113 +2283,7 @@ function renderProfile(
 ========================================================= */
 
 function backToSearch(){
-
-  selectedMember =
-    null;
-
-
-  /* Hide profile */
-
-  [
-    'profileCard',
-    'paymentCard',
-    'historyCard'
-  ].forEach(
-    id =>
-      document
-        .getElementById(id)
-        .classList
-        .add('hidden')
-  );
-
-
-  /* Show search */
-
-  document
-    .getElementById('searchCard')
-    .classList
-    .remove('hidden');
-
-
-  /* SHOW LOGOUT AGAIN */
-
-  document
-    .getElementById('searchTopBar')
-    .classList
-    .remove('hidden');
-
-
-  /* Clear search */
-
-  document
-    .getElementById('searchText')
-    .value = '';
-
-
-  document
-    .getElementById('results')
-    .innerHTML = '';
-
-
-  msg(
-    'searchMsg',
-    '',
-    ''
-  );
-
-
-  /* Clear payment */
-
-  document
-    .getElementById('paymentType')
-    .value = '';
-
-
-  document
-    .getElementById('obligationWrap')
-    .classList
-    .add('hidden');
-
-
-  document
-    .getElementById('obligationId')
-    .innerHTML =
-      '<option value="">' +
-      'Select obligation' +
-      '</option>';
-
-
-  document
-    .getElementById('amount')
-    .value = '';
-
-
-  document
-    .getElementById('remarks')
-    .value = '';
-
-
-  document
-    .getElementById('paymentMsg')
-    .innerHTML = '';
-
-
-  document
-    .getElementById('paymentSuccess')
-    .classList
-    .add('hidden');
-
-
-  document
-    .getElementById('photoMsg')
-    .innerHTML = '';
-
-
-  window.scrollTo({
-    top:0,
-    behavior:'smooth'
-  });
-
+  openSearch();
 }
 
 
@@ -2872,6 +2886,235 @@ document
     }
   );
 
+
+
+
+/* =========================================================
+   DASHBOARD NAVIGATION
+========================================================= */
+function hideAppPanels(){
+  ['dashboardView','searchCard','profileCard','paymentCard','historyCard','addMemberPanel','memberListPanel','outstandingPanel','reportPanel']
+    .forEach(id=>document.getElementById(id).classList.add('hidden'));
+}
+
+function showDashboard(){
+  hideAppPanels();
+  document.getElementById('dashboardView').classList.remove('hidden');
+  document.getElementById('searchTopBar').classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function backToDashboard(){
+  selectedMember=null;
+  showDashboard();
+  clearSearchAndPayment();
+  loadDashboard();
+}
+
+function openSearch(){
+  hideAppPanels();
+  document.getElementById('searchCard').classList.remove('hidden');
+  document.getElementById('searchTopBar').classList.remove('hidden');
+  document.getElementById('searchText').value='';
+  document.getElementById('results').innerHTML='';
+  msg('searchMsg','','');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function clearSearchAndPayment(){
+  const ids=['searchText','amount','remarks'];
+  ids.forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  document.getElementById('results').innerHTML='';
+  msg('searchMsg','','');
+  document.getElementById('paymentType').value='';
+  document.getElementById('obligationWrap').classList.add('hidden');
+  document.getElementById('obligationId').innerHTML='<option value="">Select obligation</option>';
+  msg('paymentMsg','','');
+  document.getElementById('paymentSuccess').classList.add('hidden');
+  msg('photoMsg','','');
+}
+
+/* =========================================================
+   DASHBOARD DATA
+========================================================= */
+async function loadDashboard(){
+  if(!token) return;
+  try{
+    const d=await api('getDashboardSummary',{token:token},'Loading Dashboard...','Preparing financial overview');
+    set('statAssociation',money(d.associationBalance));
+    set('statBank',money(d.bankBalance));
+    set('statCash',money(d.cashOnHand));
+    set('statCurrent',money(d.currentMonthCollections));
+    set('statPrevious',money(d.previousMonthCollections));
+    set('statUncollected',money(d.uncollectedAmount));
+    set('dashboardPeriod',(d.currentMonthName||'Current Month')+' '+(d.year||''));
+  }catch(e){
+    fail(e,'dashboardMsg');
+  }
+}
+
+/* =========================================================
+   ADD MEMBER
+========================================================= */
+function openAddMember(){
+  hideAppPanels();
+  document.getElementById('addMemberPanel').classList.remove('hidden');
+  document.getElementById('searchTopBar').classList.remove('hidden');
+  msg('addMemberMsg','','');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+async function saveNewMember(){
+  const data={
+    name:document.getElementById('newMemberName').value.trim(),
+    address:document.getElementById('newMemberAddress').value.trim(),
+    contact:document.getElementById('newMemberContact').value.trim(),
+    rsba:document.getElementById('newMemberRSBA').value.trim(),
+    area:Number(document.getElementById('newMemberArea').value||0),
+    farm:document.getElementById('newMemberFarm').value.trim(),
+    fee:Number(document.getElementById('newMemberFee').value||0),
+    remarks:document.getElementById('newMemberRemarks').value.trim()
+  };
+  if(!data.name){msg('addMemberMsg','Full Name is required.','error');return;}
+  const b=document.querySelector('#addMemberPanel .form-actions-row button:first-child');
+  b.disabled=true;
+  try{
+    const r=await api('addMember',{token:token,memberData:data},'Saving Member...','Creating member record');
+    msg('addMemberMsg','Member successfully added. Member ID: '+r.memberId,'ok');
+    ['newMemberName','newMemberAddress','newMemberContact','newMemberRSBA','newMemberArea','newMemberFarm','newMemberFee','newMemberRemarks'].forEach(id=>document.getElementById(id).value='');
+    await loadDashboard();
+  }catch(e){fail(e,'addMemberMsg');}
+  finally{b.disabled=false;}
+}
+
+/* =========================================================
+   MEMBER LIST
+========================================================= */
+async function openMemberList(){
+  hideAppPanels();
+  document.getElementById('memberListPanel').classList.remove('hidden');
+  document.getElementById('searchTopBar').classList.remove('hidden');
+  document.getElementById('memberListBody').innerHTML='';
+  document.getElementById('memberListNote').textContent='Loading members...';
+  try{
+    const rows=await api('getMemberList',{token:token},'Loading Member List...','Reading member records');
+    document.getElementById('memberListNote').textContent=(rows.length||0)+' member record(s)';
+    document.getElementById('memberListBody').innerHTML=(rows||[]).map(r=>
+      '<tr><td>'+esc(r.id)+'</td><td><b>'+esc(r.name)+'</b></td><td>'+esc(r.address)+'</td><td>'+esc(r.contact)+'</td><td>'+esc(r.status)+'</td></tr>'
+    ).join('') || '<tr><td colspan="5">No members found.</td></tr>';
+  }catch(e){
+    document.getElementById('memberListNote').textContent='';
+    fail(e,'dashboardMsg');
+  }
+}
+
+/* =========================================================
+   OUTSTANDING MEMBERS
+========================================================= */
+async function openOutstandingList(){
+  hideAppPanels();
+  document.getElementById('outstandingPanel').classList.remove('hidden');
+  document.getElementById('searchTopBar').classList.remove('hidden');
+  document.getElementById('outstandingBody').innerHTML='';
+  document.getElementById('outstandingNote').textContent='Loading outstanding balances...';
+  try{
+    const rows=await api('getOutstandingMembers',{token:token},'Loading Outstanding...','Calculating member balances');
+    const outstanding=(rows||[]).filter(r=>Number(r.totalOutstanding||0)>0);
+    document.getElementById('outstandingNote').textContent=outstanding.length+' member(s) with outstanding balance';
+    document.getElementById('outstandingBody').innerHTML=outstanding.map(r=>
+      '<tr><td>'+esc(r.id)+'</td><td><b>'+esc(r.name)+'</b></td><td>'+money(r.monthlyBalance)+'</td><td>'+money(r.registrationBalance)+'</td><td>'+money(r.otherBalance)+'</td><td><b>'+money(r.totalOutstanding)+'</b></td></tr>'
+    ).join('') || '<tr><td colspan="6">No outstanding balances.</td></tr>';
+  }catch(e){
+    document.getElementById('outstandingNote').textContent='';
+    fail(e,'dashboardMsg');
+  }
+}
+
+/* =========================================================
+   FINANCIAL REPORT
+========================================================= */
+function populateReportMonths(){
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  ['reportFromMonth','reportToMonth'].forEach(id=>{
+    const s=document.getElementById(id);
+    s.innerHTML=months.map((m,i)=>'<option value="'+(i+1)+'">'+m+'</option>').join('');
+  });
+  document.getElementById('reportToMonth').value=String(new Date().getMonth()+1);
+  document.getElementById('reportFromMonth').value=String(new Date().getMonth()+1);
+  const y=new Date().getFullYear();
+  document.getElementById('reportYear').innerHTML=Array.from({length:5},(_,i)=>y-i).map(v=>'<option value="'+v+'">'+v+'</option>').join('');
+  document.getElementById('reportYear').value=String(y);
+}
+
+function openFinancialReportPanel(){
+  hideAppPanels();
+  document.getElementById('reportPanel').classList.remove('hidden');
+  document.getElementById('searchTopBar').classList.remove('hidden');
+  populateReportMonths();
+  document.getElementById('reportOutput').classList.add('hidden');
+  document.getElementById('reportOutput').innerHTML='';
+  document.getElementById('reportActions').classList.add('hidden');
+  msg('reportMsg','','');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function formatReportDate(v){
+  if(!v)return '';
+  const d=new Date(v);
+  return isNaN(d.getTime())?String(v):d.toLocaleDateString('en-PH',{month:'short',day:'2-digit',year:'numeric'});
+}
+
+function renderFinancialReport(r){
+  const cb=r.collectionBreakdown||[];
+  const eb=r.expenseBreakdown||[];
+  const ms=r.monthlySummary||[];
+  const html=''
+    +'<div class="report-section">'
+    +'<h2 style="text-align:center;margin:0">'+esc(r.title||'FINANCIAL REPORT')+'</h2>'
+    +'<div style="text-align:center;font-size:12px;margin-top:3px">Tupol Oeste Farmer\'s Association</div>'
+    +'<div style="text-align:center;font-size:12px;margin-top:3px">'+esc(r.periodName||'')+'</div>'
+    +'</div>'
+    +'<div class="report-summary">'
+    +'<div class="report-kpi"><b>Beginning Balance</b><span>'+money(r.beginningBalance)+'</span></div>'
+    +'<div class="report-kpi"><b>Total Collections</b><span>'+money(r.totalCollections)+'</span></div>'
+    +'<div class="report-kpi"><b>Total Expenses</b><span>'+money(r.totalExpenses)+'</span></div>'
+    +'<div class="report-kpi"><b>Net Income</b><span>'+money(r.netIncome)+'</span></div>'
+    +'<div class="report-kpi"><b>Association Balance</b><span>'+money(r.associationBalance)+'</span></div>'
+    +'<div class="report-kpi"><b>Bank Balance</b><span>'+money(r.bankBalance)+'</span></div>'
+    +'<div class="report-kpi"><b>Cash Position</b><span>'+money(r.cashPosition)+'</span></div>'
+    +'<div class="report-kpi"><b>Transactions</b><span>'+((r.collectionCount||0)+(r.expenseCount||0))+'</span></div>'
+    +'</div>'
+    +'<div class="report-section"><h4>Collection Breakdown</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Type</th><th>Transactions</th><th>Amount</th></tr></thead><tbody>'
+    +cb.map(x=>'<tr><td>'+esc(x.type)+'</td><td>'+esc(x.transactions)+'</td><td>'+money(x.amount)+'</td></tr>').join('')
+    +'<tr><th>Total</th><th>'+cb.reduce((a,x)=>a+Number(x.transactions||0),0)+'</th><th>'+money(r.totalCollections)+'</th></tr></tbody></table></div></div>'
+    +'<div class="report-section"><h4>Expense Breakdown</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Category</th><th>Transactions</th><th>Amount</th></tr></thead><tbody>'
+    +eb.map(x=>'<tr><td>'+esc(x.category)+'</td><td>'+esc(x.transactions)+'</td><td>'+money(x.amount)+'</td></tr>').join('')
+    +'<tr><th>Total</th><th>'+eb.reduce((a,x)=>a+Number(x.transactions||0),0)+'</th><th>'+money(r.totalExpenses)+'</th></tr></tbody></table></div></div>'
+    +'<div class="report-section"><h4>Monthly Summary</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Month</th><th>Collections</th><th>Expenses</th><th>Net</th></tr></thead><tbody>'
+    +ms.map(x=>'<tr><td>'+esc(x.monthName)+'</td><td>'+money(x.collections)+'</td><td>'+money(x.expenses)+'</td><td>'+money(x.net)+'</td></tr>').join('')
+    +'</tbody></table></div></div>'
+    +'<div class="report-section"><h4>Selected Collections</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Date</th><th>Member</th><th>Type</th><th>Amount</th></tr></thead><tbody>'
+    +(r.collections||[]).map(x=>'<tr><td>'+formatReportDate(x.date)+'</td><td>'+esc(x.memberName||x.memberId)+'</td><td>'+esc(x.type)+'</td><td>'+money(x.amount)+'</td></tr>').join('')
+    +'</tbody></table></div></div>'
+    +'<div class="report-section"><h4>Selected Expenses</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Date</th><th>Category</th><th>Particulars</th><th>Amount</th></tr></thead><tbody>'
+    +(r.expenses||[]).map(x=>'<tr><td>'+formatReportDate(x.date)+'</td><td>'+esc(x.category)+'</td><td>'+esc(x.particulars)+'</td><td>'+money(x.amount)+'</td></tr>').join('')
+    +'</tbody></table></div></div>';
+  document.getElementById('reportOutput').innerHTML=html;
+  document.getElementById('reportOutput').classList.remove('hidden');
+  document.getElementById('reportActions').classList.remove('hidden');
+}
+
+async function generateOnlineFinancialReport(){
+  const year=Number(document.getElementById('reportYear').value);
+  const fromMonth=Number(document.getElementById('reportFromMonth').value);
+  const toMonth=Number(document.getElementById('reportToMonth').value);
+  if(fromMonth>toMonth){msg('reportMsg','FROM MONTH cannot be later than TO MONTH.','error');return;}
+  try{
+    const r=await api('getFinancialReport',{token:token,year:year,fromMonth:fromMonth,toMonth:toMonth,reportType:fromMonth===toMonth?'monthly':'annual'},'Generating Financial Report...','Preparing report');
+    renderFinancialReport(r);
+    msg('reportMsg','Report generated successfully.','ok');
+  }catch(e){fail(e,'reportMsg');}
+}
 
 </script>
 
