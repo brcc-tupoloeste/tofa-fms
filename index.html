@@ -4,10 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1f4e78">
+
 <title>Tupol Oeste Farmer's Association - Payments Received</title>
 
 <style>
 *{box-sizing:border-box}
+
 html,body{
   margin:0;
   min-height:100%;
@@ -15,25 +17,33 @@ html,body{
   background:#f3f6f8;
   color:#1f2937
 }
-body.busy{overflow:hidden}
+
+body.busy{
+  overflow:hidden
+}
+
 .wrap{
   width:100%;
   max-width:760px;
   margin:auto;
   padding:12px
 }
+
 .brand{
   text-align:center;
   padding:14px 8px 8px
 }
+
 .brand h1{
   margin:0;
   font-size:20px
 }
+
 .brand p{
   margin:5px 0 0;
   color:#6b7280
 }
+
 .card{
   background:#fff;
   border-radius:16px;
@@ -41,24 +51,39 @@ body.busy{overflow:hidden}
   margin-bottom:12px;
   box-shadow:0 2px 10px rgba(0,0,0,.07)
 }
-.hidden{display:none!important}
+
+.hidden{
+  display:none!important
+}
+
 label{
   display:block;
   font-size:13px;
   font-weight:700;
   margin:11px 0 6px
 }
-input,select,textarea,button{
+
+input,
+select,
+textarea,
+button{
   width:100%;
   font:inherit
 }
-input,select,textarea{
+
+input,
+select,
+textarea{
   padding:12px;
   border:1px solid #ccd4dc;
   border-radius:10px;
   background:#fff
 }
-textarea{min-height:70px}
+
+textarea{
+  min-height:70px
+}
+
 button{
   padding:12px;
   border:0;
@@ -66,14 +91,31 @@ button{
   background:#1f4e78;
   color:#fff;
   font-weight:700;
-  margin-top:10px
+  margin-top:10px;
+  cursor:pointer
 }
-button.alt{background:#64748b}
+
+button.alt{
+  background:#64748b
+}
+
 button.danger{
   background:#991b1b;
   width:auto;
   margin:0
 }
+
+button.back{
+  background:#64748b;
+  margin-top:0;
+  margin-bottom:12px
+}
+
+button.success-back{
+  background:#166534;
+  margin-top:10px
+}
+
 button:disabled,
 input:disabled,
 select:disabled,
@@ -81,33 +123,42 @@ textarea:disabled{
   opacity:.55;
   cursor:not-allowed
 }
+
 .msg{
   padding:10px;
   margin-top:10px;
   border-radius:9px;
   font-size:13px
 }
+
 .error{
   background:#fee2e2;
   color:#991b1b
 }
+
 .ok{
   background:#dcfce7;
   color:#166534
 }
+
 .top{
   display:flex;
   justify-content:space-between;
   align-items:center;
   margin-bottom:10px
 }
+
 .search{
   display:grid;
   grid-template-columns:1fr auto;
   gap:8px;
   align-items:end
 }
-.search button{width:auto}
+
+.search button{
+  width:auto
+}
+
 .result{
   padding:11px;
   border:1px solid #e5e7eb;
@@ -116,34 +167,44 @@ textarea:disabled{
   cursor:pointer;
   background:#fff
 }
-.result:active{transform:scale(.995)}
+
+.result:active{
+  transform:scale(.995)
+}
+
 .result strong,
 .result small{
   display:block
 }
+
 .result small{
   color:#6b7280;
   margin-top:3px
 }
+
 .result.locked{
   opacity:.5;
   pointer-events:none
 }
+
 .result.selected{
   border-color:#1f4e78;
   background:#f4f8fb
 }
+
 .profile{
   display:flex;
   align-items:center;
   gap:12px
 }
+
 .photo-wrap{
   position:relative;
   width:74px;
   height:74px;
   flex:0 0 74px
 }
+
 .photo{
   width:74px;
   height:74px;
@@ -152,6 +213,7 @@ textarea:disabled{
   background:#e5e7eb;
   border:1px solid #d1d5db
 }
+
 .camera{
   position:absolute;
   right:-3px;
@@ -164,55 +226,86 @@ textarea:disabled{
   font-size:15px;
   background:#1f4e78
 }
-#photoInput{display:none}
+
+#photoInput{
+  display:none
+}
+
 .name{
   font-weight:800;
   font-size:18px
 }
+
 .sub{
   font-size:12px;
   color:#6b7280;
   margin-top:3px
 }
+
 .accounts{
   display:grid;
   grid-template-columns:1fr;
   gap:9px;
   margin-top:14px
 }
+
 .account{
   border:1px solid #e5e7eb;
   border-radius:11px;
   padding:11px
 }
+
 .account b{
   display:block;
   margin-bottom:6px
 }
+
 .line{
   display:flex;
   justify-content:space-between;
   padding:4px 0;
   font-size:13px
 }
+
 .balance{
   border-top:1px solid #e5e7eb;
   margin-top:5px;
   padding-top:7px;
   font-weight:800
 }
+
+.profile-actions{
+  margin-bottom:12px
+}
+
+.payment-success{
+  border:1px solid #bbf7d0;
+  background:#f0fdf4;
+  border-radius:11px;
+  padding:12px;
+  margin-top:12px;
+  color:#166534;
+  font-weight:700
+}
+
 table{
   width:100%;
   border-collapse:collapse;
   min-width:500px
 }
-th,td{
+
+th,
+td{
   padding:8px;
   border-bottom:1px solid #e5e7eb;
   font-size:12px;
   text-align:left
 }
-.scroll{overflow:auto}
+
+.scroll{
+  overflow:auto
+}
+
 .busy-overlay{
   position:fixed;
   inset:0;
@@ -223,6 +316,7 @@ th,td{
   justify-content:center;
   z-index:9999
 }
+
 .busy-box{
   background:#fff;
   border-radius:16px;
@@ -231,6 +325,7 @@ th,td{
   min-width:220px;
   box-shadow:0 8px 30px rgba(0,0,0,.16)
 }
+
 .spinner{
   width:36px;
   height:36px;
@@ -240,15 +335,21 @@ th,td{
   border-radius:50%;
   animation:spin .8s linear infinite
 }
+
 @keyframes spin{
   to{transform:rotate(360deg)}
 }
-.busy-title{font-weight:800}
+
+.busy-title{
+  font-weight:800
+}
+
 .busy-sub{
   font-size:12px;
   color:#6b7280;
   margin-top:5px
 }
+
 .api-frame{
   position:absolute;
   width:1px;
@@ -257,27 +358,49 @@ th,td{
   left:-10000px;
   top:-10000px
 }
+
 @media(min-width:620px){
+
   .accounts{
     grid-template-columns:repeat(3,1fr)
   }
+
 }
 </style>
 </head>
 
 <body>
 
+<!-- =======================================================
+     BUSY OVERLAY
+======================================================= -->
+
 <div id="busyOverlay" class="busy-overlay hidden">
+
   <div class="busy-box">
+
     <div class="spinner"></div>
-    <div id="busyTitle" class="busy-title">
+
+    <div
+      id="busyTitle"
+      class="busy-title">
       Please wait...
     </div>
-    <div id="busySub" class="busy-sub">
+
+    <div
+      id="busySub"
+      class="busy-sub">
       Processing request
     </div>
+
   </div>
+
 </div>
+
+
+<!-- =======================================================
+     APPS SCRIPT BRIDGE
+======================================================= -->
 
 <iframe
   id="apiFrame"
@@ -285,87 +408,189 @@ th,td{
   name="apiFrame">
 </iframe>
 
+
 <div class="wrap">
 
+  <!-- =====================================================
+       BRAND
+  ====================================================== -->
+
   <div class="brand">
-    <h1>Tupol Oeste Farmer's Association</h1>
-    <p>Payments Received</p>
+
+    <h1>
+      Tupol Oeste Farmer's Association
+    </h1>
+
+    <p>
+      Payments Received
+    </p>
+
   </div>
 
-  <div id="loginView" class="card">
 
-    <h2>🔐 Admin Login</h2>
+  <!-- =====================================================
+       LOGIN
+  ====================================================== -->
 
-    <label>Username</label>
+  <div
+    id="loginView"
+    class="card">
+
+    <h2>
+      🔐 Admin Login
+    </h2>
+
+    <label>
+      Username
+    </label>
+
     <input
       id="username"
       value="admin"
       autocomplete="username">
 
-    <label>Password</label>
+
+    <label>
+      Password
+    </label>
+
     <input
       id="password"
       type="password"
       autocomplete="current-password">
 
+
     <label style="font-weight:400">
+
       <input
         id="showPass"
         type="checkbox"
         style="width:auto">
+
       Show password
+
     </label>
 
-    <button id="loginBtn" onclick="login()">
+
+    <button
+      id="loginBtn"
+      onclick="login()">
+
       LOGIN
+
     </button>
+
 
     <div id="loginMsg"></div>
 
   </div>
 
 
-  <div id="appView" class="hidden">
+  <!-- =====================================================
+       APPLICATION
+  ====================================================== -->
+
+  <div
+    id="appView"
+    class="hidden">
+
+
+    <!-- ===================================================
+         TOP BAR
+    ==================================================== -->
 
     <div class="top">
-      <b>💵 Payments Received</b>
+
+      <b>
+        💵 Payments Received
+      </b>
+
       <button
         class="danger"
         onclick="logout()">
+
         Logout
+
       </button>
+
     </div>
 
 
-    <div class="card">
+    <!-- ===================================================
+         SEARCH MEMBER
 
-      <h3>🔎 Search Member</h3>
+         IMPORTANT:
+         This entire card is hidden after a member
+         is selected.
+    ==================================================== -->
+
+    <div
+      id="searchCard"
+      class="card">
+
+      <h3>
+        🔎 Search Member
+      </h3>
+
 
       <div class="search">
 
         <div>
-          <label>Member ID or Name</label>
+
+          <label>
+            Member ID or Name
+          </label>
 
           <input
             id="searchText"
             placeholder="Search member">
+
         </div>
+
 
         <button
           id="searchBtn"
           onclick="searchMembers()">
+
           Search
+
         </button>
 
       </div>
 
+
       <div id="searchMsg"></div>
+
       <div id="results"></div>
 
     </div>
 
 
-    <div id="profileCard" class="card hidden">
+    <!-- ===================================================
+         MEMBER PROFILE
+    ==================================================== -->
+
+    <div
+      id="profileCard"
+      class="card hidden">
+
+
+      <!-- BACK TO SEARCH -->
+
+      <div class="profile-actions">
+
+        <button
+          class="back"
+          onclick="backToSearch()">
+
+          ← Back to Search
+
+        </button>
+
+      </div>
+
+
+      <!-- MEMBER HEADER -->
 
       <div class="profile">
 
@@ -376,12 +601,16 @@ th,td{
             class="photo"
             alt="">
 
+
           <button
             class="camera"
             onclick="document.getElementById('photoInput').click()"
             title="Upload photo">
+
             📷
+
           </button>
+
 
           <input
             id="photoInput"
@@ -391,6 +620,7 @@ th,td{
             onchange="uploadPhoto(this)">
 
         </div>
+
 
         <div>
 
@@ -411,83 +641,162 @@ th,td{
       </div>
 
 
+      <!-- ACCOUNTING -->
+
       <div class="accounts">
 
+
+        <!-- MONTHLY MEMBERSHIP -->
+
         <div class="account">
 
-          <b>📅 Monthly Membership</b>
+          <b>
+            📅 Monthly Membership
+          </b>
 
           <div class="line">
-            <span>Year Due</span>
+
+            <span>
+              Year Due
+            </span>
+
             <span id="annualDue"></span>
+
           </div>
 
+
           <div class="line">
-            <span>Paid</span>
+
+            <span>
+              Paid
+            </span>
+
             <span id="monthlyPaid"></span>
+
           </div>
 
+
           <div class="line balance">
-            <span>Balance</span>
+
+            <span>
+              Balance
+            </span>
+
             <span id="yearBalance"></span>
+
           </div>
 
         </div>
 
 
+        <!-- REGISTRATION -->
+
         <div class="account">
 
-          <b>🧾 Registration Fee</b>
+          <b>
+            🧾 Registration Fee
+          </b>
 
           <div class="line">
-            <span>Due</span>
+
+            <span>
+              Due
+            </span>
+
             <span id="registrationDue"></span>
+
           </div>
+
 
           <div class="line">
-            <span>Paid</span>
+
+            <span>
+              Paid
+            </span>
+
             <span id="registrationPaid"></span>
+
           </div>
 
+
           <div class="line balance">
-            <span>Balance</span>
+
+            <span>
+              Balance
+            </span>
+
             <span id="registrationBalance"></span>
+
           </div>
 
         </div>
 
+
+        <!-- OTHER OBLIGATIONS -->
 
         <div class="account">
 
-          <b>📦 Other Obligations</b>
+          <b>
+            📦 Other Obligations
+          </b>
 
           <div class="line">
-            <span>Due</span>
+
+            <span>
+              Due
+            </span>
+
             <span id="otherDue"></span>
+
           </div>
 
+
           <div class="line">
-            <span>Paid</span>
+
+            <span>
+              Paid
+            </span>
+
             <span id="otherPaid"></span>
+
           </div>
+
 
           <div class="line balance">
-            <span>Balance</span>
+
+            <span>
+              Balance
+            </span>
+
             <span id="otherBalance"></span>
+
           </div>
 
         </div>
+
 
       </div>
 
     </div>
 
 
-    <div id="paymentCard" class="card hidden">
+    <!-- ===================================================
+         RECEIVE PAYMENT
+    ==================================================== -->
 
-      <h3>💵 Receive Payment</h3>
+    <div
+      id="paymentCard"
+      class="card hidden">
 
-      <label>Payment Type</label>
+      <h3>
+        💵 Receive Payment
+      </h3>
+
+
+      <label>
+        Payment Type
+      </label>
+
 
       <select
         id="paymentType"
@@ -512,19 +821,27 @@ th,td{
       </select>
 
 
+      <!-- SPECIFIC OBLIGATION -->
+
       <div
         id="obligationWrap"
         class="hidden">
 
-        <label>Specific Obligation</label>
+        <label>
+          Specific Obligation
+        </label>
 
-        <select id="obligationId">
+        <select
+          id="obligationId">
+
         </select>
 
       </div>
 
 
-      <label>Amount Received</label>
+      <label>
+        Amount Received
+      </label>
 
       <input
         id="amount"
@@ -534,25 +851,62 @@ th,td{
         inputmode="decimal">
 
 
-      <label>Remarks</label>
+      <label>
+        Remarks
+      </label>
 
-      <textarea id="remarks"></textarea>
+      <textarea
+        id="remarks">
+      </textarea>
 
 
       <button
         id="saveBtn"
         onclick="savePayment()">
+
         SAVE PAYMENT
+
       </button>
 
+
       <div id="paymentMsg"></div>
+
+
+      <!-- SUCCESS BACK TO SEARCH -->
+
+      <div
+        id="paymentSuccess"
+        class="payment-success hidden">
+
+        <div>
+          ✅ Payment successfully recorded.
+        </div>
+
+        <button
+          class="success-back"
+          onclick="backToSearch()">
+
+          ← Back to Search
+
+        </button>
+
+      </div>
 
     </div>
 
 
-    <div id="historyCard" class="card hidden">
+    <!-- ===================================================
+         PAYMENT HISTORY
+    ==================================================== -->
 
-      <h3>📋 Payment History</h3>
+    <div
+      id="historyCard"
+      class="card hidden">
+
+      <h3>
+        📋 Payment History
+      </h3>
+
 
       <div class="scroll">
 
@@ -561,15 +915,30 @@ th,td{
           <thead>
 
             <tr>
-              <th>Date</th>
-              <th>Type</th>
-              <th>Remarks</th>
-              <th>Amount</th>
+
+              <th>
+                Date
+              </th>
+
+              <th>
+                Type
+              </th>
+
+              <th>
+                Remarks
+              </th>
+
+              <th>
+                Amount
+              </th>
+
             </tr>
 
           </thead>
 
-          <tbody id="historyBody">
+
+          <tbody
+            id="historyBody">
           </tbody>
 
         </table>
@@ -577,6 +946,7 @@ th,td{
       </div>
 
     </div>
+
 
   </div>
 
@@ -586,7 +956,7 @@ th,td{
 <script>
 
 /************************************************************
- * API CONFIG
+ * API CONFIGURATION
  ************************************************************/
 
 const API_URL =
@@ -596,28 +966,42 @@ const API_URL =
 /*
  * IMPORTANT:
  *
- * DO NOT hard-code:
+ * Apps Script uses a dynamic
+ * script.googleusercontent.com origin.
  *
- * https://script.googleusercontent.com
- *
- * Apps Script can use a dynamic googleusercontent.com
- * subdomain.
- *
- * We learn the real origin from the READY message.
+ * We capture the actual origin from
+ * the READY message.
  */
 
-let API_BRIDGE_ORIGIN='';
-let API_BRIDGE_WINDOW=null;
+let API_BRIDGE_ORIGIN = '';
+
+/*
+ * IMPORTANT:
+ *
+ * Capture the actual Window object that
+ * sent the READY message.
+ *
+ * Do NOT use frame.contentWindow for
+ * sending API requests.
+ */
+
+let API_BRIDGE_WINDOW = null;
+
 
 const GITHUB_ORIGIN =
   'https://brcc-tupoloeste.github.io';
 
 
 let token = '';
+
 let selectedMember = null;
+
 let requestSeq = 0;
+
 let requestTimer = null;
+
 let apiReady = false;
+
 let pendingQueue = [];
 
 
@@ -625,15 +1009,18 @@ let pendingQueue = [];
  * SHOW PASSWORD
  ************************************************************/
 
-document.getElementById('showPass').onchange =
-  function(){
+document.getElementById(
+  'showPass'
+).onchange = function(){
 
-    document.getElementById('password').type =
-      this.checked
-        ? 'text'
-        : 'password';
+  document.getElementById(
+    'password'
+  ).type =
+    this.checked
+      ? 'text'
+      : 'password';
 
-  };
+};
 
 
 /************************************************************
@@ -642,32 +1029,40 @@ document.getElementById('showPass').onchange =
 
 function esc(v){
 
-  return String(v == null ? '' : v)
-    .replace(/[&<>"']/g,m => ({
+  return String(
+    v == null ? '' : v
+  )
+  .replace(
+    /[&<>"']/g,
+    m => ({
       '&':'&amp;',
       '<':'&lt;',
       '>':'&gt;',
       '"':'&quot;',
       "'":'&#39;'
-    }[m]));
+    }[m])
+  );
 
 }
 
 
 function js(v){
 
-  return String(v == null ? '' : v)
-    .replace(/\\/g,'\\\\')
-    .replace(/'/g,"\\'")
-    .replace(/\r?\n/g,' ');
+  return String(
+    v == null ? '' : v
+  )
+  .replace(/\\/g,'\\\\')
+  .replace(/'/g,"\\'")
+  .replace(/\r?\n/g,' ');
 
 }
 
 
 function set(id,v){
 
-  document.getElementById(id).textContent =
-    v;
+  document.getElementById(
+    id
+  ).textContent = v;
 
 }
 
@@ -687,9 +1082,15 @@ function money(v){
 }
 
 
-function msg(id,text,type){
+function msg(
+  id,
+  text,
+  type
+){
 
-  document.getElementById(id).innerHTML =
+  document.getElementById(
+    id
+  ).innerHTML =
     text
       ? '<div class="msg ' +
         (type || '') +
@@ -701,23 +1102,33 @@ function msg(id,text,type){
 }
 
 
-function showBusy(title,sub){
+function showBusy(
+  title,
+  sub
+){
 
   document.getElementById(
     'busyTitle'
   ).textContent =
     title;
 
+
   document.getElementById(
     'busySub'
   ).textContent =
     sub || 'Please wait';
 
+
   document.getElementById(
     'busyOverlay'
-  ).classList.remove('hidden');
+  ).classList.remove(
+    'hidden'
+  );
 
-  document.body.classList.add('busy');
+
+  document.body.classList.add(
+    'busy'
+  );
 
 }
 
@@ -726,9 +1137,14 @@ function hideBusy(){
 
   document.getElementById(
     'busyOverlay'
-  ).classList.add('hidden');
+  ).classList.add(
+    'hidden'
+  );
 
-  document.body.classList.remove('busy');
+
+  document.body.classList.remove(
+    'busy'
+  );
 
 }
 
@@ -739,9 +1155,11 @@ function lockSearch(v){
     'searchText'
   ).disabled = v;
 
+
   document.getElementById(
     'searchBtn'
   ).disabled = v;
+
 
   document
     .querySelectorAll('.result')
@@ -756,7 +1174,10 @@ function lockSearch(v){
 }
 
 
-function fail(e,id){
+function fail(
+  e,
+  id
+){
 
   const m =
     e && e.message
@@ -764,7 +1185,10 @@ function fail(e,id){
       : String(e || 'Error');
 
 
-  if(m === 'SESSION_EXPIRED'){
+  if(
+    m ===
+    'SESSION_EXPIRED'
+  ){
 
     token = '';
 
@@ -788,22 +1212,32 @@ function fail(e,id){
 
 
 /************************************************************
- * SEND REQUEST TO APPS SCRIPT BRIDGE
+ * SEND API REQUEST
+ *
+ * IMPORTANT:
+ * Uses API_BRIDGE_WINDOW captured from
+ * ev.source when READY was received.
  ************************************************************/
 
-function sendApiRequest(req){
+function sendApiRequest(
+  req
+){
 
-  if(!API_BRIDGE_WINDOW){
+  if(
+    !API_BRIDGE_WINDOW
+  ){
 
     console.log(
       '[TOFA API] SEND FAILED: bridge window unavailable'
     );
+
 
     req.reject(
       new Error(
         'API bridge is not available.'
       )
     );
+
 
     return;
   }
@@ -822,9 +1256,13 @@ function sendApiRequest(req){
 
     {
       __onlineApiRequest:true,
+
       id:req.id,
+
       action:req.action,
+
       payload:req.payload || {}
+
     },
 
     API_BRIDGE_ORIGIN
@@ -833,15 +1271,16 @@ function sendApiRequest(req){
 
 }
 
+
 /************************************************************
  * MESSAGE HANDLER
  *
  * IMPORTANT:
  *
- * NO event.source CHECK.
+ * NO ev.source rejection here.
  *
- * Apps Script HtmlService may wrap the page
- * in another internal frame.
+ * We capture ev.source ONLY when the
+ * trusted READY message arrives.
  ************************************************************/
 
 window.addEventListener(
@@ -862,47 +1301,67 @@ window.addEventListener(
     /******************************************************
      * BRIDGE READY
      ******************************************************/
-if(msgData.__onlineBridgeReady){
 
-  API_BRIDGE_ORIGIN=ev.origin;
+    if(
+      msgData.__onlineBridgeReady
+    ){
 
-  API_BRIDGE_WINDOW=ev.source;
+      API_BRIDGE_ORIGIN =
+        ev.origin;
 
-  console.log(
-    '[TOFA API] BRIDGE READY from',
-    API_BRIDGE_ORIGIN
-  );
 
-  console.log(
-    '[TOFA API] BRIDGE WINDOW CAPTURED',
-    !!API_BRIDGE_WINDOW
-  );
+      API_BRIDGE_WINDOW =
+        ev.source;
 
-  apiReady=true;
 
-  console.log(
-    '[TOFA API] apiReady = true'
-  );
+      console.log(
+        '[TOFA API] BRIDGE READY from',
+        API_BRIDGE_ORIGIN
+      );
 
-  while(pendingQueue.length){
 
-    const req=
-      pendingQueue.shift();
+      console.log(
+        '[TOFA API] BRIDGE WINDOW CAPTURED',
+        !!API_BRIDGE_WINDOW
+      );
 
-    console.log(
-      '[TOFA API] sending queued request',
-      req.id,
-      req.action
-    );
 
-    sendApiRequest(req);
-  }
+      apiReady = true;
 
-  return;
-}
- 
+
+      console.log(
+        '[TOFA API] apiReady = true'
+      );
+
+
+      while(
+        pendingQueue.length
+      ){
+
+        const req =
+          pendingQueue.shift();
+
+
+        console.log(
+          '[TOFA API] sending queued request',
+          req.id,
+          req.action
+        );
+
+
+        sendApiRequest(
+          req
+        );
+
+      }
+
+
+      return;
+    }
+
+
     /******************************************************
-     * WAIT UNTIL BRIDGE ORIGIN EXISTS
+     * BRIDGE NOT ESTABLISHED
      ******************************************************/
 
     if(
@@ -992,21 +1451,27 @@ if(msgData.__onlineBridgeReady){
       requestTimer
     );
 
+
     window.__pendingApi =
       null;
+
 
     hideBusy();
 
 
-    if(msgData.ok){
+    if(
+      msgData.ok
+    ){
 
       console.log(
         '[TOFA API] REQUEST SUCCESS'
       );
 
+
       pending.resolve(
         msgData.data
       );
+
 
     }else{
 
@@ -1014,6 +1479,7 @@ if(msgData.__onlineBridgeReady){
         '[TOFA API] REQUEST FAILED',
         msgData.error
       );
+
 
       pending.reject(
         new Error(
@@ -1040,7 +1506,10 @@ function api(
 ){
 
   return new Promise(
-    function(resolve,reject){
+    function(
+      resolve,
+      reject
+    ){
 
       const id =
         'r' +
@@ -1048,18 +1517,28 @@ function api(
 
 
       const req = {
+
         id,
+
         action,
+
         payload,
+
         resolve,
+
         reject
+
       };
 
 
       window.__pendingApi = {
+
         id,
+
         resolve,
+
         reject
+
       };
 
 
@@ -1072,12 +1551,17 @@ function api(
 
 
       showBusy(
-        title || 'Please wait...',
-        sub || 'Processing request'
+        title ||
+          'Please wait...',
+
+        sub ||
+          'Processing request'
       );
 
 
-      if(apiReady){
+      if(
+        apiReady
+      ){
 
         sendApiRequest(
           req
@@ -1089,6 +1573,7 @@ function api(
           '[TOFA API] bridge not ready - queueing',
           id
         );
+
 
         pendingQueue.push(
           req
@@ -1116,11 +1601,13 @@ function api(
               window.__pendingApi =
                 null;
 
+
               pendingQueue =
                 pendingQueue.filter(
                   x =>
                     x.id !== id
                 );
+
 
               hideBusy();
 
@@ -1199,6 +1686,7 @@ async function login(){
         'login',
 
         {
+
           username:
             document
               .getElementById(
@@ -1213,6 +1701,7 @@ async function login(){
                 'password'
               )
               .value
+
         },
 
         'Signing in...',
@@ -1300,6 +1789,7 @@ async function logout(){
 
 
   [
+    'searchCard',
     'profileCard',
     'paymentCard',
     'historyCard'
@@ -1310,6 +1800,13 @@ async function logout(){
         .classList.add(
           'hidden'
         )
+  );
+
+
+  document.getElementById(
+    'searchCard'
+  ).classList.remove(
+    'hidden'
   );
 
 
@@ -1378,8 +1875,11 @@ async function searchMembers(){
         'searchMembers',
 
         {
+
           token,
+
           searchText:q
+
         },
 
         'Searching Members...',
@@ -1458,6 +1958,7 @@ function renderResults(
           '</strong>' +
 
           '<small>' +
+
           esc(r.id) +
 
           (
@@ -1479,6 +1980,10 @@ function renderResults(
 
 /************************************************************
  * OPEN MEMBER
+ *
+ * IMPORTANT UI CHANGE:
+ *
+ * Search card disappears after member selection.
  ************************************************************/
 
 async function openMember(
@@ -1490,10 +1995,13 @@ async function openMember(
     return;
 
 
-  if(el)
+  if(el){
+
     el.classList.add(
       'selected'
     );
+
+  }
 
 
   lockSearch(true);
@@ -1507,8 +2015,11 @@ async function openMember(
         'getMemberProfile',
 
         {
+
           token,
+
           memberId:id
+
         },
 
         'Loading Profile...',
@@ -1527,6 +2038,19 @@ async function openMember(
     );
 
 
+    /*
+     * Hide Search Member.
+     */
+    document.getElementById(
+      'searchCard'
+    ).classList.add(
+      'hidden'
+    );
+
+
+    /*
+     * Scroll to top.
+     */
     window.scrollTo({
       top:0,
       behavior:'smooth'
@@ -1569,6 +2093,27 @@ function renderProfile(
         .classList.remove(
           'hidden'
         )
+  );
+
+
+  /*
+   * Hide search.
+   */
+  document.getElementById(
+    'searchCard'
+  ).classList.add(
+    'hidden'
+  );
+
+
+  /*
+   * Hide old payment success message
+   * whenever profile is rendered again.
+   */
+  document.getElementById(
+    'paymentSuccess'
+  ).classList.add(
+    'hidden'
   );
 
 
@@ -1621,10 +2166,12 @@ function renderProfile(
     money(p.annualDue)
   );
 
+
   set(
     'monthlyPaid',
     money(p.monthlyPaid)
   );
+
 
   set(
     'yearBalance',
@@ -1637,10 +2184,12 @@ function renderProfile(
     money(p.registrationDue)
   );
 
+
   set(
     'registrationPaid',
     money(p.registrationPaid)
   );
+
 
   set(
     'registrationBalance',
@@ -1653,10 +2202,12 @@ function renderProfile(
     money(p.otherDue)
   );
 
+
   set(
     'otherPaid',
     money(p.otherPaid)
   );
+
 
   set(
     'otherBalance',
@@ -1672,6 +2223,122 @@ function renderProfile(
   fillHistory(
     p.paymentHistory || []
   );
+
+}
+
+
+/************************************************************
+ * BACK TO SEARCH
+ *
+ * Returns to the initial Search Member screen.
+ ************************************************************/
+
+function backToSearch(){
+
+  selectedMember =
+    null;
+
+
+  /*
+   * Hide profile/payment/history.
+   */
+
+  [
+    'profileCard',
+    'paymentCard',
+    'historyCard'
+  ].forEach(
+    id =>
+      document
+        .getElementById(id)
+        .classList.add(
+          'hidden'
+        )
+  );
+
+
+  /*
+   * Show Search Member.
+   */
+
+  document.getElementById(
+    'searchCard'
+  ).classList.remove(
+    'hidden'
+  );
+
+
+  /*
+   * Clear search state.
+   */
+
+  document.getElementById(
+    'searchText'
+  ).value = '';
+
+
+  document.getElementById(
+    'results'
+  ).innerHTML = '';
+
+
+  msg(
+    'searchMsg',
+    '',
+    ''
+  );
+
+
+  /*
+   * Clear payment fields.
+   */
+
+  document.getElementById(
+    'paymentType'
+  ).value = '';
+
+
+  document.getElementById(
+    'obligationWrap'
+  ).classList.add(
+    'hidden'
+  );
+
+
+  document.getElementById(
+    'obligationId'
+  ).innerHTML =
+    '<option value="">' +
+    'Select obligation' +
+    '</option>';
+
+
+  document.getElementById(
+    'amount'
+  ).value = '';
+
+
+  document.getElementById(
+    'remarks'
+  ).value = '';
+
+
+  document.getElementById(
+    'paymentMsg'
+  ).innerHTML = '';
+
+
+  document.getElementById(
+    'paymentSuccess'
+  ).classList.add(
+    'hidden'
+  );
+
+
+  window.scrollTo({
+    top:0,
+    behavior:'smooth'
+  });
 
 }
 
@@ -1706,14 +2373,17 @@ function fillObligations(
         o =>
 
           '<option value="' +
+
           esc(
             o.obligationId ||
             o.id ||
             ''
           ) +
+
           '">' +
 
           esc(
+
             (o.description ||
              'Obligation') +
 
@@ -1722,6 +2392,7 @@ function fillObligations(
             money(
               o.balance
             )
+
           ) +
 
           '</option>'
@@ -1738,13 +2409,17 @@ function fillObligations(
 
 function paymentTypeChanged(){
 
+  const type =
+    document.getElementById(
+      'paymentType'
+    ).value;
+
+
   document.getElementById(
     'obligationWrap'
   ).classList.toggle(
     'hidden',
-    document.getElementById(
-      'paymentType'
-    ).value !==
+    type !==
       'Other Obligation Payment'
   );
 
@@ -1782,11 +2457,15 @@ function fillHistory(
           '</td>' +
 
           '<td>' +
-          esc(x.remarks || '') +
+          esc(
+            x.remarks || ''
+          ) +
           '</td>' +
 
           '<td>' +
-          money(x.amount) +
+          money(
+            x.amount
+          ) +
           '</td>' +
 
           '</tr>'
@@ -1867,6 +2546,16 @@ async function savePayment(){
   }
 
 
+  const saveBtn =
+    document.getElementById(
+      'saveBtn'
+    );
+
+
+  saveBtn.disabled =
+    true;
+
+
   try{
 
     const r =
@@ -1875,6 +2564,7 @@ async function savePayment(){
         'savePayment',
 
         {
+
           token,
 
           paymentData:{
@@ -1912,10 +2602,22 @@ async function savePayment(){
       );
 
 
+    /*
+     * Update profile/accounting.
+     */
+
+    selectedMember =
+      r.profile;
+
+
     renderProfile(
       r.profile
     );
 
+
+    /*
+     * Show normal server message.
+     */
 
     msg(
       'paymentMsg',
@@ -1923,6 +2625,21 @@ async function savePayment(){
       'ok'
     );
 
+
+    /*
+     * Show success + Back to Search.
+     */
+
+    document.getElementById(
+      'paymentSuccess'
+    ).classList.remove(
+      'hidden'
+    );
+
+
+    /*
+     * Clear input fields.
+     */
 
     document.getElementById(
       'amount'
@@ -1934,12 +2651,30 @@ async function savePayment(){
     ).value = '';
 
 
+    document.getElementById(
+      'paymentType'
+    ).value = '';
+
+
+    document.getElementById(
+      'obligationWrap'
+    ).classList.add(
+      'hidden'
+    );
+
+
   }catch(e){
 
     fail(
       e,
       'paymentMsg'
     );
+
+
+  }finally{
+
+    saveBtn.disabled =
+      false;
 
   }
 
@@ -2017,8 +2752,12 @@ function compressImage(
 
 
           resolve({
+
             base64:data,
-            mimeType:'image/jpeg'
+
+            mimeType:
+              'image/jpeg'
+
           });
 
         };
@@ -2089,9 +2828,11 @@ async function uploadPhoto(
         'uploadPhoto',
 
         {
+
           token,
 
           photo:{
+
             memberId:
               selectedMember.id,
 
@@ -2100,7 +2841,9 @@ async function uploadPhoto(
 
             mimeType:
               photo.mimeType
+
           }
+
         },
 
         'Uploading Photo...',
