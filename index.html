@@ -126,22 +126,70 @@ function lock(v){
 function fail(e,id){msg(id||'loginMsg',e&&e.message?e.message:String(e||'Request failed'),'error');}
 
 async function api(action,payload,title,sub){
-  showBusy(title||'Please wait...',sub||'Processing request');
+  showBusy(
+    title || 'Please wait...',
+    sub || 'Processing request'
+  );
+
   try{
-    const r=await fetch(PROXY_URL,{
+
+    const r = await fetch(PROXY_URL,{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({action:action,payload:payload||{}})
+
+      // IMPORTANT:
+      // text/plain avoids the browser CORS preflight
+      headers:{
+        'Content-Type':'text/plain;charset=utf-8'
+      },
+
+      body:JSON.stringify({
+        action:action,
+        payload:payload || {}
+      })
     });
-    const text=await r.text();
+
+    const text = await r.text();
+
     let data;
-    try{data=JSON.parse(text);}catch(e){throw new Error('Invalid response from Payments backend.');}
-    if(!r.ok||!data.ok)throw new Error(data&&data.error||'Request failed.');
+
+    try{
+      data = JSON.parse(text);
+    }catch(e){
+      throw new Error(
+        'Invalid response from Payments backend.'
+      );
+    }
+
+    if(!r.ok || !data.ok){
+      throw new Error(
+        data && data.error
+          ? data.error
+          : 'Request failed.'
+      );
+    }
+
     return data.data;
+
   }catch(e){
-    if(e.name==='TypeError')throw new Error('Unable to reach the Payments backend.');
+
+    console.error('Payments API error:',e);
+
+    if(
+      e.name === 'TypeError' ||
+      String(e.message || '').toLowerCase().includes('fetch')
+    ){
+      throw new Error(
+        'Unable to reach the Payments backend.'
+      );
+    }
+
     throw e;
-  }finally{hideBusy();}
+
+  }finally{
+
+    hideBusy();
+
+  }
 }
 
 async function login(){
