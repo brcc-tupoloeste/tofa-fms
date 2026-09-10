@@ -126,6 +126,7 @@ if (window.top !== window.self) {
 <script>
 const API_URL='https://script.google.com/macros/s/AKfycbynk1P7SnfHWOBnJYC2vhwdH7ONxEUj8FWMp--40YUpkcecjwWoigQG29pnc4YlU6l0zA/exec';
 const API_ORIGINS=['https://script.google.com','https://script.googleusercontent.com'];
+let API_BRIDGE_ORIGIN='';
 const GITHUB_ORIGIN='https://brcc-tupoloeste.github.io';
 let token='',selectedMember=null,requestSeq=0,requestTimer=null,apiReady=false,pendingQueue=[];
 
@@ -144,21 +145,26 @@ function sendApiRequest(req){
   const frame=document.getElementById('apiFrame');
   if(!frame||!frame.contentWindow){req.reject(new Error('API bridge is not available.'));return;}
   console.log('[TOFA API] SEND', req);
-  frame.contentWindow.postMessage({__onlineApiRequest:true,id:req.id,action:req.action,payload:req.payload||{}},'*');
+  frame.contentWindow.postMessage({__onlineApiRequest:true,id:req.id,action:req.action,payload:req.payload||{}},API_BRIDGE_ORIGIN||'*');
 }
 
 window.addEventListener('message',function(ev){
   const msgData=ev.data||{};
   console.log('[TOFA API] MESSAGE', ev.origin, msgData);
-  if(msgData.__onlineBridgeReady){
-    if(API_ORIGINS.indexOf(ev.origin)!==-1){
-      console.log('[TOFA API] BRIDGE READY from',ev.origin);
-      apiReady=true;
-      while(pendingQueue.length)sendApiRequest(pendingQueue.shift());
-    }
+  const frame=document.getElementById('apiFrame');
+  if(!frame || ev.source !== frame.contentWindow){
+    console.log('[TOFA API] ignored: message source is not API iframe');
     return;
   }
-  if(API_ORIGINS.indexOf(ev.origin)===-1){console.log('[TOFA API] ignored origin',ev.origin);return;}
+  if(msgData.__onlineBridgeReady){
+    API_BRIDGE_ORIGIN=ev.origin;
+    console.log('[TOFA API] BRIDGE READY from',ev.origin);
+    apiReady=true;
+    while(pendingQueue.length)sendApiRequest(pendingQueue.shift());
+    return;
+  }
+  if(!API_BRIDGE_ORIGIN){console.log('[TOFA API] ignored: bridge origin not established');return;}
+  if(ev.origin!==API_BRIDGE_ORIGIN){console.log('[TOFA API] ignored origin',ev.origin);return;}
   if(!msgData.__onlineApi)return;
   const pending=window.__pendingApi;
   if(!pending||msgData.id!==pending.id)return;
