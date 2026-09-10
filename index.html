@@ -125,10 +125,11 @@ if (window.top !== window.self) {
 
 <script>
 const API_URL='https://script.google.com/macros/s/AKfycbynk1P7SnfHWOBnJYC2vhwdH7ONxEUj8FWMp--40YUpkcecjwWoigQG29pnc4YlU6l0zA/exec';
-let token='',selectedMember=null,requestSeq=0,requestTimer=null;
+const API_ORIGINS=['https://script.google.com','https://script.googleusercontent.com'];
+const GITHUB_ORIGIN='https://brcc-tupoloeste.github.io';
+let token='',selectedMember=null,requestSeq=0,requestTimer=null,apiReady=false,pendingQueue=[];
 
 document.getElementById('showPass').onchange=function(){document.getElementById('password').type=this.checked?'text':'password';};
-
 function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 function js(v){return String(v==null?'':v).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\r?\n/g,' ');}
 function set(id,v){document.getElementById(id).textContent=v;}
@@ -137,12 +138,24 @@ function msg(id,text,type){document.getElementById(id).innerHTML=text?'<div clas
 function showBusy(title,sub){document.getElementById('busyTitle').textContent=title;document.getElementById('busySub').textContent=sub||'Please wait';document.getElementById('busyOverlay').classList.remove('hidden');document.body.classList.add('busy');}
 function hideBusy(){document.getElementById('busyOverlay').classList.add('hidden');document.body.classList.remove('busy');}
 function lockSearch(v){document.getElementById('searchText').disabled=v;document.getElementById('searchBtn').disabled=v;document.querySelectorAll('.result').forEach(x=>x.classList.toggle('locked',v));}
-function fail(e,id){const m=e&&e.message?e.message:String(e||'Error'); if(m==='SESSION_EXPIRED'){token='';alert('Session expired. Please login again.');location.reload();return;} msg(id||'searchMsg',m,'error');}
+function fail(e,id){const m=e&&e.message?e.message:String(e||'Error');if(m==='SESSION_EXPIRED'){token='';alert('Session expired. Please login again.');location.reload();return;}msg(id||'searchMsg',m,'error');}
+
+function sendApiRequest(req){
+  const frame=document.getElementById('apiFrame');
+  if(!frame||!frame.contentWindow){req.reject(new Error('API bridge is not available.'));return;}
+  frame.contentWindow.postMessage({__onlineApiRequest:true,id:req.id,action:req.action,payload:req.payload||{}},API_ORIGINS[0]);
+}
 
 window.addEventListener('message',function(ev){
-  const allowedOrigins=['https://script.google.com','https://script.googleusercontent.com'];
-  if(allowedOrigins.indexOf(ev.origin)===-1)return;
   const msgData=ev.data||{};
+  if(msgData.__onlineBridgeReady){
+    if(API_ORIGINS.indexOf(ev.origin)!==-1){
+      apiReady=true;
+      while(pendingQueue.length)sendApiRequest(pendingQueue.shift());
+    }
+    return;
+  }
+  if(API_ORIGINS.indexOf(ev.origin)===-1)return;
   if(!msgData.__onlineApi)return;
   const pending=window.__pendingApi;
   if(!pending||msgData.id!==pending.id)return;
@@ -153,86 +166,42 @@ window.addEventListener('message',function(ev){
 function api(action,payload,title,sub){
   return new Promise((resolve,reject)=>{
     const id='r'+(++requestSeq);
+    const req={id,action,payload,resolve,reject};
     window.__pendingApi={id,resolve,reject};
     showBusy(title||'Please wait...',sub||'Processing request');
-    const form=document.createElement('form');
-    form.method='POST';form.action=API_URL;form.target='apiFrame';form.style.display='none';
-    form.setAttribute('aria-hidden','true');
-    const a=document.createElement('input');a.name='action';a.value=action;form.appendChild(a);
-    const p=document.createElement('input');p.name='payload';p.value=JSON.stringify(payload||{});form.appendChild(p);
-    const r=document.createElement('input');r.type='hidden';r.name='requestId';r.value=id;form.appendChild(r);
-    document.body.appendChild(form);form.submit();form.remove();
-    requestTimer=setTimeout(()=>{if(window.__pendingApi&&window.__pendingApi.id===id){window.__pendingApi=null;hideBusy();reject(new Error('The server took too long to respond. Please try again.'));}},45000);
+    if(apiReady)sendApiRequest(req);else pendingQueue.push(req);
+    requestTimer=setTimeout(()=>{
+      if(window.__pendingApi&&window.__pendingApi.id===id){
+        window.__pendingApi=null;
+        pendingQueue=pendingQueue.filter(x=>x.id!==id);
+        hideBusy();
+        reject(new Error('The server took too long to respond. Please try again.'));
+      }
+    },45000);
   });
 }
+
+document.getElementById('apiFrame').src=API_URL;
 
 async function login(){
   const b=document.getElementById('loginBtn');b.disabled=true;
   try{
-    const r=await api('login',{username:document.getElementById('username').value,password:document.getElementById('password').value},'Signing in...','Checking administrator access');
+    const r=await api('login',{username:document.getElementById('username').value.trim(),password:document.getElementById('password').value},'Signing in...','Checking administrator access');
     token=r.token;document.getElementById('password').value='';
     document.getElementById('loginView').classList.add('hidden');document.getElementById('appView').classList.remove('hidden');msg('loginMsg','','');
   }catch(e){fail(e,'loginMsg');}finally{b.disabled=false;}
 }
-async function logout(){
-  const t=token;token='';selectedMember=null;
-  document.getElementById('appView').classList.add('hidden');document.getElementById('loginView').classList.remove('hidden');
-  ['profileCard','paymentCard','historyCard'].forEach(id=>document.getElementById(id).classList.add('hidden'));
-  if(t){try{await api('logout',{token:t},'Signing out...','Closing session');}catch(e){}}
-}
-async function searchMembers(){
-  if(!token)return;
-  const q=document.getElementById('searchText').value.trim();if(!q){msg('searchMsg','Enter Member ID or name.','error');return;}
-  lockSearch(true);document.getElementById('results').innerHTML='';
-  try{const rows=await api('searchMembers',{token,searchText:q},'Searching Members...','Finding matching members');renderResults(rows);}
-  catch(e){fail(e,'searchMsg');}finally{lockSearch(false);}
-}
-function renderResults(rows){
-  if(!rows||!rows.length){document.getElementById('results').innerHTML='<div class="msg error">No member found.</div>';return;}
-  document.getElementById('results').innerHTML=rows.map(r=>'<div class="result" data-id="'+esc(r.id)+'" onclick="openMember(\''+js(r.id)+'\',this)"><strong>'+esc(r.name)+'</strong><small>'+esc(r.id)+(r.address?' • '+esc(r.address):'')+'</small></div>').join('');
-}
-async function openMember(id,el){
-  if(!token)return; if(el)el.classList.add('selected'); lockSearch(true);
-  try{
-    const p=await api('getMemberProfile',{token,memberId:id},'Loading Profile...','Please wait while the member record is loaded');
-    selectedMember=p;renderProfile(p);window.scrollTo({top:0,behavior:'smooth'});
-  }catch(e){fail(e,'searchMsg');}finally{lockSearch(false);}
-}
-function renderProfile(p){
-  ['profileCard','paymentCard','historyCard'].forEach(id=>document.getElementById(id).classList.remove('hidden'));
-  set('memberName',p.name||'');set('memberMeta',(p.id||'')+(p.address?' • '+p.address:''));
-  const im=document.getElementById('memberPhoto');if(p.photo){im.src=p.photo;im.style.visibility='visible';}else{im.removeAttribute('src');im.style.visibility='hidden';}
-  set('annualDue',money(p.annualDue));set('monthlyPaid',money(p.monthlyPaid));set('yearBalance',money(p.yearBalance));
-  set('registrationDue',money(p.registrationDue));set('registrationPaid',money(p.registrationPaid));set('registrationBalance',money(p.registrationBalance));
-  set('otherDue',money(p.otherDue));set('otherPaid',money(p.otherPaid));set('otherBalance',money(p.otherBalance));
-  fillObligations(p.otherObligations||[]);fillHistory(p.paymentHistory||[]);
-}
+async function logout(){const t=token;token='';selectedMember=null;document.getElementById('appView').classList.add('hidden');document.getElementById('loginView').classList.remove('hidden');['profileCard','paymentCard','historyCard'].forEach(id=>document.getElementById(id).classList.add('hidden'));if(t){try{await api('logout',{token:t},'Signing out...','Closing session');}catch(e){}}}
+async function searchMembers(){if(!token)return;const q=document.getElementById('searchText').value.trim();if(!q){msg('searchMsg','Enter Member ID or name.','error');return;}lockSearch(true);document.getElementById('results').innerHTML='';try{const rows=await api('searchMembers',{token,searchText:q},'Searching Members...','Finding matching members');renderResults(rows);}catch(e){fail(e,'searchMsg');}finally{lockSearch(false);}}
+function renderResults(rows){if(!rows||!rows.length){document.getElementById('results').innerHTML='<div class="msg error">No member found.</div>';return;}document.getElementById('results').innerHTML=rows.map(r=>'<div class="result" data-id="'+esc(r.id)+'" onclick="openMember(\''+js(r.id)+'\',this)"><strong>'+esc(r.name)+'</strong><small>'+esc(r.id)+(r.address?' • '+esc(r.address):'')+'</small></div>').join('');}
+async function openMember(id,el){if(!token)return;if(el)el.classList.add('selected');lockSearch(true);try{const p=await api('getMemberProfile',{token,memberId:id},'Loading Profile...','Please wait while the member record is loaded');selectedMember=p;renderProfile(p);window.scrollTo({top:0,behavior:'smooth'});}catch(e){fail(e,'searchMsg');}finally{lockSearch(false);}}
+function renderProfile(p){['profileCard','paymentCard','historyCard'].forEach(id=>document.getElementById(id).classList.remove('hidden'));set('memberName',p.name||'');set('memberMeta',(p.id||'')+(p.address?' • '+p.address:''));const im=document.getElementById('memberPhoto');if(p.photo){im.src=p.photo;im.style.visibility='visible';}else{im.removeAttribute('src');im.style.visibility='hidden';}set('annualDue',money(p.annualDue));set('monthlyPaid',money(p.monthlyPaid));set('yearBalance',money(p.yearBalance));set('registrationDue',money(p.registrationDue));set('registrationPaid',money(p.registrationPaid));set('registrationBalance',money(p.registrationBalance));set('otherDue',money(p.otherDue));set('otherPaid',money(p.otherPaid));set('otherBalance',money(p.otherBalance));fillObligations(p.otherObligations||[]);fillHistory(p.paymentHistory||[]);}
 function fillObligations(list){const s=document.getElementById('obligationId');s.innerHTML='<option value="">Select obligation</option>'+list.filter(o=>Number(o.balance||0)>0).map(o=>'<option value="'+esc(o.obligationId||o.id||'')+'">'+esc((o.description||'Obligation')+' — '+money(o.balance))+'</option>').join('');}
 function paymentTypeChanged(){document.getElementById('obligationWrap').classList.toggle('hidden',document.getElementById('paymentType').value!=='Other Obligation Payment');}
 function fillHistory(list){document.getElementById('historyBody').innerHTML=(list||[]).map(x=>'<tr><td>'+esc(x.date||'')+'</td><td>'+esc(x.type||x.transactionType||'')+'</td><td>'+esc(x.remarks||'')+'</td><td>'+money(x.amount)+'</td></tr>').join('');}
-async function savePayment(){
-  if(!selectedMember)return;
-  const type=document.getElementById('paymentType').value,amount=Number(document.getElementById('amount').value||0),obligationId=document.getElementById('obligationId').value;
-  if(!type){msg('paymentMsg','Select payment type.','error');return;}if(amount<=0){msg('paymentMsg','Enter a valid amount.','error');return;}
-  if(type==='Other Obligation Payment'&&!obligationId){msg('paymentMsg','Select the specific obligation.','error');return;}
-  try{
-    const r=await api('savePayment',{token,paymentData:{memberId:selectedMember.id,transactionType:type,amount,obligationId:type==='Other Obligation Payment'?obligationId:'',remarks:document.getElementById('remarks').value.trim()}},'Saving Payment...','Please wait');
-    renderProfile(r.profile);msg('paymentMsg',r.message,'ok');document.getElementById('amount').value='';document.getElementById('remarks').value='';
-  }catch(e){fail(e,'paymentMsg');}
-}
-function compressImage(file,maxW=1400,quality=.82){
-  return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const s=Math.min(1,maxW/img.width),c=document.createElement('canvas');c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);c.getContext('2d').drawImage(img,0,0,c.width,c.height);const data=c.toDataURL('image/jpeg',quality).split(',')[1];resolve({base64:data,mimeType:'image/jpeg'});};img.onerror=reject;img.src=r.result;};r.onerror=reject;r.readAsDataURL(file);});
-}
-async function uploadPhoto(input){
-  if(!selectedMember||!input.files||!input.files[0])return;
-  const file=input.files[0];
-  try{
-    msg('photoMsg','Preparing photo...','');
-    const photo=await compressImage(file);
-    const r=await api('uploadPhoto',{token,photo:{memberId:selectedMember.id,base64:photo.base64,mimeType:photo.mimeType}},'Uploading Photo...','Saving member photo');
-    msg('photoMsg',r.message,'ok');selectedMember=r.profile;renderProfile(r.profile);
-  }catch(e){fail(e,'photoMsg');}finally{input.value='';}
-}
+async function savePayment(){if(!selectedMember)return;const type=document.getElementById('paymentType').value,amount=Number(document.getElementById('amount').value||0),obligationId=document.getElementById('obligationId').value;if(!type){msg('paymentMsg','Select payment type.','error');return;}if(amount<=0){msg('paymentMsg','Enter a valid amount.','error');return;}if(type==='Other Obligation Payment'&&!obligationId){msg('paymentMsg','Select the specific obligation.','error');return;}try{const r=await api('savePayment',{token,paymentData:{memberId:selectedMember.id,transactionType:type,amount,obligationId:type==='Other Obligation Payment'?obligationId:'',remarks:document.getElementById('remarks').value.trim()}},'Saving Payment...','Please wait');renderProfile(r.profile);msg('paymentMsg',r.message,'ok');document.getElementById('amount').value='';document.getElementById('remarks').value='';}catch(e){fail(e,'paymentMsg');}}
+function compressImage(file,maxW=1400,quality=.82){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>{const img=new Image();img.onload=()=>{const s=Math.min(1,maxW/img.width),c=document.createElement('canvas');c.width=Math.round(img.width*s);c.height=Math.round(img.height*s);c.getContext('2d').drawImage(img,0,0,c.width,c.height);const data=c.toDataURL('image/jpeg',quality).split(',')[1];resolve({base64:data,mimeType:'image/jpeg'});};img.onerror=reject;img.src=r.result;};r.onerror=reject;r.readAsDataURL(file);});}
+async function uploadPhoto(input){if(!selectedMember||!input.files||!input.files[0])return;const file=input.files[0];try{msg('photoMsg','Preparing photo...','');const photo=await compressImage(file);const r=await api('uploadPhoto',{token,photo:{memberId:selectedMember.id,base64:photo.base64,mimeType:photo.mimeType}},'Uploading Photo...','Saving member photo');msg('photoMsg',r.message,'ok');selectedMember=r.profile;renderProfile(r.profile);}catch(e){fail(e,'photoMsg');}finally{input.value='';}}
 </script>
 </body>
 </html>
