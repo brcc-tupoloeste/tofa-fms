@@ -1648,7 +1648,9 @@ console.log(
 
 
 apiFrame.src =
-  API_URL;
+  API_URL +
+  '?bridge=' +
+  Date.now();
 
 
 /************************************************************
