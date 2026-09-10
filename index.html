@@ -19,6 +19,10 @@
 
 <style>
 
+/* =========================================================
+   BASE
+========================================================= */
+
 *{
   box-sizing:border-box;
 }
@@ -36,12 +40,29 @@ body.busy{
   overflow:hidden;
 }
 
+button,
+input,
+select,
+textarea{
+  font:inherit;
+}
+
+
+/* =========================================================
+   MAIN WRAPPER
+========================================================= */
+
 .wrap{
   width:100%;
   max-width:760px;
-  margin:auto;
+  margin:0 auto;
   padding:12px;
 }
+
+
+/* =========================================================
+   BRAND
+========================================================= */
 
 .brand{
   text-align:center;
@@ -51,12 +72,19 @@ body.busy{
 .brand h1{
   margin:0;
   font-size:20px;
+  line-height:1.25;
 }
 
 .brand p{
   margin:5px 0 0;
   color:#6b7280;
+  font-size:14px;
 }
+
+
+/* =========================================================
+   CARD
+========================================================= */
 
 .card{
   background:#fff;
@@ -70,6 +98,11 @@ body.busy{
   display:none!important;
 }
 
+
+/* =========================================================
+   FORM
+========================================================= */
+
 label{
   display:block;
   font-size:13px;
@@ -79,19 +112,13 @@ label{
 
 input,
 select,
-textarea,
-button{
-  width:100%;
-  font:inherit;
-}
-
-input,
-select,
 textarea{
+  width:100%;
   padding:12px;
   border:1px solid #ccd4dc;
   border-radius:10px;
   background:#fff;
+  color:#1f2937;
 }
 
 textarea{
@@ -99,7 +126,21 @@ textarea{
   resize:vertical;
 }
 
+input:focus,
+select:focus,
+textarea:focus{
+  outline:none;
+  border-color:#1f4e78;
+  box-shadow:0 0 0 2px rgba(31,78,120,.10);
+}
+
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
 button{
+  width:100%;
   padding:12px;
   border:0;
   border-radius:10px;
@@ -111,11 +152,15 @@ button{
 }
 
 button:hover{
-  opacity:.94;
+  filter:brightness(.96);
 }
 
-button:active{
-  transform:scale(.995);
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled{
+  opacity:.55;
+  cursor:not-allowed;
 }
 
 button.alt{
@@ -126,6 +171,7 @@ button.danger{
   background:#991b1b;
   width:auto;
   margin:0;
+  padding:9px 14px;
 }
 
 button.back{
@@ -139,37 +185,27 @@ button.success-back{
   margin-top:10px;
 }
 
-button:disabled,
-input:disabled,
-select:disabled,
-textarea:disabled{
-  opacity:.55;
-  cursor:not-allowed;
-}
 
-.msg{
-  padding:10px;
-  margin-top:10px;
-  border-radius:9px;
-  font-size:13px;
-}
-
-.error{
-  background:#fee2e2;
-  color:#991b1b;
-}
-
-.ok{
-  background:#dcfce7;
-  color:#166534;
-}
+/* =========================================================
+   TOP BAR
+========================================================= */
 
 .top{
   display:flex;
   justify-content:space-between;
   align-items:center;
+  gap:10px;
   margin-bottom:10px;
 }
+
+.top b{
+  font-size:15px;
+}
+
+
+/* =========================================================
+   SEARCH
+========================================================= */
 
 .search{
   display:grid;
@@ -180,7 +216,7 @@ textarea:disabled{
 
 .search button{
   width:auto;
-  white-space:nowrap;
+  min-width:70px;
 }
 
 .result{
@@ -215,6 +251,11 @@ textarea:disabled{
   border-color:#1f4e78;
   background:#f4f8fb;
 }
+
+
+/* =========================================================
+   MEMBER PROFILE
+========================================================= */
 
 .profile{
   display:flex;
@@ -266,6 +307,15 @@ textarea:disabled{
   margin-top:3px;
 }
 
+.profile-actions{
+  margin-bottom:12px;
+}
+
+
+/* =========================================================
+   ACCOUNTS
+========================================================= */
+
 .accounts{
   display:grid;
   grid-template-columns:1fr;
@@ -292,6 +342,10 @@ textarea:disabled{
   font-size:13px;
 }
 
+.line span:last-child{
+  text-align:right;
+}
+
 .balance{
   border-top:1px solid #e5e7eb;
   margin-top:5px;
@@ -299,9 +353,32 @@ textarea:disabled{
   font-weight:800;
 }
 
-.profile-actions{
-  margin-bottom:12px;
+
+/* =========================================================
+   MESSAGES
+========================================================= */
+
+.msg{
+  padding:10px;
+  margin-top:10px;
+  border-radius:9px;
+  font-size:13px;
 }
+
+.error{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+.ok{
+  background:#dcfce7;
+  color:#166534;
+}
+
+
+/* =========================================================
+   PAYMENT SUCCESS
+========================================================= */
 
 .payment-success{
   border:1px solid #bbf7d0;
@@ -311,6 +388,16 @@ textarea:disabled{
   margin-top:12px;
   color:#166534;
   font-weight:700;
+}
+
+
+/* =========================================================
+   PAYMENT HISTORY
+========================================================= */
+
+.scroll{
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
 }
 
 table{
@@ -325,16 +412,13 @@ td{
   border-bottom:1px solid #e5e7eb;
   font-size:12px;
   text-align:left;
+  vertical-align:top;
 }
 
-th{
-  font-weight:800;
-  background:#f8fafc;
-}
 
-.scroll{
-  overflow:auto;
-}
+/* =========================================================
+   BUSY OVERLAY
+========================================================= */
 
 .busy-overlay{
   position:fixed;
@@ -345,6 +429,7 @@ th{
   align-items:center;
   justify-content:center;
   z-index:9999;
+  padding:20px;
 }
 
 .busy-box{
@@ -353,6 +438,7 @@ th{
   padding:22px 26px;
   text-align:center;
   min-width:220px;
+  max-width:90vw;
   box-shadow:0 8px 30px rgba(0,0,0,.16);
 }
 
@@ -382,43 +468,76 @@ th{
   margin-top:5px;
 }
 
-@media(min-width:620px){
 
-  .accounts{
-    grid-template-columns:repeat(3,1fr);
-  }
+/* =========================================================
+   MOBILE
+========================================================= */
 
-}
-
-@media(max-width:480px){
+@media(max-width:619px){
 
   .wrap{
     padding:8px;
   }
 
   .brand{
-    padding-top:10px;
+    padding:12px 6px 7px;
   }
 
   .brand h1{
     font-size:18px;
   }
 
+  .brand p{
+    font-size:13px;
+  }
+
   .card{
+    border-radius:13px;
     padding:13px;
-    border-radius:14px;
+  }
+
+  .top{
+    margin-bottom:8px;
+  }
+
+  .top b{
+    font-size:14px;
+  }
+
+  button.danger{
+    padding:8px 11px;
+    font-size:12px;
   }
 
   .search{
     grid-template-columns:1fr;
+    gap:0;
   }
 
   .search button{
     width:100%;
+    margin-top:9px;
   }
 
   .profile{
     align-items:flex-start;
+  }
+
+  .accounts{
+    grid-template-columns:1fr;
+  }
+
+}
+
+
+/* =========================================================
+   DESKTOP
+========================================================= */
+
+@media(min-width:620px){
+
+  .accounts{
+    grid-template-columns:repeat(3,1fr);
   }
 
 }
@@ -431,9 +550,9 @@ th{
 <body>
 
 
-<!-- =====================================================
+<!-- =======================================================
      BUSY OVERLAY
-====================================================== -->
+======================================================= -->
 
 <div
   id="busyOverlay"
@@ -464,9 +583,9 @@ th{
 <div class="wrap">
 
 
-<!-- =====================================================
+<!-- =======================================================
      BRAND
-====================================================== -->
+======================================================= -->
 
 <div class="brand">
 
@@ -482,9 +601,9 @@ th{
 
 
 
-<!-- =====================================================
+<!-- =======================================================
      LOGIN
-====================================================== -->
+======================================================= -->
 
 <div
   id="loginView"
@@ -537,34 +656,45 @@ th{
 
 
 
-<!-- =====================================================
+<!-- =======================================================
      APPLICATION
-====================================================== -->
+======================================================= -->
 
 <div
   id="appView"
   class="hidden">
 
 
-<!-- =====================================================
-     TOP BAR
-====================================================== -->
+<!-- =======================================================
+     SEARCH TOP BAR
 
-<div class="top" id="searchTopBar">
-  <b>💵 Payments Received</b>
+     IMPORTANT:
+     Logout is ONLY visible here.
+======================================================= -->
+
+<div
+  id="searchTopBar"
+  class="top">
+
+  <b>
+    💵 Payments Received
+  </b>
 
   <button
     class="danger"
     onclick="logout()">
+
     🚪 Logout
+
   </button>
+
 </div>
 
 
 
-<!-- =====================================================
+<!-- =======================================================
      SEARCH MEMBER
-====================================================== -->
+======================================================= -->
 
 <div
   id="searchCard"
@@ -607,9 +737,9 @@ th{
 
 
 
-<!-- =====================================================
+<!-- =======================================================
      MEMBER PROFILE
-====================================================== -->
+======================================================= -->
 
 <div
   id="profileCard"
@@ -811,9 +941,9 @@ th{
 
 
 
-<!-- =====================================================
+<!-- =======================================================
      RECEIVE PAYMENT
-====================================================== -->
+======================================================= -->
 
 <div
   id="paymentCard"
@@ -862,6 +992,7 @@ th{
 
     <select
       id="obligationId">
+
     </select>
 
   </div>
@@ -895,7 +1026,6 @@ th{
 
   </button>
 
-
   <div id="paymentMsg"></div>
 
 
@@ -923,9 +1053,9 @@ th{
 
 
 
-<!-- =====================================================
+<!-- =======================================================
      PAYMENT HISTORY
-====================================================== -->
+======================================================= -->
 
 <div
   id="historyCard"
@@ -975,64 +1105,50 @@ th{
 
 
 </div>
+<!-- END appView -->
+
 
 </div>
+<!-- END wrap -->
 
 
 
 <script>
 
-/************************************************************
- * API CONFIGURATION
- *
- * DIRECT POST
- *
- * GitHub Pages
- *      ↓
- * fetch()
- *      ↓
- * Apps Script doPost()
- *      ↓
- * TOFA backend
- ************************************************************/
+/* =========================================================
+   API CONFIGURATION
+========================================================= */
 
 const API_URL =
   'https://script.google.com/macros/s/AKfycbynk1P7SnfHWOBnJYC2vhwdH7ONxEUj8FWMp--40YUpkcecjwWoigQG29pnc4YlU6l0zA/exec';
 
-
-/************************************************************
- * STATE
- ************************************************************/
 
 let token = '';
 
 let selectedMember = null;
 
 
-/************************************************************
- * SHOW PASSWORD
- ************************************************************/
+/* =========================================================
+   SHOW PASSWORD
+========================================================= */
 
 document
   .getElementById('showPass')
-  .addEventListener(
-    'change',
-    function(){
+  .onchange = function(){
 
-      document
-        .getElementById('password')
-        .type =
-          this.checked
-            ? 'text'
-            : 'password';
+    document
+      .getElementById('password')
+      .type =
+        this.checked
+          ? 'text'
+          : 'password';
 
-    }
-  );
+  };
 
 
-/************************************************************
- * HELPERS
- ************************************************************/
+/* =========================================================
+   HELPERS
+========================================================= */
 
 function esc(v){
 
@@ -1041,30 +1157,14 @@ function esc(v){
   )
   .replace(
     /[&<>"']/g,
-    function(m){
-
-      return {
-        '&':'&amp;',
-        '<':'&lt;',
-        '>':'&gt;',
-        '"':'&quot;',
-        "'":'&#39;'
-      }[m];
-
-    }
+    m => ({
+      '&':'&amp;',
+      '<':'&lt;',
+      '>':'&gt;',
+      '"':'&quot;',
+      "'":'&#39;'
+    }[m])
   );
-
-}
-
-
-function js(v){
-
-  return String(
-    v == null ? '' : v
-  )
-  .replace(/\\/g,'\\\\')
-  .replace(/'/g,"\\'")
-  .replace(/\r?\n/g,' ');
 
 }
 
@@ -1160,25 +1260,26 @@ function hideBusy(){
 
 function lockSearch(v){
 
-  document
-    .getElementById('searchText')
-    .disabled = v;
+  const searchText =
+    document.getElementById('searchText');
 
-  document
-    .getElementById('searchBtn')
-    .disabled = v;
+  const searchBtn =
+    document.getElementById('searchBtn');
+
+  if(searchText)
+    searchText.disabled = v;
+
+  if(searchBtn)
+    searchBtn.disabled = v;
 
   document
     .querySelectorAll('.result')
     .forEach(
-      function(x){
-
+      x =>
         x.classList.toggle(
           'locked',
           v
-        );
-
-      }
+        )
     );
 
 }
@@ -1194,6 +1295,7 @@ function fail(
       ? e.message
       : String(e || 'Error');
 
+
   if(
     m === 'SESSION_EXPIRED'
   ){
@@ -1207,7 +1309,9 @@ function fail(
     location.reload();
 
     return;
+
   }
+
 
   msg(
     id || 'searchMsg',
@@ -1218,11 +1322,15 @@ function fail(
 }
 
 
-/************************************************************
- * DIRECT API
- *
- * SAME FLOW AS APPROVAL CENTER
- ************************************************************/
+/* =========================================================
+   API CALL — DIRECT POST
+
+   GitHub Pages
+        ↓
+   Apps Script doPost()
+        ↓
+   route/action
+========================================================= */
 
 async function api(
   action,
@@ -1236,11 +1344,13 @@ async function api(
     sub || 'Processing request'
   );
 
+
   console.log(
     '[TOFA API] POST START',
     action,
     payload
   );
+
 
   try{
 
@@ -1289,6 +1399,7 @@ async function api(
 
     let result;
 
+
     try{
 
       result =
@@ -1322,8 +1433,7 @@ async function api(
     ){
 
       throw new Error(
-        result &&
-        result.message
+        result && result.message
           ? result.message
           : 'Request failed.'
       );
@@ -1341,6 +1451,7 @@ async function api(
       result.result || {}
     );
 
+
   }catch(error){
 
     console.error(
@@ -1351,6 +1462,7 @@ async function api(
 
     throw error;
 
+
   }finally{
 
     hideBusy();
@@ -1360,9 +1472,9 @@ async function api(
 }
 
 
-/************************************************************
- * LOGIN
- ************************************************************/
+/* =========================================================
+   LOGIN
+========================================================= */
 
 async function login(){
 
@@ -1371,50 +1483,7 @@ async function login(){
       'loginBtn'
     );
 
-  const username =
-    document
-      .getElementById('username')
-      .value
-      .trim();
-
-  const password =
-    document
-      .getElementById('password')
-      .value;
-
-
-  if(!username){
-
-    msg(
-      'loginMsg',
-      'Enter username.',
-      'error'
-    );
-
-    return;
-  }
-
-
-  if(!password){
-
-    msg(
-      'loginMsg',
-      'Enter password.',
-      'error'
-    );
-
-    return;
-  }
-
-
   b.disabled = true;
-
-
-  msg(
-    'loginMsg',
-    '',
-    ''
-  );
 
 
   try{
@@ -1425,8 +1494,22 @@ async function login(){
         'login',
 
         {
-          username:username,
-          password:password
+
+          username:
+            document
+              .getElementById(
+                'username'
+              )
+              .value
+              .trim(),
+
+          password:
+            document
+              .getElementById(
+                'password'
+              )
+              .value
+
         },
 
         'Signing in...',
@@ -1434,24 +1517,6 @@ async function login(){
         'Checking administrator access'
 
       );
-
-
-    console.log(
-      '[TOFA LOGIN] LOGIN RESULT',
-      r
-    );
-
-
-    if(
-      !r ||
-      !r.token
-    ){
-
-      throw new Error(
-        'Login succeeded but no session token was returned.'
-      );
-
-    }
 
 
     token =
@@ -1475,22 +1540,46 @@ async function login(){
       .remove('hidden');
 
 
+    /* Always start on Search Member */
+
     document
-      .getElementById('searchText')
-      .focus();
+      .getElementById('searchTopBar')
+      .classList
+      .remove('hidden');
 
 
-    console.log(
-      '[TOFA LOGIN] APPLICATION OPENED'
+    document
+      .getElementById('searchCard')
+      .classList
+      .remove('hidden');
+
+
+    document
+      .getElementById('profileCard')
+      .classList
+      .add('hidden');
+
+
+    document
+      .getElementById('paymentCard')
+      .classList
+      .add('hidden');
+
+
+    document
+      .getElementById('historyCard')
+      .classList
+      .add('hidden');
+
+
+    msg(
+      'loginMsg',
+      '',
+      ''
     );
 
 
   }catch(e){
-
-    console.error(
-      '[TOFA LOGIN] ERROR',
-      e
-    );
 
     fail(
       e,
@@ -1507,19 +1596,24 @@ async function login(){
 }
 
 
-/************************************************************
- * LOGOUT
- ************************************************************/
+/* =========================================================
+   LOGOUT
+
+   Logout button exists ONLY on Search screen.
+========================================================= */
 
 async function logout(){
 
   const t =
     token;
 
+
   token = '';
 
   selectedMember = null;
 
+
+  /* Return to Login */
 
   document
     .getElementById('appView')
@@ -1533,21 +1627,12 @@ async function logout(){
     .remove('hidden');
 
 
-  [
-    'profileCard',
-    'paymentCard',
-    'historyCard'
-  ]
-  .forEach(
-    function(id){
+  /* Reset screen */
 
-      document
-        .getElementById(id)
-        .classList
-        .add('hidden');
-
-    }
-  );
+  document
+    .getElementById('searchTopBar')
+    .classList
+    .remove('hidden');
 
 
   document
@@ -1556,23 +1641,66 @@ async function logout(){
     .remove('hidden');
 
 
+  [
+    'profileCard',
+    'paymentCard',
+    'historyCard'
+  ].forEach(
+    id =>
+      document
+        .getElementById(id)
+        .classList
+        .add('hidden')
+  );
+
+
+  document
+    .getElementById('searchText')
+    .value = '';
+
+
+  document
+    .getElementById('results')
+    .innerHTML = '';
+
+
+  msg(
+    'searchMsg',
+    '',
+    ''
+  );
+
+
+  document
+    .getElementById('password')
+    .value = '';
+
+
+  document
+    .getElementById('showPass')
+    .checked = false;
+
+
+  document
+    .getElementById('password')
+    .type = 'password';
+
+
   if(t){
 
     try{
 
       await api(
         'logout',
-        {
-          token:t
-        },
+        {token:t},
         'Signing out...',
         'Closing session'
       );
 
     }catch(e){
 
-      console.error(
-        '[TOFA LOGOUT] ERROR',
+      console.warn(
+        '[TOFA API] Logout server call failed',
         e
       );
 
@@ -1583,9 +1711,9 @@ async function logout(){
 }
 
 
-/************************************************************
- * SEARCH MEMBERS
- ************************************************************/
+/* =========================================================
+   SEARCH MEMBERS
+========================================================= */
 
 async function searchMembers(){
 
@@ -1595,7 +1723,9 @@ async function searchMembers(){
 
   const q =
     document
-      .getElementById('searchText')
+      .getElementById(
+        'searchText'
+      )
       .value
       .trim();
 
@@ -1609,6 +1739,7 @@ async function searchMembers(){
     );
 
     return;
+
   }
 
 
@@ -1618,13 +1749,6 @@ async function searchMembers(){
   document
     .getElementById('results')
     .innerHTML = '';
-
-
-  msg(
-    'searchMsg',
-    '',
-    ''
-  );
 
 
   try{
@@ -1646,9 +1770,7 @@ async function searchMembers(){
       );
 
 
-    renderResults(
-      rows
-    );
+    renderResults(rows);
 
 
   }catch(e){
@@ -1668,9 +1790,9 @@ async function searchMembers(){
 }
 
 
-/************************************************************
- * RENDER SEARCH RESULTS
- ************************************************************/
+/* =========================================================
+   RENDER SEARCH RESULTS
+========================================================= */
 
 function renderResults(
   rows
@@ -1689,6 +1811,7 @@ function renderResults(
         '</div>';
 
     return;
+
   }
 
 
@@ -1698,19 +1821,29 @@ function renderResults(
 
       rows
         .map(
-          function(r){
+          r => {
+
+            const id =
+              String(
+                r.id == null
+                  ? ''
+                  : r.id
+              );
+
+            const safeId =
+              encodeURIComponent(id);
 
             return (
 
               '<div class="result" ' +
 
               'data-id="' +
-              esc(r.id) +
+              esc(id) +
               '" ' +
 
-              'onclick="openMember(\'' +
-              js(r.id) +
-              '\',this)">' +
+              'data-member-id="' +
+              esc(safeId) +
+              '">' +
 
               '<strong>' +
               esc(r.name) +
@@ -1737,12 +1870,37 @@ function renderResults(
         )
         .join('');
 
+
+  /* Attach click handlers safely */
+
+  document
+    .querySelectorAll(
+      '#results .result'
+    )
+    .forEach(
+      el => {
+
+        el.addEventListener(
+          'click',
+          function(){
+
+            openMember(
+              this.dataset.id,
+              this
+            );
+
+          }
+        );
+
+      }
+    );
+
 }
 
 
-/************************************************************
- * OPEN MEMBER
- ************************************************************/
+/* =========================================================
+   OPEN MEMBER
+========================================================= */
 
 async function openMember(
   id,
@@ -1784,26 +1942,25 @@ async function openMember(
       );
 
 
-    if(!p){
-
-      throw new Error(
-        'Member profile was not returned.'
-      );
-
-    }
-
-
     selectedMember =
       p;
 
 
-    renderProfile(
-      p
-    );
+    renderProfile(p);
 
+
+    /* =====================================================
+       HIDE SEARCH + LOGOUT
+    ===================================================== */
 
     document
       .getElementById('searchCard')
+      .classList
+      .add('hidden');
+
+
+    document
+      .getElementById('searchTopBar')
       .classList
       .add('hidden');
 
@@ -1831,9 +1988,9 @@ async function openMember(
 }
 
 
-/************************************************************
- * RENDER PROFILE
- ************************************************************/
+/* =========================================================
+   RENDER PROFILE
+========================================================= */
 
 function renderProfile(
   p
@@ -1843,24 +2000,32 @@ function renderProfile(
     'profileCard',
     'paymentCard',
     'historyCard'
-  ]
-  .forEach(
-    function(id){
-
+  ].forEach(
+    id =>
       document
         .getElementById(id)
         .classList
-        .remove('hidden');
-
-    }
+        .remove('hidden')
   );
 
+
+  /* Search hidden while viewing member */
 
   document
     .getElementById('searchCard')
     .classList
     .add('hidden');
 
+
+  /* Logout hidden while viewing member */
+
+  document
+    .getElementById('searchTopBar')
+    .classList
+    .add('hidden');
+
+
+  /* Hide previous payment success */
 
   document
     .getElementById('paymentSuccess')
@@ -1876,15 +2041,22 @@ function renderProfile(
 
   set(
     'memberMeta',
+
     (p.id || '') +
+
     (
       p.address
         ? ' • ' +
           p.address
         : ''
     )
+
   );
 
+
+  /* =====================================================
+     PHOTO
+  ===================================================== */
 
   const im =
     document.getElementById(
@@ -1911,6 +2083,10 @@ function renderProfile(
 
   }
 
+
+  /* =====================================================
+     ACCOUNTING
+  ===================================================== */
 
   set(
     'annualDue',
@@ -1978,37 +2154,52 @@ function renderProfile(
 }
 
 
-/************************************************************
- * BACK TO SEARCH
- ************************************************************/
+/* =========================================================
+   BACK TO SEARCH
+
+   This brings back BOTH:
+   - Search Member
+   - Logout
+========================================================= */
 
 function backToSearch(){
 
-  selectedMember = null;
+  selectedMember =
+    null;
 
+
+  /* Hide profile */
 
   [
     'profileCard',
     'paymentCard',
     'historyCard'
-  ]
-  .forEach(
-    function(id){
-
+  ].forEach(
+    id =>
       document
         .getElementById(id)
         .classList
-        .add('hidden');
-
-    }
+        .add('hidden')
   );
 
+
+  /* Show search */
 
   document
     .getElementById('searchCard')
     .classList
     .remove('hidden');
 
+
+  /* SHOW LOGOUT AGAIN */
+
+  document
+    .getElementById('searchTopBar')
+    .classList
+    .remove('hidden');
+
+
+  /* Clear search */
 
   document
     .getElementById('searchText')
@@ -2026,6 +2217,8 @@ function backToSearch(){
     ''
   );
 
+
+  /* Clear payment */
 
   document
     .getElementById('paymentType')
@@ -2067,6 +2260,11 @@ function backToSearch(){
     .add('hidden');
 
 
+  document
+    .getElementById('photoMsg')
+    .innerHTML = '';
+
+
   window.scrollTo({
     top:0,
     behavior:'smooth'
@@ -2075,9 +2273,9 @@ function backToSearch(){
 }
 
 
-/************************************************************
- * OBLIGATIONS
- ************************************************************/
+/* =========================================================
+   OBLIGATIONS
+========================================================= */
 
 function fillObligations(
   list
@@ -2094,42 +2292,35 @@ function fillObligations(
     'Select obligation' +
     '</option>' +
 
-    (list || [])
+    list
       .filter(
-        function(o){
-
-          return Number(
+        o =>
+          Number(
             o.balance || 0
-          ) > 0;
-
-        }
+          ) > 0
       )
       .map(
-        function(o){
+        o => {
+
+          const id =
+            o.obligationId ||
+            o.id ||
+            '';
+
+          const description =
+            o.description ||
+            'Obligation';
 
           return (
 
             '<option value="' +
-
-            esc(
-              o.obligationId ||
-              o.id ||
-              ''
-            ) +
-
+            esc(id) +
             '">' +
 
             esc(
-
-              (o.description ||
-               'Obligation') +
-
+              description +
               ' — ' +
-
-              money(
-                o.balance
-              )
-
+              money(o.balance)
             ) +
 
             '</option>'
@@ -2143,20 +2334,24 @@ function fillObligations(
 }
 
 
-/************************************************************
- * PAYMENT TYPE
- ************************************************************/
+/* =========================================================
+   PAYMENT TYPE
+========================================================= */
 
 function paymentTypeChanged(){
 
   const type =
     document
-      .getElementById('paymentType')
+      .getElementById(
+        'paymentType'
+      )
       .value;
 
 
   document
-    .getElementById('obligationWrap')
+    .getElementById(
+      'obligationWrap'
+    )
     .classList
     .toggle(
       'hidden',
@@ -2167,64 +2362,59 @@ function paymentTypeChanged(){
 }
 
 
-/************************************************************
- * PAYMENT HISTORY
- ************************************************************/
+/* =========================================================
+   PAYMENT HISTORY
+========================================================= */
 
 function fillHistory(
   list
 ){
 
   document
-    .getElementById('historyBody')
+    .getElementById(
+      'historyBody'
+    )
     .innerHTML =
 
       (list || [])
         .map(
-          function(x){
+          x =>
 
-            return (
+            '<tr>' +
 
-              '<tr>' +
+            '<td>' +
+            esc(x.date || '') +
+            '</td>' +
 
-              '<td>' +
-              esc(x.date || '') +
-              '</td>' +
+            '<td>' +
+            esc(
+              x.type ||
+              x.transactionType ||
+              ''
+            ) +
+            '</td>' +
 
-              '<td>' +
-              esc(
-                x.type ||
-                x.transactionType ||
-                ''
-              ) +
-              '</td>' +
+            '<td>' +
+            esc(
+              x.remarks || ''
+            ) +
+            '</td>' +
 
-              '<td>' +
-              esc(
-                x.remarks || ''
-              ) +
-              '</td>' +
+            '<td>' +
+            money(x.amount) +
+            '</td>' +
 
-              '<td>' +
-              money(
-                x.amount
-              ) +
-              '</td>' +
+            '</tr>'
 
-              '</tr>'
-
-            );
-
-          }
         )
         .join('');
 
 }
 
 
-/************************************************************
- * SAVE PAYMENT
- ************************************************************/
+/* =========================================================
+   SAVE PAYMENT
+========================================================= */
 
 async function savePayment(){
 
@@ -2234,21 +2424,27 @@ async function savePayment(){
 
   const type =
     document
-      .getElementById('paymentType')
+      .getElementById(
+        'paymentType'
+      )
       .value;
 
 
   const amount =
     Number(
       document
-        .getElementById('amount')
+        .getElementById(
+          'amount'
+        )
         .value || 0
     );
 
 
   const obligationId =
     document
-      .getElementById('obligationId')
+      .getElementById(
+        'obligationId'
+      )
       .value;
 
 
@@ -2261,6 +2457,7 @@ async function savePayment(){
     );
 
     return;
+
   }
 
 
@@ -2273,6 +2470,7 @@ async function savePayment(){
     );
 
     return;
+
   }
 
 
@@ -2289,6 +2487,7 @@ async function savePayment(){
     );
 
     return;
+
   }
 
 
@@ -2298,14 +2497,8 @@ async function savePayment(){
     );
 
 
-  saveBtn.disabled = true;
-
-
-  msg(
-    'paymentMsg',
-    '',
-    ''
-  );
+  saveBtn.disabled =
+    true;
 
 
   try{
@@ -2316,6 +2509,7 @@ async function savePayment(){
         'savePayment',
 
         {
+
           token:token,
 
           paymentData:{
@@ -2326,8 +2520,7 @@ async function savePayment(){
             transactionType:
               type,
 
-            amount:
-              amount,
+            amount:amount,
 
             obligationId:
               type ===
@@ -2354,17 +2547,7 @@ async function savePayment(){
       );
 
 
-    if(
-      !r ||
-      !r.profile
-    ){
-
-      throw new Error(
-        'Payment was processed but updated profile was not returned.'
-      );
-
-    }
-
+    /* Update profile */
 
     selectedMember =
       r.profile;
@@ -2375,37 +2558,52 @@ async function savePayment(){
     );
 
 
+    /* Server message */
+
     msg(
       'paymentMsg',
-      r.message ||
-        'Payment successfully recorded.',
+      r.message,
       'ok'
     );
 
 
+    /* Success */
+
     document
-      .getElementById('paymentSuccess')
+      .getElementById(
+        'paymentSuccess'
+      )
       .classList
       .remove('hidden');
 
 
+    /* Clear fields */
+
     document
-      .getElementById('amount')
+      .getElementById(
+        'amount'
+      )
       .value = '';
 
 
     document
-      .getElementById('remarks')
+      .getElementById(
+        'remarks'
+      )
       .value = '';
 
 
     document
-      .getElementById('paymentType')
+      .getElementById(
+        'paymentType'
+      )
       .value = '';
 
 
     document
-      .getElementById('obligationWrap')
+      .getElementById(
+        'obligationWrap'
+      )
       .classList
       .add('hidden');
 
@@ -2420,16 +2618,17 @@ async function savePayment(){
 
   }finally{
 
-    saveBtn.disabled = false;
+    saveBtn.disabled =
+      false;
 
   }
 
 }
 
 
-/************************************************************
- * IMAGE COMPRESSION
- ************************************************************/
+/* =========================================================
+   IMAGE COMPRESSION
+========================================================= */
 
 function compressImage(
   file,
@@ -2438,101 +2637,94 @@ function compressImage(
 ){
 
   return new Promise(
-    function(resolve,reject){
+    (resolve,reject)=>{
 
-      const reader =
+      const r =
         new FileReader();
 
 
-      reader.onload =
-        function(){
+      r.onload = () => {
 
-          const img =
-            new Image();
-
-
-          img.onload =
-            function(){
-
-              const scale =
-                Math.min(
-                  1,
-                  maxW /
-                    img.width
-                );
+        const img =
+          new Image();
 
 
-              const canvas =
-                document.createElement(
-                  'canvas'
-                );
+        img.onload = () => {
+
+          const s =
+            Math.min(
+              1,
+              maxW / img.width
+            );
 
 
-              canvas.width =
-                Math.round(
-                  img.width *
-                  scale
-                );
+          const c =
+            document.createElement(
+              'canvas'
+            );
 
 
-              canvas.height =
-                Math.round(
-                  img.height *
-                  scale
-                );
+          c.width =
+            Math.round(
+              img.width * s
+            );
 
 
-              const ctx =
-                canvas.getContext(
-                  '2d'
-                );
+          c.height =
+            Math.round(
+              img.height * s
+            );
 
 
-              ctx.drawImage(
-                img,
-                0,
-                0,
-                canvas.width,
-                canvas.height
-              );
+          const ctx =
+            c.getContext('2d');
 
 
-              const data =
-                canvas
-                  .toDataURL(
-                    'image/jpeg',
-                    quality
-                  )
-                  .split(',')[1];
+          ctx.drawImage(
+            img,
+            0,
+            0,
+            c.width,
+            c.height
+          );
 
 
-              resolve({
-
-                base64:data,
-
-                mimeType:
-                  'image/jpeg'
-
-              });
-
-            };
+          const data =
+            c
+              .toDataURL(
+                'image/jpeg',
+                quality
+              )
+              .split(',')[1];
 
 
-          img.onerror =
-            reject;
+          resolve({
 
+            base64:data,
 
-          img.src =
-            reader.result;
+            mimeType:
+              'image/jpeg'
+
+          });
 
         };
 
 
-      reader.onerror =
+        img.onerror =
+          reject;
+
+
+        img.src =
+          r.result;
+
+      };
+
+
+      r.onerror =
         reject;
 
 
-      reader.readAsDataURL(
+      r.readAsDataURL(
         file
       );
 
@@ -2542,9 +2734,9 @@ function compressImage(
 }
 
 
-/************************************************************
- * UPLOAD MEMBER PHOTO
- ************************************************************/
+/* =========================================================
+   UPLOAD MEMBER PHOTO
+========================================================= */
 
 async function uploadPhoto(
   input
@@ -2610,25 +2802,18 @@ async function uploadPhoto(
 
     msg(
       'photoMsg',
-      r.message ||
-        'Photo successfully uploaded.',
+      r.message,
       'ok'
     );
 
 
-    if(
+    selectedMember =
+      r.profile;
+
+
+    renderProfile(
       r.profile
-    ){
-
-      selectedMember =
-        r.profile;
-
-
-      renderProfile(
-        r.profile
-      );
-
-    }
+    );
 
 
   }catch(e){
@@ -2648,21 +2833,21 @@ async function uploadPhoto(
 }
 
 
-/************************************************************
- * ENTER KEY SUPPORT
- ************************************************************/
+/* =========================================================
+   ENTER KEY SUPPORT
+========================================================= */
 
 document
-  .getElementById('password')
+  .getElementById('searchText')
   .addEventListener(
     'keydown',
     function(e){
 
-      if(
-        e.key === 'Enter'
-      ){
+      if(e.key === 'Enter'){
 
-        login();
+        e.preventDefault();
+
+        searchMembers();
 
       }
 
@@ -2671,16 +2856,16 @@ document
 
 
 document
-  .getElementById('searchText')
+  .getElementById('password')
   .addEventListener(
     'keydown',
     function(e){
 
-      if(
-        e.key === 'Enter'
-      ){
+      if(e.key === 'Enter'){
 
-        searchMembers();
+        e.preventDefault();
+
+        login();
 
       }
 
@@ -2691,5 +2876,4 @@ document
 </script>
 
 </body>
-
 </html>
