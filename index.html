@@ -1468,142 +1468,164 @@ window.addEventListener(
   }
 );
 
-
 /************************************************************
- * API CALL
+ * API CALL — DIRECT POST
+ * GitHub Pages → Apps Script doPost()
  ************************************************************/
 
-function api(
+async function api(
   action,
   payload,
   title,
   sub
 ){
 
-  return new Promise(
-    function(
-      resolve,
-      reject
+  showBusy(
+    title ||
+      'Please wait...',
+
+    sub ||
+      'Processing request'
+  );
+
+
+  console.log(
+    '[TOFA API] POST START',
+    action,
+    payload
+  );
+
+
+  try {
+
+    const response =
+      await fetch(
+        API_URL,
+        {
+          method: 'POST',
+
+          body:
+            JSON.stringify({
+
+              action:
+                action,
+
+              payload:
+                payload || {}
+
+            }),
+
+          redirect:
+            'follow'
+        }
+      );
+
+
+    console.log(
+      '[TOFA API] HTTP RESPONSE',
+      response.status,
+      response.url
+    );
+
+
+    const responseText =
+      await response.text();
+
+
+    console.log(
+      '[TOFA API] RESPONSE RECEIVED',
+      responseText
+    );
+
+
+    if(
+      !responseText
     ){
 
-      const id =
-        'r' +
-        (++requestSeq);
-
-
-      const req = {
-
-        id,
-
-        action,
-
-        payload,
-
-        resolve,
-
-        reject
-
-      };
-
-
-      window.__pendingApi = {
-
-        id,
-
-        resolve,
-
-        reject
-
-      };
-
-
-      console.log(
-        '[TOFA API] REQUEST',
-        id,
-        action,
-        payload
+      throw new Error(
+        'The server returned an empty response.'
       );
 
-
-      showBusy(
-        title ||
-          'Please wait...',
-
-        sub ||
-          'Processing request'
-      );
+    }
 
 
-      if(
-        apiReady
-      ){
-
-        sendApiRequest(
-          req
-        );
-
-      }else{
-
-        console.log(
-          '[TOFA API] bridge not ready - queueing',
-          id
-        );
+    let result;
 
 
-        pendingQueue.push(
-          req
-        );
+    try {
 
-      }
-
-
-      requestTimer =
-        setTimeout(
-          function(){
-
-            if(
-              window.__pendingApi &&
-              window.__pendingApi.id === id
-            ){
-
-              console.log(
-                '[TOFA API] TIMEOUT',
-                id,
-                action
-              );
-
-
-              window.__pendingApi =
-                null;
-
-
-              pendingQueue =
-                pendingQueue.filter(
-                  x =>
-                    x.id !== id
-                );
-
-
-              hideBusy();
-
-
-              reject(
-                new Error(
-                  'The server took too long to respond. Please try again.'
-                )
-              );
-
-            }
-
-          },
-          15000
+      result =
+        JSON.parse(
+          responseText
         );
 
     }
-  );
+    catch(parseError){
+
+      console.error(
+        '[TOFA API] INVALID JSON RESPONSE',
+        responseText
+      );
+
+
+      throw new Error(
+        'The server returned an invalid response.'
+      );
+
+    }
+
+
+    console.log(
+      '[TOFA API] PARSED RESPONSE',
+      result
+    );
+
+
+    if(
+      !result ||
+      result.success !== true
+    ){
+
+      throw new Error(
+        result &&
+        result.message
+          ? result.message
+          : 'Request failed.'
+      );
+
+    }
+
+
+    console.log(
+      '[TOFA API] SUCCESS',
+      action
+    );
+
+
+    return (
+      result.result || {}
+    );
+
+  }
+  catch(error){
+
+    console.error(
+      '[TOFA API] ERROR',
+      action,
+      error
+    );
+
+
+    throw error;
+
+  }
+  finally {
+
+    hideBusy();
+
+  }
 
 }
-
 
 /************************************************************
  * LOAD APPS SCRIPT IFRAME
