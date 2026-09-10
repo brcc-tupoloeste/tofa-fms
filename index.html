@@ -1,15 +1,31 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#1f4e78">
 
-<title>Tupol Oeste Farmer's Association - Payments Received</title>
+<meta charset="utf-8">
+
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1,viewport-fit=cover"
+>
+
+<meta
+  name="theme-color"
+  content="#1f4e78"
+>
+
+<title>
+  Tupol Oeste Farmer's Association - Payments Received
+</title>
 
 <style>
+
+/* ============================================================
+   BASE
+============================================================ */
+
 *{
-  box-sizing:border-box
+  box-sizing:border-box;
 }
 
 html,
@@ -18,48 +34,63 @@ body{
   min-height:100%;
   font-family:Arial,sans-serif;
   background:#f3f6f8;
-  color:#1f2937
+  color:#1f2937;
 }
 
 .wrap{
   width:100%;
   max-width:760px;
   margin:auto;
-  padding:12px
+  padding:12px;
 }
+
+
+/* ============================================================
+   BRAND
+============================================================ */
 
 .brand{
   text-align:center;
-  padding:14px 8px 8px
+  padding:14px 8px 8px;
 }
 
 .brand h1{
   margin:0;
-  font-size:20px
+  font-size:20px;
 }
 
 .brand p{
   margin:5px 0 0;
-  color:#6b7280
+  color:#6b7280;
 }
+
+
+/* ============================================================
+   CARDS
+============================================================ */
 
 .card{
   background:#fff;
   border-radius:16px;
   padding:15px;
   margin-bottom:12px;
-  box-shadow:0 2px 10px rgba(0,0,0,.07)
+  box-shadow:0 2px 10px rgba(0,0,0,.07);
 }
 
 .hidden{
-  display:none!important
+  display:none!important;
 }
+
+
+/* ============================================================
+   FORM
+============================================================ */
 
 label{
   display:block;
   font-size:13px;
   font-weight:700;
-  margin:11px 0 6px
+  margin:11px 0 6px;
 }
 
 input,
@@ -67,7 +98,7 @@ select,
 textarea,
 button{
   width:100%;
-  font:inherit
+  font:inherit;
 }
 
 input,
@@ -76,7 +107,7 @@ textarea{
   padding:12px;
   border:1px solid #ccd4dc;
   border-radius:10px;
-  background:#fff
+  background:#fff;
 }
 
 button{
@@ -86,7 +117,8 @@ button{
   background:#1f4e78;
   color:#fff;
   font-weight:700;
-  margin-top:10px
+  margin-top:10px;
+  cursor:pointer;
 }
 
 button:disabled,
@@ -94,48 +126,63 @@ input:disabled,
 select:disabled,
 textarea:disabled{
   opacity:.55;
-  cursor:not-allowed
+  cursor:not-allowed;
 }
+
+
+/* ============================================================
+   MESSAGES
+============================================================ */
 
 .msg{
   padding:10px;
   margin-top:10px;
   border-radius:9px;
-  font-size:13px
+  font-size:13px;
 }
 
 .error{
   background:#fee2e2;
-  color:#991b1b
+  color:#991b1b;
 }
 
 .ok{
   background:#dcfce7;
-  color:#166534
+  color:#166534;
 }
+
+
+/* ============================================================
+   TOP BAR
+============================================================ */
 
 .top{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin-bottom:10px
+  margin-bottom:10px;
 }
 
 button.danger{
   background:#991b1b;
   width:auto;
-  margin:0
+  margin:0;
 }
+
+
+/* ============================================================
+   SEARCH
+============================================================ */
 
 .search{
   display:grid;
   grid-template-columns:1fr auto;
   gap:8px;
-  align-items:end
+  align-items:end;
 }
 
 .search button{
-  width:auto
+  width:auto;
 }
 
 .result{
@@ -144,41 +191,68 @@ button.danger{
   border-radius:10px;
   margin-top:8px;
   cursor:pointer;
-  background:#fff
+  background:#fff;
 }
 
 .result strong,
 .result small{
-  display:block
+  display:block;
 }
 
 .result small{
   font-size:12px;
   color:#6b7280;
-  margin-top:3px
+  margin-top:3px;
 }
 
 .result.locked{
   opacity:.5;
-  pointer-events:none
+  pointer-events:none;
 }
 
 .result.selected{
   border-color:#1f4e78;
-  background:#f4f8fb
+  background:#f4f8fb;
 }
+
+
+/* ============================================================
+   BACK TO SEARCH
+============================================================ */
+
+.member-back{
+  margin-bottom:10px;
+}
+
+.back-btn{
+  width:auto;
+  margin:0;
+  background:#fff;
+  color:#1f4e78;
+  border:1px solid #1f4e78;
+  padding:9px 14px;
+}
+
+.back-btn:hover{
+  background:#f4f8fb;
+}
+
+
+/* ============================================================
+   PROFILE
+============================================================ */
 
 .profile{
   display:flex;
   align-items:center;
-  gap:12px
+  gap:12px;
 }
 
 .photo-wrap{
   position:relative;
   width:74px;
   height:74px;
-  flex:0 0 74px
+  flex:0 0 74px;
 }
 
 .photo{
@@ -187,7 +261,7 @@ button.danger{
   border-radius:50%;
   object-fit:cover;
   background:#e5e7eb;
-  border:1px solid #d1d5db
+  border:1px solid #d1d5db;
 }
 
 .camera{
@@ -199,66 +273,81 @@ button.danger{
   border-radius:50%;
   padding:0;
   margin:0;
-  font-size:15px
+  font-size:15px;
 }
 
 #photoInput{
-  display:none
+  display:none;
 }
 
 .name{
   font-weight:800;
-  font-size:18px
+  font-size:18px;
 }
 
 .sub{
   font-size:12px;
   color:#6b7280;
-  margin-top:3px
+  margin-top:3px;
 }
+
+
+/* ============================================================
+   ACCOUNT CARDS
+============================================================ */
 
 .accounts{
   display:grid;
   grid-template-columns:1fr;
   gap:9px;
-  margin-top:14px
+  margin-top:14px;
 }
 
 .account{
   border:1px solid #e5e7eb;
   border-radius:11px;
-  padding:11px
+  padding:11px;
 }
 
 .account b{
   display:block;
-  margin-bottom:6px
+  margin-bottom:6px;
 }
 
 .line{
   display:flex;
   justify-content:space-between;
   padding:4px 0;
-  font-size:13px
+  font-size:13px;
 }
 
 .balance{
   border-top:1px solid #e5e7eb;
   margin-top:5px;
   padding-top:7px;
-  font-weight:800
+  font-weight:800;
 }
+
+
+/* ============================================================
+   PAYMENT
+============================================================ */
 
 .payment-grid{
   display:grid;
   grid-template-columns:1fr;
-  gap:9px
+  gap:9px;
 }
 
 textarea{
   min-height:78px;
-  resize:vertical
+  resize:vertical;
 }
+
+
+/* ============================================================
+   OBLIGATION
+============================================================ */
 
 .obligation-box{
   padding:10px;
@@ -266,13 +355,18 @@ textarea{
   border-radius:10px;
   background:#fafafa;
   margin-top:8px;
-  font-size:13px
+  font-size:13px;
 }
+
+
+/* ============================================================
+   PAYMENT HISTORY
+============================================================ */
 
 table{
   width:100%;
   border-collapse:collapse;
-  min-width:500px
+  min-width:500px;
 }
 
 th,
@@ -280,12 +374,43 @@ td{
   padding:8px;
   border-bottom:1px solid #e5e7eb;
   font-size:12px;
-  text-align:left
+  text-align:left;
 }
 
 .scroll{
-  overflow:auto
+  overflow:auto;
 }
+
+
+/* ============================================================
+   AFTER SAVE
+============================================================ */
+
+.after-save{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-top:10px;
+}
+
+.after-save .msg{
+  flex:1;
+  margin-top:0;
+}
+
+.after-save button{
+  width:auto;
+  margin:0;
+  background:#fff;
+  color:#1f4e78;
+  border:1px solid #1f4e78;
+  white-space:nowrap;
+}
+
+
+/* ============================================================
+   BUSY OVERLAY
+============================================================ */
 
 .busy-overlay{
   position:fixed;
@@ -295,7 +420,7 @@ td{
   display:flex;
   align-items:center;
   justify-content:center;
-  z-index:9999
+  z-index:9999;
 }
 
 .busy-box{
@@ -304,7 +429,7 @@ td{
   padding:22px 26px;
   text-align:center;
   min-width:230px;
-  box-shadow:0 8px 30px rgba(0,0,0,.16)
+  box-shadow:0 8px 30px rgba(0,0,0,.16);
 }
 
 .spinner{
@@ -314,55 +439,91 @@ td{
   border:4px solid #dbe3ea;
   border-top-color:#1f4e78;
   border-radius:50%;
-  animation:spin .8s linear infinite
+  animation:spin .8s linear infinite;
 }
 
 @keyframes spin{
   to{
-    transform:rotate(360deg)
+    transform:rotate(360deg);
   }
 }
 
 .busy-title{
-  font-weight:800
+  font-weight:800;
 }
 
 .busy-sub{
   font-size:12px;
   color:#6b7280;
-  margin-top:5px
+  margin-top:5px;
 }
+
+
+/* ============================================================
+   DESKTOP
+============================================================ */
 
 @media(min-width:620px){
 
   .accounts{
-    grid-template-columns:repeat(3,1fr)
+    grid-template-columns:repeat(3,1fr);
   }
 
   .payment-grid{
-    grid-template-columns:repeat(2,1fr)
+    grid-template-columns:repeat(2,1fr);
   }
+
 }
+
+
+/* ============================================================
+   MOBILE
+============================================================ */
+
+@media(max-width:500px){
+
+  .after-save{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .after-save button{
+    width:100%;
+  }
+
+}
+
 </style>
 </head>
 
+
 <body>
 
-<!-- =========================================================
-     BUSY OVERLAY
-========================================================= -->
 
-<div id="busyOverlay" class="busy-overlay hidden">
+<!-- ============================================================
+     BUSY OVERLAY
+============================================================ -->
+
+<div
+  id="busyOverlay"
+  class="busy-overlay hidden"
+>
 
   <div class="busy-box">
 
     <div class="spinner"></div>
 
-    <div id="busyTitle" class="busy-title">
+    <div
+      id="busyTitle"
+      class="busy-title"
+    >
       Please wait...
     </div>
 
-    <div id="busySub" class="busy-sub">
+    <div
+      id="busySub"
+      class="busy-sub"
+    >
       Processing request
     </div>
 
@@ -371,16 +532,16 @@ td{
 </div>
 
 
-<!-- =========================================================
-     MAIN WRAPPER
-========================================================= -->
+<!-- ============================================================
+     MAIN
+============================================================ -->
 
 <div class="wrap">
 
 
-  <!-- =======================================================
+  <!-- ========================================================
        BRAND
-  ======================================================== -->
+  ========================================================= -->
 
   <div class="brand">
 
@@ -395,15 +556,19 @@ td{
   </div>
 
 
-  <!-- =======================================================
-       LOGIN
-  ======================================================== -->
+  <!-- ========================================================
+       LOGIN VIEW
+  ========================================================= -->
 
-  <div id="loginView" class="card">
+  <div
+    id="loginView"
+    class="card"
+  >
 
     <h2>
       🔐 Admin Login
     </h2>
+
 
     <label>
       Username
@@ -453,14 +618,19 @@ td{
   </div>
 
 
-  <!-- =======================================================
-       APPLICATION
-  ======================================================== -->
+  <!-- ========================================================
+       APP VIEW
+  ========================================================= -->
 
-  <div id="appView" class="hidden">
+  <div
+    id="appView"
+    class="hidden"
+  >
 
 
-    <!-- TOP BAR -->
+    <!-- ======================================================
+         TOP BAR
+    ======================================================= -->
 
     <div class="top">
 
@@ -478,15 +648,21 @@ td{
     </div>
 
 
-    <!-- =====================================================
-         SEARCH MEMBER
-    ====================================================== -->
+    <!-- ======================================================
+         SEARCH SECTION
+         Visible initially
+         Hidden after selecting a member
+    ======================================================= -->
 
-  <div id="searchSection" class="card">
+    <div
+      id="searchSection"
+      class="card"
+    >
 
       <h3>
         🔎 Search Member
       </h3>
+
 
       <div class="search">
 
@@ -521,413 +697,435 @@ td{
     </div>
 
 
-    <!-- =====================================================
-         MEMBER PROFILE
-    ====================================================== -->
+    <!-- ======================================================
+         MEMBER SECTION
+         Entire section hidden until member selected
+    ======================================================= -->
 
     <div
-      id="profileCard"
-      class="card hidden"
+      id="memberSection"
+      class="hidden"
     >
 
-      <div id="memberSection" class="hidden">
 
-  <div class="member-back">
-    <button
-      class="back-btn"
-      onclick="backToSearch()"
-    >
-      ← Back to Search
-    </button>
-  </div>
+      <!-- ====================================================
+           BACK TO SEARCH
+      ===================================================== -->
 
-      <div class="profile">
+      <div class="member-back">
 
-
-        <!-- PHOTO -->
-
-        <div class="photo-wrap">
-
-          <img
-            id="memberPhoto"
-            class="photo"
-            alt=""
-          >
-
-
-          <button
-            class="camera"
-            onclick="document.getElementById('photoInput').click()"
-            title="Upload photo"
-          >
-            📷
-          </button>
-
-
-          <input
-            id="photoInput"
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            capture="environment"
-            onchange="uploadPhoto(this)"
-          >
-
-        </div>
-
-
-        <!-- MEMBER INFO -->
-
-        <div>
-
-          <div
-            id="memberName"
-            class="name"
-          ></div>
-
-
-          <div
-            id="memberMeta"
-            class="sub"
-          ></div>
-
-
-          <div id="photoMsg"></div>
-
-        </div>
+        <button
+          class="back-btn"
+          onclick="backToSearch()"
+        >
+          ← Back to Search
+        </button>
 
       </div>
 
 
-      <!-- ===================================================
-           ACCOUNT SUMMARY
-      ==================================================== -->
-
-      <div class="accounts">
-
-
-        <!-- MONTHLY MEMBERSHIP -->
-
-        <div class="account">
-
-          <b>
-            📅 Monthly Membership
-          </b>
-
-          <div class="line">
-
-            <span>
-              Year Due
-            </span>
-
-            <span id="annualDue"></span>
-
-          </div>
-
-
-          <div class="line">
-
-            <span>
-              Paid
-            </span>
-
-            <span id="monthlyPaid"></span>
-
-          </div>
-
-
-          <div class="line balance">
-
-            <span>
-              Balance
-            </span>
-
-            <span id="yearBalance"></span>
-
-          </div>
-
-        </div>
-
-
-        <!-- REGISTRATION -->
-
-        <div class="account">
-
-          <b>
-            🧾 Registration Fee
-          </b>
-
-          <div class="line">
-
-            <span>
-              Due
-            </span>
-
-            <span id="registrationDue"></span>
-
-          </div>
-
-
-          <div class="line">
-
-            <span>
-              Paid
-            </span>
-
-            <span id="registrationPaid"></span>
-
-          </div>
-
-
-          <div class="line balance">
-
-            <span>
-              Balance
-            </span>
-
-            <span id="registrationBalance"></span>
-
-          </div>
-
-        </div>
-
-
-        <!-- OTHER OBLIGATIONS -->
-
-        <div class="account">
-
-          <b>
-            📦 Other Obligations
-          </b>
-
-          <div class="line">
-
-            <span>
-              Due
-            </span>
-
-            <span id="otherDue"></span>
-
-          </div>
-
-
-          <div class="line">
-
-            <span>
-              Paid
-            </span>
-
-            <span id="otherPaid"></span>
-
-          </div>
-
-
-          <div class="line balance">
-
-            <span>
-              Balance
-            </span>
-
-            <span id="otherBalance"></span>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <!-- =====================================================
-         RECEIVE PAYMENT
-    ====================================================== -->
-
-    <div
-      id="paymentCard"
-      class="card hidden"
-    >
-
-      <h3>
-        💵 Receive Payment
-      </h3>
-
-
-      <div class="payment-grid">
-
-
-        <!-- PAYMENT TYPE -->
-
-        <div>
-
-          <label>
-            Payment Type
-          </label>
-
-          <select
-            id="paymentType"
-            onchange="paymentTypeChanged()"
-          >
-
-            <option value="Monthly Membership">
-              Monthly Membership
-            </option>
-
-            <option value="Registration Fee">
-              Registration Fee
-            </option>
-
-            <option value="Other Obligation">
-              Other Obligation
-            </option>
-
-          </select>
-
-        </div>
-
-
-        <!-- AMOUNT -->
-
-        <div>
-
-          <label>
-            Amount Received
-          </label>
-
-          <input
-            id="paymentAmount"
-            type="number"
-            inputmode="decimal"
-            min="0.01"
-            step="0.01"
-            placeholder="0.00"
-          >
-
-        </div>
-
-      </div>
-
-
-      <!-- ===================================================
-           OBLIGATION SELECTOR
-      ==================================================== -->
+      <!-- ====================================================
+           MEMBER PROFILE
+      ===================================================== -->
 
       <div
-        id="obligationBox"
-        class="obligation-box hidden"
+        id="profileCard"
+        class="card hidden"
       >
 
-        <label>
-          Obligation
-        </label>
+        <div class="profile">
 
 
-        <select
-          id="obligationSelect"
-        ></select>
+          <!-- PHOTO -->
 
+          <div class="photo-wrap">
+
+            <img
+              id="memberPhoto"
+              class="photo"
+              alt=""
+            >
+
+
+            <button
+              class="camera"
+              onclick="document.getElementById('photoInput').click()"
+              title="Upload photo"
+            >
+              📷
+            </button>
+
+
+            <input
+              id="photoInput"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              capture="environment"
+              onchange="uploadPhoto(this)"
+            >
+
+          </div>
+
+
+          <!-- MEMBER INFORMATION -->
+
+          <div>
+
+            <div
+              id="memberName"
+              class="name"
+            ></div>
+
+
+            <div
+              id="memberMeta"
+              class="sub"
+            ></div>
+
+
+            <div id="photoMsg"></div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ==================================================
+             ACCOUNT SUMMARY
+        =================================================== -->
+
+        <div class="accounts">
+
+
+          <!-- MONTHLY MEMBERSHIP -->
+
+          <div class="account">
+
+            <b>
+              📅 Monthly Membership
+            </b>
+
+
+            <div class="line">
+
+              <span>
+                Year Due
+              </span>
+
+              <span id="annualDue"></span>
+
+            </div>
+
+
+            <div class="line">
+
+              <span>
+                Paid
+              </span>
+
+              <span id="monthlyPaid"></span>
+
+            </div>
+
+
+            <div class="line balance">
+
+              <span>
+                Balance
+              </span>
+
+              <span id="yearBalance"></span>
+
+            </div>
+
+          </div>
+
+
+          <!-- REGISTRATION -->
+
+          <div class="account">
+
+            <b>
+              🧾 Registration Fee
+            </b>
+
+
+            <div class="line">
+
+              <span>
+                Due
+              </span>
+
+              <span id="registrationDue"></span>
+
+            </div>
+
+
+            <div class="line">
+
+              <span>
+                Paid
+              </span>
+
+              <span id="registrationPaid"></span>
+
+            </div>
+
+
+            <div class="line balance">
+
+              <span>
+                Balance
+              </span>
+
+              <span id="registrationBalance"></span>
+
+            </div>
+
+          </div>
+
+
+          <!-- OTHER OBLIGATIONS -->
+
+          <div class="account">
+
+            <b>
+              📦 Other Obligations
+            </b>
+
+
+            <div class="line">
+
+              <span>
+                Due
+              </span>
+
+              <span id="otherDue"></span>
+
+            </div>
+
+
+            <div class="line">
+
+              <span>
+                Paid
+              </span>
+
+              <span id="otherPaid"></span>
+
+            </div>
+
+
+            <div class="line balance">
+
+              <span>
+                Balance
+              </span>
+
+              <span id="otherBalance"></span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ====================================================
+           RECEIVE PAYMENT
+      ===================================================== -->
+
+      <div
+        id="paymentCard"
+        class="card hidden"
+      >
+
+        <h3>
+          💵 Receive Payment
+        </h3>
+
+
+        <div class="payment-grid">
+
+
+          <!-- PAYMENT TYPE -->
+
+          <div>
+
+            <label>
+              Payment Type
+            </label>
+
+            <select
+              id="paymentType"
+              onchange="paymentTypeChanged()"
+            >
+
+              <option value="Monthly Membership">
+                Monthly Membership
+              </option>
+
+              <option value="Registration Fee">
+                Registration Fee
+              </option>
+
+              <option value="Other Obligation">
+                Other Obligation
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- AMOUNT -->
+
+          <div>
+
+            <label>
+              Amount Received
+            </label>
+
+            <input
+              id="paymentAmount"
+              type="number"
+              inputmode="decimal"
+              min="0.01"
+              step="0.01"
+              placeholder="0.00"
+            >
+
+          </div>
+
+        </div>
+
+
+        <!-- ==================================================
+             OBLIGATION
+        =================================================== -->
 
         <div
-          id="obligationInfo"
-          style="margin-top:6px;color:#6b7280"
-        ></div>
+          id="obligationBox"
+          class="obligation-box hidden"
+        >
+
+          <label>
+            Obligation
+          </label>
+
+
+          <select
+            id="obligationSelect"
+          ></select>
+
+
+          <div
+            id="obligationInfo"
+            style="margin-top:6px;color:#6b7280"
+          ></div>
+
+        </div>
+
+
+        <!-- REMARKS -->
+
+        <label>
+          Remarks / Purpose
+        </label>
+
+        <textarea
+          id="paymentRemarks"
+          placeholder="Enter remarks or payment purpose"
+        ></textarea>
+
+
+        <!-- SAVE PAYMENT -->
+
+        <button
+          id="savePaymentBtn"
+          onclick="savePayment()"
+        >
+          💾 SAVE PAYMENT
+        </button>
+
+
+        <div id="paymentMsg"></div>
 
       </div>
 
 
-      <!-- REMARKS -->
+      <!-- ====================================================
+           PAYMENT HISTORY
+      ===================================================== -->
 
-      <label>
-        Remarks / Purpose
-      </label>
-
-      <textarea
-        id="paymentRemarks"
-        placeholder="Enter remarks or payment purpose"
-      ></textarea>
-
-
-      <!-- SAVE -->
-
-      <button
-        id="savePaymentBtn"
-        onclick="savePayment()"
+      <div
+        id="historyCard"
+        class="card hidden"
       >
-        💾 SAVE PAYMENT
-      </button>
+
+        <h3>
+          📋 Payment History
+        </h3>
 
 
-      <div id="paymentMsg"></div>
+        <div class="scroll">
 
-    </div>
+          <table>
 
+            <thead>
 
-    <!-- =====================================================
-         PAYMENT HISTORY
-    ====================================================== -->
+              <tr>
 
-    <div
-      id="historyCard"
-      class="card hidden"
-    >
+                <th>
+                  Date
+                </th>
 
-      <h3>
-        📋 Payment History
-      </h3>
+                <th>
+                  Type
+                </th>
 
+                <th>
+                  Remarks
+                </th>
 
-      <div class="scroll">
+                <th>
+                  Amount
+                </th>
 
-        <table>
+              </tr>
 
-          <thead>
-
-            <tr>
-
-              <th>
-                Date
-              </th>
-
-              <th>
-                Type
-              </th>
-
-              <th>
-                Remarks
-              </th>
-
-              <th>
-                Amount
-              </th>
-
-            </tr>
-
-          </thead>
+            </thead>
 
 
-          <tbody
-            id="historyBody"
-          ></tbody>
+            <tbody
+              id="historyBody"
+            ></tbody>
 
-        </table>
+          </table>
+
+        </div>
 
       </div>
 
+
     </div>
+    <!-- END memberSection -->
 
 
   </div>
+  <!-- END appView -->
+
 
 </div>
+<!-- END wrap -->
 
-
-<!-- =========================================================
-     JAVASCRIPT
-========================================================= -->
 
 <script>
 
 /* ============================================================
-   APPS SCRIPT BRIDGE URL
+   APPS SCRIPT BRIDGE
 ============================================================ */
 
 const BRIDGE_URL =
@@ -954,7 +1152,7 @@ let bridgeRequests = {};
 
 
 /* ============================================================
-   SHOW / HIDE PASSWORD
+   SHOW PASSWORD
 ============================================================ */
 
 document
@@ -963,9 +1161,10 @@ document
 
     document
       .getElementById('password')
-      .type = this.checked
-        ? 'text'
-        : 'password';
+      .type =
+        this.checked
+          ? 'text'
+          : 'password';
 
   };
 
@@ -1032,7 +1231,11 @@ function money(v){
    MESSAGE
 ============================================================ */
 
-function msg(id,text,type){
+function msg(
+  id,
+  text,
+  type
+){
 
   document
     .getElementById(id)
@@ -1052,18 +1255,23 @@ function msg(id,text,type){
    BUSY
 ============================================================ */
 
-function showBusy(t,s){
+function showBusy(
+  title,
+  sub
+){
 
   document
     .getElementById('busyTitle')
     .textContent =
-      t || 'Please wait...';
+      title ||
+      'Please wait...';
 
 
   document
     .getElementById('busySub')
     .textContent =
-      s || 'Processing request';
+      sub ||
+      'Processing request';
 
 
   document
@@ -1085,12 +1293,13 @@ function hideBusy(){
 
 
 /* ============================================================
-   LOCK UI
+   LOCK
 ============================================================ */
 
 function lock(v){
 
   busy = v;
+
 
   document
     .querySelectorAll(
@@ -1114,11 +1323,10 @@ function lock(v){
     .querySelectorAll('.result')
     .forEach(function(x){
 
-      x.classList
-        .toggle(
-          'locked',
-          v
-        );
+      x.classList.toggle(
+        'locked',
+        v
+      );
 
     });
 
@@ -1129,14 +1337,18 @@ function lock(v){
    ERROR
 ============================================================ */
 
-function fail(e,id){
+function fail(
+  e,
+  id
+){
 
   msg(
     id || 'loginMsg',
     e && e.message
       ? e.message
       : String(
-          e || 'Request failed.'
+          e ||
+          'Request failed.'
         ),
     'error'
   );
@@ -1175,18 +1387,13 @@ function initBridge(){
 
 
 /* ============================================================
-   RECEIVE BRIDGE MESSAGE
+   BRIDGE MESSAGE RECEIVER
 ============================================================ */
 
 window.addEventListener(
   'message',
   function(event){
 
-    /*
-     * Apps Script may return either
-     * script.google.com or
-     * script.googleusercontent.com
-     */
     const allowedOrigins = [
 
       'https://script.google.com',
@@ -1298,7 +1505,7 @@ window.addEventListener(
 
 
 /* ============================================================
-   SEND REQUEST TO BRIDGE
+   SEND BRIDGE REQUEST
 ============================================================ */
 
 function sendBridgeRequest_(
@@ -1349,9 +1556,10 @@ function sendBridgeRequest_(
     );
 
 
-  /*
-   * Timeout protection
-   */
+  /* ---------------------------------------------
+     Timeout
+  --------------------------------------------- */
+
   setTimeout(
     function(){
 
@@ -1433,7 +1641,7 @@ function bridgeApi(
 
 
 /* ============================================================
-   MAIN API FUNCTION
+   MAIN API
 ============================================================ */
 
 async function api(
@@ -1444,8 +1652,10 @@ async function api(
 ){
 
   showBusy(
-    title || 'Please wait...',
-    sub || 'Processing request'
+    title ||
+      'Please wait...',
+    sub ||
+      'Processing request'
   );
 
 
@@ -1462,7 +1672,6 @@ async function api(
       'TOFA Payments API:',
       e
     );
-
 
     throw e;
 
@@ -1486,20 +1695,23 @@ async function login(){
   }
 
 
-  const u =
+  const username =
     document
       .getElementById('username')
       .value
       .trim();
 
 
-  const p =
+  const password =
     document
       .getElementById('password')
       .value;
 
 
-  if(!u || !p){
+  if(
+    !username ||
+    !password
+  ){
 
     msg(
       'loginMsg',
@@ -1521,8 +1733,11 @@ async function login(){
       await api(
         'login',
         {
-          username:u,
-          password:p
+          username:
+            username,
+
+          password:
+            password
         },
         'Signing in...',
         'Checking administrator access'
@@ -1562,13 +1777,6 @@ async function login(){
       .remove('hidden');
 
 
-    msg(
-      'loginMsg',
-      '',
-      ''
-    );
-
-
   }catch(e){
 
     fail(
@@ -1591,13 +1799,14 @@ async function login(){
 
 async function logout(){
 
-  const t =
+  const oldToken =
     token;
 
 
   token = '';
 
-  selectedMember = null;
+  selectedMember =
+    null;
 
 
   document
@@ -1622,28 +1831,27 @@ async function logout(){
     .value = '';
 
 
-  [
-    'profileCard',
-    'paymentCard',
-    'historyCard'
-  ].forEach(function(id){
-
-    document
-      .getElementById(id)
-      .classList
-      .add('hidden');
-
-  });
+  document
+    .getElementById('memberSection')
+    .classList
+    .add('hidden');
 
 
-  if(t){
+  document
+    .getElementById('searchSection')
+    .classList
+    .remove('hidden');
+
+
+  if(oldToken){
 
     try{
 
       await api(
         'logout',
         {
-          token:t
+          token:
+            oldToken
         },
         'Signing out...',
         'Closing session'
@@ -1651,10 +1859,7 @@ async function logout(){
 
     }catch(e){
 
-      /*
-       * Ignore logout errors.
-       * Local session is already cleared.
-       */
+      /* Ignore logout errors */
 
     }
 
@@ -1720,8 +1925,11 @@ async function searchMembers(){
       await api(
         'searchMembers',
         {
-          token:token,
-          searchText:q
+          token:
+            token,
+
+          searchText:
+            q
         },
         'Searching Members...',
         'Finding matching members'
@@ -1752,7 +1960,9 @@ async function searchMembers(){
    RENDER SEARCH RESULTS
 ============================================================ */
 
-function renderResults(rows){
+function renderResults(
+  rows
+){
 
   if(
     !rows ||
@@ -1864,8 +2074,11 @@ async function openMember(
       await api(
         'getMemberProfile',
         {
-          token:token,
-          memberId:id
+          token:
+            token,
+
+          memberId:
+            id
         },
         'Loading Profile...',
         'Please wait while the member record is loaded'
@@ -1883,6 +2096,24 @@ async function openMember(
 
     selectedMember =
       p;
+
+
+    /*
+     * HIDE SEARCH
+     */
+    document
+      .getElementById('searchSection')
+      .classList
+      .add('hidden');
+
+
+    /*
+     * SHOW MEMBER PROFILE
+     */
+    document
+      .getElementById('memberSection')
+      .classList
+      .remove('hidden');
 
 
     renderProfile(
@@ -1913,10 +2144,104 @@ async function openMember(
 
 
 /* ============================================================
+   BACK TO SEARCH
+============================================================ */
+
+function backToSearch(){
+
+  selectedMember =
+    null;
+
+
+  /*
+   * HIDE MEMBER PROFILE
+   */
+  document
+    .getElementById('memberSection')
+    .classList
+    .add('hidden');
+
+
+  /*
+   * SHOW SEARCH
+   */
+  document
+    .getElementById('searchSection')
+    .classList
+    .remove('hidden');
+
+
+  /*
+   * RESET SEARCH
+   */
+  document
+    .getElementById('results')
+    .innerHTML = '';
+
+
+  document
+    .getElementById('searchText')
+    .value = '';
+
+
+  msg(
+    'searchMsg',
+    '',
+    ''
+  );
+
+
+  /*
+   * RESET PAYMENT FORM
+   */
+  document
+    .getElementById('paymentAmount')
+    .value = '';
+
+
+  document
+    .getElementById('paymentRemarks')
+    .value = '';
+
+
+  document
+    .getElementById('paymentType')
+    .value =
+      'Monthly Membership';
+
+
+  paymentTypeChanged();
+
+
+  msg(
+    'paymentMsg',
+    '',
+    ''
+  );
+
+
+  msg(
+    'photoMsg',
+    '',
+    ''
+  );
+
+
+  window.scrollTo({
+    top:0,
+    behavior:'smooth'
+  });
+
+}
+
+
+/* ============================================================
    RENDER PROFILE
 ============================================================ */
 
-function renderProfile(p){
+function renderProfile(
+  p
+){
 
   [
     'profileCard',
@@ -1950,6 +2275,10 @@ function renderProfile(p){
   );
 
 
+  /* ---------------------------------------------
+     PHOTO
+  --------------------------------------------- */
+
   const im =
     document
       .getElementById('memberPhoto');
@@ -1981,19 +2310,25 @@ function renderProfile(p){
 
   set(
     'annualDue',
-    money(p.annualDue)
+    money(
+      p.annualDue
+    )
   );
 
 
   set(
     'monthlyPaid',
-    money(p.monthlyPaid)
+    money(
+      p.monthlyPaid
+    )
   );
 
 
   set(
     'yearBalance',
-    money(p.yearBalance)
+    money(
+      p.yearBalance
+    )
   );
 
 
@@ -2003,19 +2338,25 @@ function renderProfile(p){
 
   set(
     'registrationDue',
-    money(p.registrationDue)
+    money(
+      p.registrationDue
+    )
   );
 
 
   set(
     'registrationPaid',
-    money(p.registrationPaid)
+    money(
+      p.registrationPaid
+    )
   );
 
 
   set(
     'registrationBalance',
-    money(p.registrationBalance)
+    money(
+      p.registrationBalance
+    )
   );
 
 
@@ -2025,19 +2366,25 @@ function renderProfile(p){
 
   set(
     'otherDue',
-    money(p.otherDue)
+    money(
+      p.otherDue
+    )
   );
 
 
   set(
     'otherPaid',
-    money(p.otherPaid)
+    money(
+      p.otherPaid
+    )
   );
 
 
   set(
     'otherBalance',
-    money(p.otherBalance)
+    money(
+      p.otherBalance
+    )
   );
 
 
@@ -2056,7 +2403,9 @@ function renderProfile(p){
             '<tr>' +
 
             '<td>' +
-            esc(x.date || '') +
+            esc(
+              x.date || ''
+            ) +
             '</td>' +
 
             '<td>' +
@@ -2069,12 +2418,15 @@ function renderProfile(p){
 
             '<td>' +
             esc(
-              x.remarks || ''
+              x.remarks ||
+              ''
             ) +
             '</td>' +
 
             '<td>' +
-            money(x.amount) +
+            money(
+              x.amount
+            ) +
             '</td>' +
 
             '</tr>'
@@ -2119,7 +2471,9 @@ function renderProfile(p){
    GET OBLIGATIONS
 ============================================================ */
 
-function getObligations(p){
+function getObligations(
+  p
+){
 
   return (
     p.obligations ||
@@ -2135,10 +2489,14 @@ function getObligations(p){
    RENDER OBLIGATIONS
 ============================================================ */
 
-function renderObligations(p){
+function renderObligations(
+  p
+){
 
   const list =
-    getObligations(p);
+    getObligations(
+      p
+    );
 
 
   const sel =
@@ -2195,7 +2553,9 @@ function renderObligations(p){
     opt.textContent =
       desc +
       ' — ' +
-      money(due);
+      money(
+        due
+      );
 
 
     opt.dataset.description =
@@ -2221,7 +2581,8 @@ function renderObligations(p){
       );
 
 
-    opt.value = '';
+    opt.value =
+      '';
 
 
     opt.textContent =
@@ -2285,7 +2646,7 @@ document
 
 
 /* ============================================================
-   PAYMENT TYPE
+   PAYMENT TYPE CHANGE
 ============================================================ */
 
 function paymentTypeChanged(){
@@ -2411,15 +2772,29 @@ async function savePayment(){
   }
 
 
+  /* ========================================================
+     PAYMENT DATA
+     ========================================================
+
+     BOTH paymentType AND type are sent.
+
+     This keeps compatibility with the existing
+     Collections backend.
+  ======================================================== */
+
   const paymentData = {
 
     memberId:
       selectedMember.id,
 
     memberName:
-      selectedMember.name || '',
+      selectedMember.name ||
+      '',
 
     paymentType:
+      type,
+
+    type:
       type,
 
     amount:
@@ -2443,13 +2818,20 @@ async function savePayment(){
       await api(
         'savePayment',
         {
-          token:token,
-          paymentData:paymentData
+          token:
+            token,
+
+          paymentData:
+            paymentData
         },
         'Saving Payment...',
         'Recording the received payment'
       );
 
+
+    /* ---------------------------------------------
+       REFRESH PROFILE
+    --------------------------------------------- */
 
     if(
       r &&
@@ -2467,6 +2849,10 @@ async function savePayment(){
     }
 
 
+    /* ---------------------------------------------
+       CLEAR FORM
+    --------------------------------------------- */
+
     document
       .getElementById(
         'paymentAmount'
@@ -2481,15 +2867,42 @@ async function savePayment(){
       .value = '';
 
 
-    msg(
-      'paymentMsg',
-      (
-        r &&
-        r.message
-      ) ||
-      'Payment successfully recorded.',
-      'ok'
-    );
+    /* ---------------------------------------------
+       SUCCESS + BACK TO SEARCH
+    --------------------------------------------- */
+
+    document
+      .getElementById(
+        'paymentMsg'
+      )
+      .innerHTML =
+
+      '<div class="after-save">' +
+
+        '<div class="msg ok">' +
+
+          '✓ ' +
+
+          esc(
+            (
+              r &&
+              r.message
+            ) ||
+            'Payment successfully recorded.'
+          ) +
+
+        '</div>' +
+
+        '<button ' +
+          'type="button" ' +
+          'onclick="backToSearch()"' +
+        '>' +
+
+          '← Back to Search' +
+
+        '</button>' +
+
+      '</div>';
 
 
   }catch(e){
@@ -2509,7 +2922,7 @@ async function savePayment(){
 
 
 /* ============================================================
-   RESIZE / COMPRESS IMAGE
+   RESIZE / COMPRESS PHOTO
 ============================================================ */
 
 function resizeImage(
@@ -2719,7 +3132,8 @@ async function uploadPhoto(
     input.files[0];
 
 
-  input.value = '';
+  input.value =
+    '';
 
 
   if(
@@ -2755,7 +3169,8 @@ async function uploadPhoto(
       await api(
         'uploadMemberPhoto',
         {
-          token:token,
+          token:
+            token,
 
           payload:{
 
@@ -2834,7 +3249,7 @@ window.addEventListener(
 
 
 /* ============================================================
-   ENTER KEY - SEARCH
+   ENTER = SEARCH
 ============================================================ */
 
 document
@@ -2861,7 +3276,7 @@ document
 
 
 /* ============================================================
-   ENTER KEY - LOGIN
+   ENTER = LOGIN
 ============================================================ */
 
 document
@@ -2885,6 +3300,7 @@ document
 
     }
   );
+
 
 </script>
 
