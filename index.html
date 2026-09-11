@@ -677,6 +677,56 @@ td{
 }
 
 
+
+.profile-contact-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin-top:9px;
+}
+
+.profile-contact-item{
+  padding:8px 10px;
+  border:1px solid #d7e8da;
+  border-radius:9px;
+  background:#f7fcf8;
+}
+
+.profile-contact-label{
+  display:block;
+  color:#4b7256;
+  font-size:10px;
+  font-weight:700;
+  margin-bottom:2px;
+}
+
+.profile-contact-item strong{
+  display:block;
+  color:#14532d;
+  font-size:13px;
+  word-break:break-word;
+}
+
+.profile-edit-row{
+  margin-top:10px;
+}
+
+.profile-edit-btn{
+  background:#166534!important;
+  color:#fff!important;
+  border-color:#166534!important;
+}
+
+.profile-edit-btn:hover{
+  background:#15803d!important;
+}
+
+@media(max-width:619px){
+  .profile-contact-grid{
+    grid-template-columns:1fr;
+  }
+}
+
 /* =========================================================
    TOFA GREEN AGRICULTURAL THEME
    Presentation-only layer; existing functionality preserved.
@@ -1489,6 +1539,27 @@ button.danger{
         class="sub">
       </div>
 
+      <div class="profile-contact-grid">
+        <div class="profile-contact-item">
+          <span class="profile-contact-label">RSBSA No.</span>
+          <strong id="memberRSBSA">—</strong>
+        </div>
+
+        <div class="profile-contact-item">
+          <span class="profile-contact-label">Contact Number</span>
+          <strong id="memberContact">—</strong>
+        </div>
+      </div>
+
+      <div class="profile-edit-row">
+        <button
+          type="button"
+          class="profile-edit-btn"
+          onclick="openEditMember()">
+          ✏️ Edit Member Details
+        </button>
+      </div>
+
       <div id="photoMsg"></div>
 
     </div>
@@ -1627,6 +1698,100 @@ button.danger{
 
 </div>
 
+
+
+<!-- =======================================================
+     EDIT MEMBER DETAILS
+======================================================= -->
+
+<div
+  id="editMemberPanel"
+  class="card hidden">
+
+  <div class="panel-nav">
+    <button
+      type="button"
+      class="back-dashboard"
+      onclick="cancelEditMember()">
+      ← Back to Profile
+    </button>
+  </div>
+
+  <h3 class="panel-title">✏️ Edit Member Details</h3>
+
+  <div class="panel-note">
+    Correct member information when needed. Financial records and payment history are not changed.
+  </div>
+
+  <div class="form-grid">
+
+    <div class="full">
+      <label>Full Name</label>
+      <input id="editMemberName" autocomplete="off">
+    </div>
+
+    <div>
+      <label>Address / Sitio</label>
+      <input id="editMemberAddress">
+    </div>
+
+    <div>
+      <label>Contact Number</label>
+      <input id="editMemberContact" inputmode="tel">
+    </div>
+
+    <div>
+      <label>RSBSA No.</label>
+      <input id="editMemberRSBSA">
+    </div>
+
+    <div>
+      <label>Rice Area (ha)</label>
+      <input
+        id="editMemberArea"
+        type="number"
+        min="0"
+        step="0.01"
+        inputmode="decimal">
+    </div>
+
+    <div>
+      <label>Date of Birth</label>
+      <input id="editMemberDateOfBirth" type="date">
+    </div>
+
+    <div class="full">
+      <label>Farm Information</label>
+      <input id="editMemberFarm">
+    </div>
+
+    <div class="full">
+      <label>Remarks</label>
+      <textarea id="editMemberRemarks"></textarea>
+    </div>
+
+  </div>
+
+  <div class="form-actions-row">
+
+    <button
+      type="button"
+      onclick="saveEditedMember()">
+      💾 SAVE CHANGES
+    </button>
+
+    <button
+      type="button"
+      class="alt"
+      onclick="cancelEditMember()">
+      CANCEL
+    </button>
+
+  </div>
+
+  <div id="editMemberMsg"></div>
+
+</div>
 
 
 <!-- =======================================================
@@ -2294,7 +2459,7 @@ async function logout(){
 
   document.getElementById('searchTopBar').classList.remove('hidden');
 
-  ['dashboardView','searchCard','profileCard','paymentCard','historyCard','addMemberPanel','memberListPanel','outstandingPanel','reportPanel','expensePanel','bankPanel']
+  ['dashboardView','searchCard','profileCard','paymentCard','historyCard','addMemberPanel','memberListPanel','outstandingPanel','reportPanel','expensePanel','bankPanel','editMemberPanel']
     .forEach(function(id){
       const el=document.getElementById(id);
       if(el) el.classList.add('hidden');
@@ -2689,16 +2854,17 @@ function renderProfile(
 
   set(
     'memberMeta',
+    ''
+  );
 
-    (p.id || '') +
+  set(
+    'memberRSBSA',
+    p.rsba || p.rsbsa || ''
+  );
 
-    (
-      p.address
-        ? ' • ' +
-          p.address
-        : ''
-    )
-
+  set(
+    'memberContact',
+    p.contact || ''
   );
 
 
@@ -2800,6 +2966,272 @@ function renderProfile(
   );
 
 }
+
+
+/* =========================================================
+   EDIT MEMBER DETAILS
+========================================================= */
+
+function openEditMember(){
+
+  if(!selectedMember){
+    return;
+  }
+
+  hideAppPanels();
+
+  document
+    .getElementById('editMemberPanel')
+    .classList
+    .remove('hidden');
+
+  document
+    .getElementById('searchTopBar')
+    .classList
+    .remove('hidden');
+
+  document.getElementById('editMemberName').value =
+    selectedMember.name || '';
+
+  document.getElementById('editMemberAddress').value =
+    selectedMember.address || '';
+
+  document.getElementById('editMemberContact').value =
+    selectedMember.contact || '';
+
+  document.getElementById('editMemberRSBSA').value =
+    selectedMember.rsba ||
+    selectedMember.rsbsa ||
+    '';
+
+  document.getElementById('editMemberArea').value =
+    selectedMember.area ||
+    selectedMember.riceArea ||
+    '';
+
+  document.getElementById('editMemberDateOfBirth').value =
+    formatDateForInput(
+      selectedMember.dateOfBirth ||
+      selectedMember.dob ||
+      ''
+    );
+
+  document.getElementById('editMemberFarm').value =
+    selectedMember.farm ||
+    selectedMember.farmInformation ||
+    '';
+
+  document.getElementById('editMemberRemarks').value =
+    selectedMember.remarks ||
+    '';
+
+  msg('editMemberMsg','','');
+
+  window.scrollTo({
+    top:0,
+    behavior:'smooth'
+  });
+}
+
+function formatDateForInput(value){
+
+  if(!value){
+    return '';
+  }
+
+  const d = new Date(value);
+
+  if(isNaN(d.getTime())){
+    return String(value).slice(0,10);
+  }
+
+  return d.getFullYear() + '-' +
+    String(d.getMonth()+1).padStart(2,'0') + '-' +
+    String(d.getDate()).padStart(2,'0');
+}
+
+function cancelEditMember(){
+
+  hideAppPanels();
+
+  document
+    .getElementById('profileCard')
+    .classList
+    .remove('hidden');
+
+  document
+    .getElementById('paymentCard')
+    .classList
+    .remove('hidden');
+
+  document
+    .getElementById('historyCard')
+    .classList
+    .remove('hidden');
+
+  document
+    .getElementById('searchTopBar')
+    .classList
+    .add('hidden');
+
+  window.scrollTo({
+    top:0,
+    behavior:'smooth'
+  });
+}
+
+async function saveEditedMember(){
+
+  if(!selectedMember || !selectedMember.id){
+    msg(
+      'editMemberMsg',
+      'No member selected.',
+      'error'
+    );
+    return;
+  }
+
+  const data = {
+    memberId: selectedMember.id,
+
+    name:
+      document.getElementById(
+        'editMemberName'
+      ).value.trim(),
+
+    address:
+      document.getElementById(
+        'editMemberAddress'
+      ).value.trim(),
+
+    contact:
+      document.getElementById(
+        'editMemberContact'
+      ).value.trim(),
+
+    rsba:
+      document.getElementById(
+        'editMemberRSBSA'
+      ).value.trim(),
+
+    area:
+      Number(
+        document.getElementById(
+          'editMemberArea'
+        ).value || 0
+      ),
+
+    dateOfBirth:
+      document.getElementById(
+        'editMemberDateOfBirth'
+      ).value,
+
+    farm:
+      document.getElementById(
+        'editMemberFarm'
+      ).value.trim(),
+
+    remarks:
+      document.getElementById(
+        'editMemberRemarks'
+      ).value.trim()
+  };
+
+  if(!data.name){
+    msg(
+      'editMemberMsg',
+      'Full Name is required.',
+      'error'
+    );
+    return;
+  }
+
+  if(!isFinite(data.area) || data.area < 0){
+    msg(
+      'editMemberMsg',
+      'Rice Area must be zero or greater.',
+      'error'
+    );
+    return;
+  }
+
+  const button =
+    document.querySelector(
+      '#editMemberPanel .form-actions-row button:first-child'
+    );
+
+  if(button){
+    button.disabled = true;
+  }
+
+  try{
+
+    const r =
+      await api(
+        'editMember',
+        {
+          token: token,
+          memberData: data
+        },
+        'Saving Changes...',
+        'Updating member information'
+      );
+
+    if(r && r.profile){
+
+      selectedMember =
+        r.profile;
+
+      renderProfile(
+        r.profile
+      );
+
+    }else{
+
+      selectedMember =
+        Object.assign(
+          {},
+          selectedMember,
+          {
+            name:data.name,
+            address:data.address,
+            contact:data.contact,
+            rsba:data.rsba,
+            area:data.area,
+            dateOfBirth:data.dateOfBirth,
+            farm:data.farm,
+            remarks:data.remarks
+          }
+        );
+
+      renderProfile(
+        selectedMember
+      );
+
+    }
+
+    msg(
+      'photoMsg',
+      'Member details successfully updated.',
+      'ok'
+    );
+
+  }catch(e){
+
+    fail(
+      e,
+      'editMemberMsg'
+    );
+
+  }finally{
+
+    if(button){
+      button.disabled = false;
+    }
+
+  }
+}
+
 
 
 /* =========================================================
@@ -3588,7 +4020,8 @@ function hideAppPanels(){
     'outstandingPanel',
     'reportPanel',
     'expensePanel',
-    'bankPanel'
+    'bankPanel',
+    'editMemberPanel'
   ].forEach(function(id){
     const el = document.getElementById(id);
     if(el) el.classList.add('hidden');
