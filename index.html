@@ -3323,8 +3323,22 @@ async function saveOnlineBankTransaction(){
    DASHBOARD NAVIGATION
 ========================================================= */
 function hideAppPanels(){
-  ['dashboardView','searchCard','profileCard','paymentCard','historyCard','addMemberPanel','memberListPanel','outstandingPanel','reportPanel']
-    .forEach(id=>document.getElementById(id).classList.add('hidden'));
+  [
+    'dashboardView',
+    'searchCard',
+    'profileCard',
+    'paymentCard',
+    'historyCard',
+    'addMemberPanel',
+    'memberListPanel',
+    'outstandingPanel',
+    'reportPanel',
+    'expensePanel',
+    'bankPanel'
+  ].forEach(function(id){
+    const el = document.getElementById(id);
+    if(el) el.classList.add('hidden');
+  });
 }
 
 function showDashboard(){
