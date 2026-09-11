@@ -680,9 +680,10 @@ td{
 
 .profile-contact-grid{
   display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;
   gap:8px;
   margin-top:9px;
+  align-items:stretch;
 }
 
 .profile-contact-item{
@@ -708,13 +709,22 @@ td{
 }
 
 .profile-edit-row{
-  margin-top:10px;
+  margin:0;
+  display:flex;
+  align-items:stretch;
 }
 
 .profile-edit-btn{
+  margin:0!important;
+  padding:8px 12px!important;
+  min-height:0!important;
+  height:100%;
+  white-space:nowrap;
+  font-size:12px!important;
   background:#166534!important;
   color:#fff!important;
   border-color:#166534!important;
+  border-radius:9px!important;
 }
 
 .profile-edit-btn:hover{
@@ -723,7 +733,21 @@ td{
 
 @media(max-width:619px){
   .profile-contact-grid{
-    grid-template-columns:1fr;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto;
+    gap:6px;
+  }
+  .profile-contact-item{
+    padding:7px 8px;
+  }
+  .profile-contact-label{
+    font-size:9px;
+  }
+  .profile-contact-item strong{
+    font-size:11px;
+  }
+  .profile-edit-btn{
+    padding:7px 9px!important;
+    font-size:11px!important;
   }
 }
 
@@ -1549,15 +1573,15 @@ button.danger{
           <span class="profile-contact-label">Contact Number</span>
           <strong id="memberContact">—</strong>
         </div>
-      </div>
 
-      <div class="profile-edit-row">
-        <button
-          type="button"
-          class="profile-edit-btn"
-          onclick="openEditMember()">
-          ✏️ Edit Member Details
-        </button>
+        <div class="profile-edit-row">
+          <button
+            type="button"
+            class="profile-edit-btn"
+            onclick="openEditMember()">
+            ✏️ Edit
+          </button>
+        </div>
       </div>
 
       <div id="photoMsg"></div>
