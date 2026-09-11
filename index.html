@@ -14,7 +14,7 @@
   content="#1f4e78">
 
 <title>
-  Tupol Oeste Farmer's Association - Financial Management
+  Tupol Oeste Farmer's Association - Payments Received
 </title>
 
 <style>
@@ -730,7 +730,7 @@ td{
   </h1>
 
   <p>
-    Financial Management
+    Payments Received
   </p>
 
 </div>
@@ -813,7 +813,7 @@ td{
   class="top">
 
   <b>
-    💵 Financial Management
+    💵 Payments Received
   </b>
 
   <button
@@ -852,6 +852,9 @@ td{
   <div class="quick-grid">
     <button class="quick-btn" onclick="openSearch()">🔎 Search Member</button>
     <button class="quick-btn" onclick="openAddMember()">➕ Add Member</button>
+    <button class="quick-btn" onclick="openReceivePayment()">💵 Receive Payment</button>
+    <button class="quick-btn" onclick="openExpensePanel()">💸 Expenses</button>
+    <button class="quick-btn" onclick="openBankPanel()">🏦 Bank</button>
     <button class="quick-btn" onclick="openFinancialReportPanel()">📑 Financial Report</button>
     <button class="quick-btn" onclick="openMemberList()">👥 Member List</button>
   </div>
@@ -1009,6 +1012,113 @@ td{
     <button class="print-btn" onclick="window.print()">🖨️ PRINT A4</button>
     <button class="alt" onclick="backToDashboard()">← Dashboard</button>
   </div>
+</div>
+
+
+<!-- =======================================================
+     EXPENSES
+======================================================= -->
+<div id="expensePanel" class="card hidden">
+  <div class="panel-nav">
+    <button type="button" class="back-dashboard" onclick="backToDashboard()">← Back to Dashboard</button>
+  </div>
+
+  <h3 class="panel-title">💸 Record Expense</h3>
+  <div class="panel-note">Encode an expense transaction. This saves to the Expenses records only.</div>
+
+  <div class="form-grid">
+    <div>
+      <label>Date</label>
+      <input id="expenseDate" type="date">
+    </div>
+
+    <div>
+      <label>Category</label>
+      <input id="expenseCategory" placeholder="Example: Supplies">
+    </div>
+
+    <div class="full">
+      <label>Particulars</label>
+      <input id="expenseParticulars" placeholder="Enter expense particulars">
+    </div>
+
+    <div>
+      <label>Amount</label>
+      <input id="expenseAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00">
+    </div>
+
+    <div>
+      <label>Reference No.</label>
+      <input id="expenseReference" placeholder="Optional">
+    </div>
+
+    <div class="full">
+      <label>Remarks</label>
+      <textarea id="expenseRemarks" placeholder="Optional remarks"></textarea>
+    </div>
+  </div>
+
+  <div class="form-actions-row">
+    <button type="button" onclick="saveOnlineExpense()">SAVE EXPENSE</button>
+    <button type="button" class="alt" onclick="backToDashboard()">CANCEL</button>
+  </div>
+
+  <div id="expenseMsg"></div>
+</div>
+
+<!-- =======================================================
+     BANK TRANSACTIONS
+======================================================= -->
+<div id="bankPanel" class="card hidden">
+  <div class="panel-nav">
+    <button type="button" class="back-dashboard" onclick="backToDashboard()">← Back to Dashboard</button>
+  </div>
+
+  <h3 class="panel-title">🏦 Bank Transaction</h3>
+  <div class="panel-note">Encode a bank deposit or withdrawal. This saves to Bank Transactions only.</div>
+
+  <div class="form-grid">
+    <div>
+      <label>Date</label>
+      <input id="bankDate" type="date">
+    </div>
+
+    <div>
+      <label>Transaction Type</label>
+      <select id="bankType">
+        <option value="">Select transaction type</option>
+        <option value="Deposit">Deposit</option>
+        <option value="Withdrawal">Withdrawal</option>
+      </select>
+    </div>
+
+    <div class="full">
+      <label>Particulars</label>
+      <input id="bankParticulars" placeholder="Enter bank transaction particulars">
+    </div>
+
+    <div>
+      <label>Amount</label>
+      <input id="bankAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00">
+    </div>
+
+    <div>
+      <label>Reference No.</label>
+      <input id="bankReference" placeholder="Optional">
+    </div>
+
+    <div class="full">
+      <label>Remarks</label>
+      <textarea id="bankRemarks" placeholder="Optional remarks"></textarea>
+    </div>
+  </div>
+
+  <div class="form-actions-row">
+    <button type="button" onclick="saveOnlineBankTransaction()">SAVE BANK TRANSACTION</button>
+    <button type="button" class="alt" onclick="backToDashboard()">CANCEL</button>
+  </div>
+
+  <div id="bankMsg"></div>
 </div>
 
 <div
@@ -1295,6 +1405,14 @@ td{
 
     <option value="Registration Fee">
       Registration Fee
+    </option>
+
+    <option value="Rice">
+      RICE
+    </option>
+
+    <option value="Fertilizer">
+      FERTILIZER
     </option>
 
     <option value="Other Obligation Payment">
@@ -1922,7 +2040,7 @@ async function logout(){
 
   document.getElementById('searchTopBar').classList.remove('hidden');
 
-  ['dashboardView','searchCard','profileCard','paymentCard','historyCard','addMemberPanel','memberListPanel','outstandingPanel','reportPanel']
+  ['dashboardView','searchCard','profileCard','paymentCard','historyCard','addMemberPanel','memberListPanel','outstandingPanel','reportPanel','expensePanel','bankPanel']
     .forEach(function(id){
       const el=document.getElementById(id);
       if(el) el.classList.add('hidden');
@@ -3044,6 +3162,162 @@ document
 
 
 
+
+
+/* =========================================================
+   ONLINE RECEIVE PAYMENT / EXPENSE / BANK NAVIGATION
+========================================================= */
+
+function openReceivePayment(){
+  if(!selectedMember){
+    openSearch();
+    msg('searchMsg','Please select a member first to receive a payment.','error');
+    return;
+  }
+
+  hideAppPanels();
+  document.getElementById('profileCard').classList.remove('hidden');
+  document.getElementById('paymentCard').classList.remove('hidden');
+  document.getElementById('historyCard').classList.remove('hidden');
+  document.getElementById('searchTopBar').classList.remove('hidden');
+
+  const type = document.getElementById('paymentType');
+  if(type) type.value = '';
+  paymentTypeChanged();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function todayInputValue(){
+  const d = new Date();
+  return d.getFullYear() + '-' +
+    String(d.getMonth()+1).padStart(2,'0') + '-' +
+    String(d.getDate()).padStart(2,'0');
+}
+
+function openExpensePanel(){
+  hideAppPanels();
+  document.getElementById('expensePanel').classList.remove('hidden');
+  document.getElementById('searchTopBar').classList.remove('hidden');
+
+  const date = document.getElementById('expenseDate');
+  if(date && !date.value) date.value = todayInputValue();
+
+  msg('expenseMsg','','');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function openBankPanel(){
+  hideAppPanels();
+  document.getElementById('bankPanel').classList.remove('hidden');
+  document.getElementById('searchTopBar').classList.remove('hidden');
+
+  const date = document.getElementById('bankDate');
+  if(date && !date.value) date.value = todayInputValue();
+
+  msg('bankMsg','','');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+async function saveOnlineExpense(){
+
+  const particulars = document.getElementById('expenseParticulars').value.trim();
+  const amount = Number(document.getElementById('expenseAmount').value || 0);
+
+  if(!particulars){
+    msg('expenseMsg','Please enter the expense particulars.','error');
+    return;
+  }
+
+  if(amount <= 0){
+    msg('expenseMsg','Please enter a valid expense amount.','error');
+    return;
+  }
+
+  try{
+    const r = await api(
+      'saveExpense',
+      {
+        token: token,
+        expenseData: {
+          date: document.getElementById('expenseDate').value,
+          category: document.getElementById('expenseCategory').value.trim(),
+          particulars: particulars,
+          amount: amount,
+          referenceNo: document.getElementById('expenseReference').value.trim(),
+          remarks: document.getElementById('expenseRemarks').value.trim()
+        }
+      },
+      'Saving Expense...',
+      'Recording expense transaction'
+    );
+
+    msg('expenseMsg', r.message || 'Expense successfully recorded.','ok');
+
+    document.getElementById('expenseParticulars').value = '';
+    document.getElementById('expenseAmount').value = '';
+    document.getElementById('expenseReference').value = '';
+    document.getElementById('expenseRemarks').value = '';
+
+    loadDashboard();
+
+  }catch(e){
+    fail(e,'expenseMsg');
+  }
+}
+
+async function saveOnlineBankTransaction(){
+
+  const type = document.getElementById('bankType').value;
+  const particulars = document.getElementById('bankParticulars').value.trim();
+  const amount = Number(document.getElementById('bankAmount').value || 0);
+
+  if(!type){
+    msg('bankMsg','Please select Deposit or Withdrawal.','error');
+    return;
+  }
+
+  if(!particulars){
+    msg('bankMsg','Please enter the bank transaction particulars.','error');
+    return;
+  }
+
+  if(amount <= 0){
+    msg('bankMsg','Please enter a valid amount.','error');
+    return;
+  }
+
+  try{
+    const r = await api(
+      'saveBankTransaction',
+      {
+        token: token,
+        bankData: {
+          date: document.getElementById('bankDate').value,
+          type: type,
+          particulars: particulars,
+          amount: amount,
+          referenceNo: document.getElementById('bankReference').value.trim(),
+          remarks: document.getElementById('bankRemarks').value.trim()
+        }
+      },
+      'Saving Bank Transaction...',
+      'Recording bank transaction'
+    );
+
+    msg('bankMsg', r.message || 'Bank transaction successfully recorded.','ok');
+
+    document.getElementById('bankParticulars').value = '';
+    document.getElementById('bankAmount').value = '';
+    document.getElementById('bankReference').value = '';
+    document.getElementById('bankRemarks').value = '';
+    document.getElementById('bankType').value = '';
+
+    loadDashboard();
+
+  }catch(e){
+    fail(e,'bankMsg');
+  }
+}
 
 /* =========================================================
    DASHBOARD NAVIGATION
