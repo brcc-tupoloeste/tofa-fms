@@ -2824,7 +2824,6 @@ async function openMember(
 
 }
 
-
 /* =========================================================
    RENDER PROFILE
 ========================================================= */
@@ -2862,13 +2861,36 @@ function renderProfile(
     .add('hidden');
 
 
-  /* Hide previous payment success */
+  /* =====================================================
+     RESET PREVIOUS PAYMENT SUCCESS MESSAGE
+     ===================================================== */
 
-  document
-    .getElementById('paymentSuccess')
-    .classList
-    .add('hidden');
+  const paymentSuccess =
+    document.getElementById(
+      'paymentSuccess'
+    );
 
+  if(paymentSuccess){
+
+    paymentSuccess
+      .classList
+      .add('hidden');
+
+  }
+
+
+  /* Clear the small payment message also */
+
+  msg(
+    'paymentMsg',
+    '',
+    ''
+  );
+
+
+  /* =====================================================
+     MEMBER INFORMATION
+     ===================================================== */
 
   set(
     'memberName',
@@ -2881,16 +2903,17 @@ function renderProfile(
     ''
   );
 
+
   set(
     'memberRSBSA',
     p.rsba || p.rsbsa || ''
   );
 
+
   set(
     'memberContact',
     p.contact || ''
   );
-
 
   /* =====================================================
      PHOTO
@@ -4067,13 +4090,115 @@ function backToDashboard(){
 }
 
 function openSearch(){
+
+  /* Hide all application panels */
   hideAppPanels();
-  document.getElementById('searchCard').classList.remove('hidden');
-  document.getElementById('searchTopBar').classList.remove('hidden');
-  document.getElementById('searchText').value='';
-  document.getElementById('results').innerHTML='';
-  msg('searchMsg','','');
-  window.scrollTo({top:0,behavior:'smooth'});
+
+  /* Open Search */
+  document
+    .getElementById('searchCard')
+    .classList
+    .remove('hidden');
+
+  document
+    .getElementById('searchTopBar')
+    .classList
+    .remove('hidden');
+
+  /* Clear search */
+  document
+    .getElementById('searchText')
+    .value = '';
+
+  document
+    .getElementById('results')
+    .innerHTML = '';
+
+  msg(
+    'searchMsg',
+    '',
+    ''
+  );
+
+  /* ==========================================
+     RESET PAYMENT SUCCESS STATE
+     ========================================== */
+
+  const paymentSuccess =
+    document.getElementById(
+      'paymentSuccess'
+    );
+
+  if(paymentSuccess){
+    paymentSuccess.classList.add(
+      'hidden'
+    );
+  }
+
+  /* Clear payment message */
+  msg(
+    'paymentMsg',
+    '',
+    ''
+  );
+
+  /* Clear payment form */
+  const paymentType =
+    document.getElementById(
+      'paymentType'
+    );
+
+  if(paymentType){
+    paymentType.value = '';
+  }
+
+  const amount =
+    document.getElementById(
+      'amount'
+    );
+
+  if(amount){
+    amount.value = '';
+  }
+
+  const remarks =
+    document.getElementById(
+      'remarks'
+    );
+
+  if(remarks){
+    remarks.value = '';
+  }
+
+  /* Reset obligation */
+  const obligationWrap =
+    document.getElementById(
+      'obligationWrap'
+    );
+
+  if(obligationWrap){
+    obligationWrap.classList.add(
+      'hidden'
+    );
+  }
+
+  const obligationId =
+    document.getElementById(
+      'obligationId'
+    );
+
+  if(obligationId){
+    obligationId.innerHTML =
+      '<option value="">Select obligation</option>';
+  }
+
+  /* Reset selected member */
+  selectedMember = null;
+
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
 }
 
 function clearSearchAndPayment(){
