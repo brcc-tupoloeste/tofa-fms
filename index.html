@@ -1168,23 +1168,95 @@ button.danger{
     <div class="dashboard-title">Financial Overview</div>
     <div id="dashboardPeriod" class="dashboard-period">Loading...</div>
   </div>
+
   <div class="stats">
-    <div class="stat"><div class="stat-label">Association Balance</div><div id="statAssociation" class="stat-value">...</div></div>
-    <div class="stat"><div class="stat-label">Bank Balance</div><div id="statBank" class="stat-value">...</div></div>
-    <div class="stat"><div class="stat-label">Cash on Hand</div><div id="statCash" class="stat-value">...</div></div>
-    <div class="stat"><div class="stat-label">Current Month Collections</div><div id="statCurrent" class="stat-value">...</div></div>
-    <div class="stat"><div class="stat-label">Previous Month Collections</div><div id="statPrevious" class="stat-value">...</div></div>
-    <button type="button" class="stat stat-button" onclick="openOutstandingList()"><div class="stat-label">Uncollected Amount</div><div id="statUncollected" class="stat-value">...</div></button>
+    <div class="stat">
+      <div class="stat-label">Association Balance</div>
+      <div id="statAssociation" class="stat-value">...</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">Bank Balance</div>
+      <div id="statBank" class="stat-value">...</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">Cash on Hand</div>
+      <div id="statCash" class="stat-value">...</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">Current Month Collections</div>
+      <div id="statCurrent" class="stat-value">...</div>
+    </div>
+
+    <div class="stat">
+      <div class="stat-label">Previous Month Collections</div>
+      <div id="statPrevious" class="stat-value">...</div>
+    </div>
+
+    <button
+      type="button"
+      class="stat stat-button"
+      onclick="openOutstandingList()">
+
+      <div class="stat-label">
+        Uncollected Amount
+      </div>
+
+      <div
+        id="statUncollected"
+        class="stat-value">
+        ...
+      </div>
+
+    </button>
   </div>
-  <div class="quick-title">Quick Actions</div>
+
+  <div class="quick-title">
+    Quick Actions
+  </div>
+
   <div class="quick-grid">
-    <button class="quick-btn" onclick="openSearch()">🔎 Search Member</button>
-    <button class="quick-btn" onclick="openAddMember()">➕ Add Member</button>
-    <button class="quick-btn" onclick="openExpensePanel()">💸 Expenses</button>
-    <button class="quick-btn" onclick="openBankPanel()">🏦 Bank</button>
-    <button class="quick-btn" onclick="openFinancialReportPanel()">📑 Financial Report</button>
-    <button class="quick-btn" onclick="openMemberList()">👥 Member List</button>
+
+    <button
+      class="quick-btn"
+      onclick="openSearch()">
+      🔎 Search Member
+    </button>
+
+    <button
+      class="quick-btn"
+      onclick="openAddMember()">
+      ➕ Add Member
+    </button>
+
+    <button
+      class="quick-btn"
+      onclick="openExpensePanel()">
+      💸 Expenses
+    </button>
+
+    <button
+      class="quick-btn"
+      onclick="openBankPanel()">
+      🏦 Bank
+    </button>
+
+    <button
+      class="quick-btn"
+      onclick="openFinancialReportPanel()">
+      📑 Financial Report
+    </button>
+
+    <button
+      class="quick-btn"
+      onclick="openMemberList()">
+      👥 Member List
+    </button>
+
   </div>
+
   <div id="dashboardMsg"></div>
 </div>
 
