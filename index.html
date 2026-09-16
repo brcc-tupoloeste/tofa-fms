@@ -4551,10 +4551,25 @@ function showDashboard(){
 }
 
 function backToDashboard(){
-  selectedMember=null;
+
+  selectedMember = null;
+
+  /*
+   * Display Dashboard immediately.
+   */
   showDashboard();
+
   clearSearchAndPayment();
-  loadDashboard();
+
+
+  /*
+   * Refresh financial statistics
+   * silently in the background.
+   */
+  loadDashboard({
+    silent:true
+  });
+
 }
 
 function openSearch(){
@@ -4683,22 +4698,275 @@ function clearSearchAndPayment(){
 }
 
 /* =========================================================
-   DASHBOARD DATA
+   DASHBOARD DATA — FAST / BACKGROUND REFRESH
 ========================================================= */
-async function loadDashboard(){
-  if(!token) return;
-  try{
-    const d=await api('getDashboardSummary',{token:token},'Loading Dashboard...','Preparing financial overview');
-    set('statAssociation',money(d.associationBalance));
-    set('statBank',money(d.bankBalance));
-    set('statCash',money(d.cashOnHand));
-    set('statCurrent',money(d.currentMonthCollections));
-    set('statPrevious',money(d.previousMonthCollections));
-    set('statUncollected',money(d.uncollectedAmount));
-    set('dashboardPeriod',(d.currentMonthName||'Current Month')+' '+(d.year||''));
-  }catch(e){
-    fail(e,'dashboardMsg');
+
+let dashboardLoading = false;
+
+async function loadDashboard(options){
+
+  options = options || {};
+
+  const silent =
+    options.silent === true;
+
+  if(!token){
+    return;
   }
+
+  /*
+   * Prevent overlapping / duplicate dashboard requests.
+   */
+  if(dashboardLoading){
+
+    console.log(
+      '[TOFA DASHBOARD] Refresh already running. Duplicate skipped.'
+    );
+
+    return;
+  }
+
+  dashboardLoading = true;
+
+  try{
+
+    let d;
+
+
+    /* =====================================================
+       SILENT BACKGROUND REFRESH
+       Used when returning to Dashboard.
+       No full-screen loading overlay.
+    ===================================================== */
+
+    if(silent){
+
+      console.log(
+        '[TOFA DASHBOARD] Background refresh started'
+      );
+
+      const response =
+        await fetch(
+          API_URL,
+          {
+            method:'POST',
+
+            body:
+              JSON.stringify({
+                action:'getDashboardSummary',
+
+                payload:{
+                  token:token
+                }
+              }),
+
+            redirect:'follow'
+          }
+        );
+
+
+      const responseText =
+        await response.text();
+
+
+      if(!responseText){
+
+        throw new Error(
+          'Dashboard server returned an empty response.'
+        );
+
+      }
+
+
+      let result;
+
+
+      try{
+
+        result =
+          JSON.parse(
+            responseText
+          );
+
+      }
+      catch(parseError){
+
+        console.error(
+          '[TOFA DASHBOARD] Invalid response:',
+          responseText
+        );
+
+        throw new Error(
+          'Dashboard server returned an invalid response.'
+        );
+
+      }
+
+
+      if(
+        !result ||
+        result.success !== true
+      ){
+
+        throw new Error(
+          result &&
+          result.message
+            ? result.message
+            : 'Unable to refresh dashboard.'
+        );
+
+      }
+
+
+      d =
+        result.result || {};
+
+    }
+
+
+    /* =====================================================
+       NORMAL DASHBOARD LOAD
+       Used after successful login.
+    ===================================================== */
+
+    else{
+
+      d =
+        await api(
+          'getDashboardSummary',
+          {
+            token:token
+          },
+          'Loading Dashboard...',
+          'Preparing financial overview'
+        );
+
+    }
+
+
+    /* =====================================================
+       UPDATE DASHBOARD
+       EXACT EXISTING FIELD IDs
+    ===================================================== */
+
+    set(
+      'statAssociation',
+      money(
+        d.associationBalance
+      )
+    );
+
+    set(
+      'statBank',
+      money(
+        d.bankBalance
+      )
+    );
+
+    set(
+      'statCash',
+      money(
+        d.cashOnHand
+      )
+    );
+
+    set(
+      'statCurrent',
+      money(
+        d.currentMonthCollections
+      )
+    );
+
+    set(
+      'statPrevious',
+      money(
+        d.previousMonthCollections
+      )
+    );
+
+    set(
+      'statUncollected',
+      money(
+        d.uncollectedAmount
+      )
+    );
+
+    set(
+      'dashboardPeriod',
+      (
+        d.currentMonthName ||
+        'Current Month'
+      ) +
+      ' ' +
+      (
+        d.year ||
+        ''
+      )
+    );
+
+
+    console.log(
+      '[TOFA DASHBOARD] Refresh completed'
+    );
+
+  }
+  catch(e){
+
+    console.error(
+      '[TOFA DASHBOARD] Refresh failed',
+      e
+    );
+
+
+    /*
+     * SESSION_EXPIRED must still force
+     * the normal session-expired handling.
+     */
+    if(
+      e &&
+      e.message === 'SESSION_EXPIRED'
+    ){
+
+      fail(
+        e,
+        'dashboardMsg'
+      );
+
+      return;
+    }
+
+
+    /*
+     * Silent refresh:
+     * retain currently displayed values.
+     * Do not interrupt the user.
+     */
+    if(silent){
+
+      console.warn(
+        '[TOFA DASHBOARD] Existing values retained.'
+      );
+
+      return;
+    }
+
+
+    /*
+     * Normal initial load:
+     * show error as before.
+     */
+    fail(
+      e,
+      'dashboardMsg'
+    );
+
+  }
+  finally{
+
+    dashboardLoading = false;
+
+  }
+
 }
 
 /* =========================================================
