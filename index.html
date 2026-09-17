@@ -1013,6 +1013,22 @@ button.danger{
   .search-row{grid-template-columns:1fr}
   .search-row button{width:100%!important}
 }
+
+/* BATCH OBLIGATION MEMBER CHECKLIST */
+.batch-obligation-box{border:1px solid #d7e8da;border-radius:12px;padding:12px;margin:12px 0;background:#f7fcf8}
+.batch-member-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.batch-member-toolbar input[type="search"]{flex:1;min-width:180px}
+.batch-select-all{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:800;margin:0;white-space:nowrap}
+.batch-select-all input{width:auto;margin:0}
+.batch-member-list{max-height:360px;overflow:auto;border:1px solid #d7e8da;border-radius:10px;background:#fff}
+.batch-member-item{display:flex;align-items:flex-start;gap:9px;padding:10px;border-bottom:1px solid #e5eee7;cursor:pointer}
+.batch-member-item:last-child{border-bottom:0}
+.batch-member-item input{width:auto;margin:3px 0 0}
+.batch-member-name{font-size:13px;font-weight:800;color:#14532d}
+.batch-member-meta{font-size:11px;color:#64748b;margin-top:2px}
+.batch-selected-count{font-size:12px;font-weight:800;color:#166534;margin:8px 0}
+@media(max-width:619px){.batch-member-toolbar{display:grid;grid-template-columns:1fr}.batch-select-all{padding:5px 2px}}
+
 @page{size:A4 portrait;margin:14mm}
 @media print{
   body.print-payment-type #reportPanel,
@@ -2114,7 +2130,47 @@ button.danger{
   </div>
 
   <h3 class="panel-title">📌 Obligations Management</h3>
-  <div class="panel-note">Search a member, then add, edit or delete an obligation.</div>
+  <div class="panel-note">Use Batch Add for many members, or search one member for individual add/edit/delete.</div>
+
+  <div class="batch-obligation-box">
+    <h4 style="margin:0 0 6px">Batch Add Obligation</h4>
+    <div class="panel-note">Enter one obligation, check the members who should receive it, then save once.</div>
+
+    <div class="form-grid">
+      <div class="full">
+        <label>Obligation / Description</label>
+        <input id="batchObligationDescription" autocomplete="off" placeholder="Example: Uniform, Rice, Fertilizer">
+      </div>
+      <div>
+        <label>Amount</label>
+        <input id="batchObligationAmount" type="number" min="0.01" step="0.01" inputmode="decimal">
+      </div>
+      <div class="full">
+        <label>Remarks</label>
+        <textarea id="batchObligationRemarks" placeholder="Optional. For Uniform, size may be entered/edited manually in Remarks."></textarea>
+      </div>
+    </div>
+
+    <label>Members</label>
+    <div class="batch-member-toolbar">
+      <input id="batchMemberFilter" type="search" autocomplete="off" placeholder="Search name or Member ID" oninput="filterBatchMembers()">
+      <label class="batch-select-all">
+        <input id="batchSelectAll" type="checkbox" onchange="toggleBatchSelectAll(this.checked)">
+        Select All Visible
+      </label>
+    </div>
+
+    <div id="batchSelectedCount" class="batch-selected-count">Selected: 0</div>
+    <div id="batchMemberList" class="batch-member-list">
+      <div class="panel-note" style="padding:10px">Open Obligations Management to load members.</div>
+    </div>
+
+    <div class="form-actions-row">
+      <button type="button" onclick="saveBatchObligations()">➕ ADD OBLIGATION TO SELECTED MEMBERS</button>
+      <button type="button" class="alt" onclick="clearBatchObligationForm()">CLEAR</button>
+    </div>
+    <div id="batchObligationMsg"></div>
+  </div>
 
   <label>Search Member</label>
   <div class="search-row">
@@ -2143,21 +2199,6 @@ button.danger{
       <div>
         <label>Amount</label>
         <input id="manageObligationAmount" type="number" min="0.01" step="0.01" inputmode="decimal">
-      </div>
-
-      <div id="uniformSizeWrap" class="hidden">
-        <label>Uniform Size</label>
-        <select id="manageUniformSize">
-          <option value="">Select size</option>
-          <option>XS</option><option>S</option><option>M</option><option>L</option>
-          <option>XL</option><option>2XL</option><option>3XL</option>
-          <option value="CUSTOM">Other / Custom</option>
-        </select>
-      </div>
-
-      <div id="uniformCustomSizeWrap" class="full hidden">
-        <label>Custom Uniform Size</label>
-        <input id="manageUniformCustomSize" autocomplete="off">
       </div>
 
       <div class="full">
@@ -5409,7 +5450,115 @@ function obligationApiRows(response){
   return [];
 }
 
-async function openObligationsManagement(){
+async let batchObligationMembers = [];
+
+function batchMemberId(m){
+  return String((m && (m.id || m.memberId)) || '').trim();
+}
+function batchMemberName(m){
+  return String((m && (m.name || m.memberName)) || '').trim();
+}
+function batchMemberVisible(m){
+  const q = String(document.getElementById('batchMemberFilter').value || '').trim().toLowerCase();
+  if(!q) return true;
+  return (batchMemberId(m)+' '+batchMemberName(m)+' '+String(m.address||m.sitio||'')).toLowerCase().includes(q);
+}
+function renderBatchMembers(){
+  const box=document.getElementById('batchMemberList');
+  const visible=batchObligationMembers.filter(batchMemberVisible);
+  box.innerHTML=visible.length ? visible.map(m=>{
+    const id=batchMemberId(m);
+    const name=batchMemberName(m);
+    return '<label class="batch-member-item">'+
+      '<input type="checkbox" class="batch-member-check" data-member-id="'+esc(id)+'" onchange="batchSelectionChanged()">'+
+      '<span><div class="batch-member-name">'+esc(name)+'</div>'+
+      '<div class="batch-member-meta">'+esc(id+(m.address?' • '+m.address:''))+'</div></span></label>';
+  }).join('') : '<div class="panel-note" style="padding:10px">No members found.</div>';
+  batchSelectionChanged();
+}
+function selectedBatchIds(){
+  return Array.from(document.querySelectorAll('.batch-member-check:checked')).map(x=>x.dataset.memberId);
+}
+function batchSelectionChanged(){
+  const count=selectedBatchIds().length;
+  document.getElementById('batchSelectedCount').textContent='Selected: '+count;
+  const visible=document.querySelectorAll('.batch-member-check');
+  const checked=document.querySelectorAll('.batch-member-check:checked');
+  const all=document.getElementById('batchSelectAll');
+  all.checked=visible.length>0 && checked.length===visible.length;
+  all.indeterminate=checked.length>0 && checked.length<visible.length;
+}
+function filterBatchMembers(){
+  const selected=new Set(selectedBatchIds());
+  renderBatchMembers();
+  document.querySelectorAll('.batch-member-check').forEach(cb=>{
+    if(selected.has(cb.dataset.memberId)) cb.checked=true;
+  });
+  batchSelectionChanged();
+}
+function toggleBatchSelectAll(checked){
+  document.querySelectorAll('.batch-member-check').forEach(cb=>cb.checked=checked);
+  batchSelectionChanged();
+}
+async function loadBatchObligationMembers(){
+  document.getElementById('batchMemberList').innerHTML='<div class="panel-note" style="padding:10px">Loading members...</div>';
+  try{
+    const rows=await api('getMemberList',{token:token},'Loading Members...','Preparing checklist');
+    batchObligationMembers=Array.isArray(rows)?rows:((rows&&(rows.members||rows.results))||[]);
+    renderBatchMembers();
+  }catch(e){
+    batchObligationMembers=[];
+    document.getElementById('batchMemberList').innerHTML='<div class="panel-note" style="padding:10px">Unable to load members.</div>';
+    fail(e,'batchObligationMsg');
+  }
+}
+function clearBatchObligationForm(){
+  ['batchObligationDescription','batchObligationAmount','batchObligationRemarks','batchMemberFilter'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.querySelectorAll('.batch-member-check').forEach(cb=>cb.checked=false);
+  const all=document.getElementById('batchSelectAll'); if(all){all.checked=false;all.indeterminate=false;}
+  msg('batchObligationMsg','','');
+  renderBatchMembers();
+}
+async function saveBatchObligations(){
+  const description=document.getElementById('batchObligationDescription').value.trim();
+  const amount=Number(document.getElementById('batchObligationAmount').value||0);
+  const remarks=document.getElementById('batchObligationRemarks').value.trim();
+  const ids=selectedBatchIds();
+
+  if(!description){msg('batchObligationMsg','Enter the obligation description.','error');return;}
+  if(!(amount>0)){msg('batchObligationMsg','Enter a valid amount.','error');return;}
+  if(!ids.length){msg('batchObligationMsg','Select at least one member.','error');return;}
+
+  const idSet=new Set(ids);
+  const members=batchObligationMembers.filter(m=>idSet.has(batchMemberId(m))).map(m=>({
+    memberId:batchMemberId(m),
+    memberName:batchMemberName(m)
+  }));
+
+  if(!confirm('Add "'+description+'" obligation of '+money(amount)+' to '+members.length+' selected member(s)?')) return;
+
+  try{
+    const r=await api(
+      'batchAddObligations',
+      {token:token,batchData:{description:description,amount:amount,remarks:remarks,members:members}},
+      'Adding Obligations...',
+      'Saving '+members.length+' member obligation(s)'
+    );
+    msg('batchObligationMsg',(r&&r.message)||members.length+' obligation(s) added successfully.','ok');
+    document.querySelectorAll('.batch-member-check').forEach(cb=>cb.checked=false);
+    batchSelectionChanged();
+    document.getElementById('batchObligationDescription').value='';
+    document.getElementById('batchObligationAmount').value='';
+    document.getElementById('batchObligationRemarks').value='';
+    await loadDashboard();
+  }catch(e){
+    fail(e,'batchObligationMsg');
+  }
+}
+
+function openObligationsManagement(){
   hideAppPanels();
   document.getElementById('obligationsManagementPanel').classList.remove('hidden');
   document.getElementById('searchTopBar').classList.remove('hidden');
@@ -5420,7 +5569,9 @@ async function openObligationsManagement(){
   document.getElementById('obligationSelectedMember').classList.add('hidden');
   clearManagedObligationForm();
   msg('obligationManagementMsg','','');
+  msg('batchObligationMsg','','');
   window.scrollTo({top:0,behavior:'smooth'});
+  loadBatchObligationMembers();
 }
 
 async function searchObligationMembers(){
@@ -5569,35 +5720,7 @@ function renderManagedObligations(){
 }
 
 function obligationDescriptionChanged(){
-  const description =
-    document.getElementById('manageObligationDescription').value.trim();
-  const isUniform = /^uniform$/i.test(description);
-
-  document.getElementById('uniformSizeWrap')
-    .classList.toggle('hidden',!isUniform);
-
-  if(!isUniform){
-    document.getElementById('uniformCustomSizeWrap').classList.add('hidden');
-    document.getElementById('manageUniformSize').value = '';
-    document.getElementById('manageUniformCustomSize').value = '';
-  }
-}
-
-document.getElementById('manageUniformSize').addEventListener('change',function(){
-  document.getElementById('uniformCustomSizeWrap')
-    .classList.toggle('hidden',this.value !== 'CUSTOM');
-});
-
-function parseUniformSize(remarks){
-  const m = String(remarks || '').match(/(?:^|\|)\s*Size\s*:\s*([^|]+)/i);
-  return m ? String(m[1] || '').trim() : '';
-}
-
-function remarksWithoutSize(remarks){
-  return String(remarks || '')
-    .replace(/(?:^|\|)\s*Size\s*:\s*[^|]+/ig,'')
-    .replace(/^\s*\|\s*|\s*\|\s*$/g,'')
-    .trim();
+  /* Uniform size is entered manually in Remarks. */
 }
 
 function editManagedObligation(index){
@@ -5613,18 +5736,6 @@ function editManagedObligation(index){
 
   obligationDescriptionChanged();
 
-  if(/^uniform$/i.test(String(o.description || '').trim())){
-    const size = parseUniformSize(o.remarks || '');
-    const standard = ['XS','S','M','L','XL','2XL','3XL'];
-    if(standard.indexOf(size.toUpperCase()) >= 0){
-      document.getElementById('manageUniformSize').value = size.toUpperCase();
-    }else if(size){
-      document.getElementById('manageUniformSize').value = 'CUSTOM';
-      document.getElementById('manageUniformCustomSize').value = size;
-      document.getElementById('uniformCustomSizeWrap').classList.remove('hidden');
-    }
-  }
-
   window.scrollTo({
     top:document.getElementById('obligationSelectedMember').offsetTop,
     behavior:'smooth'
@@ -5633,16 +5744,10 @@ function editManagedObligation(index){
 
 function clearManagedObligationForm(){
   ['manageObligationId','manageObligationDescription','manageObligationAmount',
-   'manageObligationRemarks','manageUniformCustomSize'].forEach(id => {
+   'manageObligationRemarks'].forEach(id => {
     const el = document.getElementById(id);
     if(el) el.value = '';
   });
-  const size = document.getElementById('manageUniformSize');
-  if(size) size.value = '';
-  const sw = document.getElementById('uniformSizeWrap');
-  const cw = document.getElementById('uniformCustomSizeWrap');
-  if(sw) sw.classList.add('hidden');
-  if(cw) cw.classList.add('hidden');
 }
 
 async function saveManagedObligation(){
@@ -5671,18 +5776,6 @@ async function saveManagedObligation(){
     return;
   }
 
-  let uniformSize = '';
-  if(/^uniform$/i.test(description)){
-    uniformSize = document.getElementById('manageUniformSize').value;
-    if(uniformSize === 'CUSTOM'){
-      uniformSize = document.getElementById('manageUniformCustomSize').value.trim();
-    }
-    if(!uniformSize){
-      msg('obligationManagementMsg','Select or enter the Uniform Size.','error');
-      return;
-    }
-  }
-
   const memberId =
     obligationAdminMember.id ||
     obligationAdminMember.memberId ||
@@ -5700,8 +5793,7 @@ async function saveManagedObligation(){
     description:description,
     amount:amount,
     dueAmount:amount,
-    remarks:remarks,
-    uniformSize:uniformSize
+    remarks:remarks
   };
 
   try{
