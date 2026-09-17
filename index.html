@@ -2503,540 +2503,141 @@ function fail(
    route/action
 ========================================================= */
 
-async function api(
-  action,
-  payload,
-  title,
-  sub
-){
+/* =========================================================
+   APPS SCRIPT IFRAME BRIDGE
+   Avoids browser CORS problems from direct fetch().
+========================================================= */
+let tofaBridgeFrame = null;
+let tofaBridgeReady = false;
+let tofaBridgeWaiters = {};
+let tofaBridgeReadyPromise = null;
 
+function ensureTofaBridge(){
+  if(tofaBridgeReady && tofaBridgeFrame) return Promise.resolve();
+
+  if(tofaBridgeReadyPromise) return tofaBridgeReadyPromise;
+
+  tofaBridgeReadyPromise = new Promise(function(resolve,reject){
+    let settled = false;
+
+    function finishReady(){
+      if(settled) return;
+      settled = true;
+      clearTimeout(timer);
+      tofaBridgeReady = true;
+      resolve();
+    }
+
+    const timer = setTimeout(function(){
+      if(settled) return;
+      settled = true;
+      tofaBridgeReadyPromise = null;
+      reject(new Error('TOFA server bridge did not become ready. Please try again.'));
+    },25000);
+
+    if(!tofaBridgeFrame){
+      tofaBridgeFrame = document.createElement('iframe');
+      tofaBridgeFrame.id = 'tofaApiBridge';
+      tofaBridgeFrame.src = API_URL;
+      tofaBridgeFrame.setAttribute('aria-hidden','true');
+      tofaBridgeFrame.style.position = 'fixed';
+      tofaBridgeFrame.style.width = '1px';
+      tofaBridgeFrame.style.height = '1px';
+      tofaBridgeFrame.style.opacity = '0';
+      tofaBridgeFrame.style.pointerEvents = 'none';
+      tofaBridgeFrame.style.border = '0';
+      tofaBridgeFrame.style.left = '-9999px';
+      document.body.appendChild(tofaBridgeFrame);
+    }
+
+    if(tofaBridgeReady) finishReady();
+
+    window.addEventListener('tofa-bridge-ready-internal',finishReady,{once:true});
+  });
+
+  return tofaBridgeReadyPromise;
+}
+
+window.addEventListener('message',function(ev){
+  const m = ev.data || {};
+
+  if(m.__onlineBridgeReady === true){
+    console.log('[TOFA BRIDGE CLIENT] READY',ev.origin);
+    tofaBridgeReady = true;
+    window.dispatchEvent(new Event('tofa-bridge-ready-internal'));
+    return;
+  }
+
+  if(m.__onlineApi !== true || !m.id) return;
+
+  const pending = tofaBridgeWaiters[m.id];
+  if(!pending) return;
+
+  delete tofaBridgeWaiters[m.id];
+  clearTimeout(pending.timer);
+
+  if(m.ok){
+    pending.resolve(m.data === undefined || m.data === null ? {} : m.data);
+  }else{
+    pending.reject(new Error(m.error || 'Request failed.'));
+  }
+});
+
+function callTofaBridge(action,payload){
+  return ensureTofaBridge().then(function(){
+    return new Promise(function(resolve,reject){
+      const id =
+        'TOFA-BRIDGE-' +
+        Date.now() + '-' +
+        Math.random().toString(36).substring(2,8).toUpperCase();
+
+      const timer = setTimeout(function(){
+        delete tofaBridgeWaiters[id];
+        reject(new Error('TOFA server request timed out. Please try again.'));
+      },30000);
+
+      tofaBridgeWaiters[id] = {
+        resolve:resolve,
+        reject:reject,
+        timer:timer
+      };
+
+      try{
+        tofaBridgeFrame.contentWindow.postMessage(
+          {
+            __onlineApiRequest:true,
+            id:id,
+            action:action,
+            payload:payload || {}
+          },
+          '*'
+        );
+      }catch(err){
+        clearTimeout(timer);
+        delete tofaBridgeWaiters[id];
+        reject(err);
+      }
+    });
+  });
+}
+
+async function api(action,payload,title,sub){
   showBusy(
     title || 'Please wait...',
     sub || 'Processing request'
   );
 
-
-  /* ---------------------------------------------------------
-     REQUEST CONFIGURATION
-  --------------------------------------------------------- */
-
-  const REQUEST_TIMEOUT = 25000;
-  const RETRY_DELAY = 1200;
-
-  /*
-   * SAFE actions only.
-   *
-   * These may automatically retry once when the browser
-   * fails to establish/complete the connection.
-   *
-   * IMPORTANT:
-   * Financial/write actions are intentionally NOT included.
-   */
-  const RETRYABLE_ACTIONS = [
-    'login',
-    'diagnostic',
-    'searchMembers',
-    'getDashboardSummary',
-    'getMemberList',
-    'getOutstandingMembers',
-    'getFinancialReport',
-    'getMemberProfile'
-  ];
-
-  const allowRetry =
-    RETRYABLE_ACTIONS.includes(action);
-
-  const maxAttempts =
-    allowRetry ? 2 : 1;
-
-
-  /* ---------------------------------------------------------
-     UNIQUE REQUEST ID
-  --------------------------------------------------------- */
-
-  const requestId =
-    'TOFA-' +
-    Date.now() +
-    '-' +
-    Math.random()
-      .toString(36)
-      .substring(2,8)
-      .toUpperCase();
-
-
-  console.log(
-    '[TOFA API][' + requestId + '] START',
-    {
-      action: action,
-      retryable: allowRetry,
-      maxAttempts: maxAttempts
-    }
-  );
-
-
-  /* ---------------------------------------------------------
-     SMALL DELAY HELPER
-  --------------------------------------------------------- */
-
-  function wait(ms){
-
-    return new Promise(
-      resolve =>
-        setTimeout(resolve,ms)
-    );
-
-  }
-
-
   try{
-
-    let lastError = null;
-
-
-    /* =======================================================
-       ATTEMPTS
-    ======================================================= */
-
-    for(
-      let attempt = 1;
-      attempt <= maxAttempts;
-      attempt++
-    ){
-
-      const controller =
-        new AbortController();
-
-      const timeoutId =
-        setTimeout(
-          function(){
-
-            controller.abort();
-
-          },
-          REQUEST_TIMEOUT
-        );
-
-
-      try{
-
-        console.log(
-          '[TOFA API][' +
-          requestId +
-          '] ATTEMPT ' +
-          attempt +
-          '/' +
-          maxAttempts,
-          action
-        );
-
-
-        /* ---------------------------------------------------
-           HTTP POST
-        --------------------------------------------------- */
-
-        const response =
-          await fetch(
-            API_URL,
-            {
-              method:'POST',
-
-              body:
-                JSON.stringify({
-                  action:action,
-                  payload:payload || {}
-                }),
-
-              redirect:'follow',
-
-              signal:
-                controller.signal
-            }
-          );
-
-
-        clearTimeout(
-          timeoutId
-        );
-
-
-        console.log(
-          '[TOFA API][' +
-          requestId +
-          '] HTTP RESPONSE',
-          {
-            status:
-              response.status,
-
-            ok:
-              response.ok,
-
-            url:
-              response.url,
-
-            redirected:
-              response.redirected
-          }
-        );
-
-
-        /* ---------------------------------------------------
-           READ RESPONSE AS TEXT FIRST
-        --------------------------------------------------- */
-
-        const responseText =
-          await response.text();
-
-
-        console.log(
-          '[TOFA API][' +
-          requestId +
-          '] RESPONSE LENGTH:',
-          responseText.length
-        );
-
-
-        /* ---------------------------------------------------
-           EMPTY RESPONSE
-        --------------------------------------------------- */
-
-        if(!responseText){
-
-          throw new Error(
-            'The TOFA server returned an empty response.'
-          );
-
-        }
-
-
-        /* ---------------------------------------------------
-           DETECT HTML / GOOGLE ERROR PAGE
-        --------------------------------------------------- */
-
-        const trimmedResponse =
-          responseText.trim();
-
-
-        if(
-          trimmedResponse
-            .toLowerCase()
-            .startsWith('<!doctype html') ||
-
-          trimmedResponse
-            .toLowerCase()
-            .startsWith('<html')
-        ){
-
-          console.error(
-            '[TOFA API][' +
-            requestId +
-            '] HTML RESPONSE RECEIVED',
-            trimmedResponse.substring(
-              0,
-              500
-            )
-          );
-
-
-          throw new Error(
-            'The TOFA server returned a web page instead of API data. Please try again.'
-          );
-
-        }
-
-
-        /* ---------------------------------------------------
-           PARSE JSON
-        --------------------------------------------------- */
-
-        let result;
-
-
-        try{
-
-          result =
-            JSON.parse(
-              responseText
-            );
-
-        }
-        catch(parseError){
-
-          console.error(
-            '[TOFA API][' +
-            requestId +
-            '] INVALID JSON RESPONSE',
-            responseText.substring(
-              0,
-              1000
-            )
-          );
-
-
-          throw new Error(
-            'The TOFA server returned an invalid response. Please try again.'
-          );
-
-        }
-
-
-        console.log(
-          '[TOFA API][' +
-          requestId +
-          '] PARSED RESPONSE',
-          result
-        );
-
-
-        /* ---------------------------------------------------
-           SERVER REPORTED ERROR
-        --------------------------------------------------- */
-
-        if(
-          !result ||
-          result.success !== true
-        ){
-
-          /*
-           * This is an actual response from Apps Script.
-           * Do NOT retry authentication/application errors.
-           */
-
-          const serverError =
-            new Error(
-              result &&
-              result.message
-                ? result.message
-                : 'Request failed.'
-            );
-
-
-          serverError.isServerError =
-            true;
-
-
-          throw serverError;
-
-        }
-
-
-        /* ---------------------------------------------------
-           SUCCESS
-        --------------------------------------------------- */
-
-        console.log(
-          '[TOFA API][' +
-          requestId +
-          '] SUCCESS',
-          action
-        );
-
-
-        return (
-          result.result === undefined ||
-          result.result === null
-            ? {}
-            : result.result
-        );
-
-      }
-      catch(error){
-
-        clearTimeout(
-          timeoutId
-        );
-
-
-        lastError =
-          error;
-
-
-        console.error(
-          '[TOFA API][' +
-          requestId +
-          '] ATTEMPT FAILED',
-          {
-            attempt:
-              attempt,
-
-            action:
-              action,
-
-            name:
-              error &&
-              error.name
-                ? error.name
-                : '',
-
-            message:
-              error &&
-              error.message
-                ? error.message
-                : String(error)
-          }
-        );
-
-
-        /* ---------------------------------------------------
-           ACTUAL SERVER ERROR
-           Example:
-           invalid password
-           SESSION_EXPIRED
-           validation error
-
-           Never retry these.
-        --------------------------------------------------- */
-
-        if(
-          error &&
-          error.isServerError
-        ){
-
-          throw error;
-
-        }
-
-
-        /* ---------------------------------------------------
-           TIMEOUT
-        --------------------------------------------------- */
-
-        const timedOut =
-          error &&
-          error.name ===
-          'AbortError';
-
-
-        /* ---------------------------------------------------
-           RETRY IF ALLOWED
-        --------------------------------------------------- */
-
-        if(
-          attempt < maxAttempts
-        ){
-
-          console.warn(
-            '[TOFA API][' +
-            requestId +
-            '] TEMPORARY CONNECTION FAILURE.' +
-            ' Retrying in ' +
-            RETRY_DELAY +
-            'ms...'
-          );
-
-
-          if(
-            action === 'login'
-          ){
-
-            const busySub =
-              document.getElementById(
-                'busySub'
-              );
-
-
-            if(busySub){
-
-              busySub.textContent =
-                'Connection interrupted. Retrying...';
-
-            }
-
-          }
-
-
-          await wait(
-            RETRY_DELAY
-          );
-
-
-          continue;
-
-        }
-
-
-        /* ---------------------------------------------------
-           FINAL CONNECTION ERROR
-        --------------------------------------------------- */
-
-        if(timedOut){
-
-          throw new Error(
-            'Connection to the TOFA server timed out. Please check your internet connection and try again.'
-          );
-
-        }
-
-
-        /*
-         * Browser fetch failures commonly appear as:
-         *
-         * TypeError: Failed to fetch
-         * NetworkError
-         * Load failed
-         */
-
-        const errorMessage =
-          error &&
-          error.message
-            ? String(
-                error.message
-              )
-            : '';
-
-
-        if(
-          error instanceof TypeError ||
-
-          /failed to fetch/i.test(
-            errorMessage
-          ) ||
-
-          /network/i.test(
-            errorMessage
-          ) ||
-
-          /load failed/i.test(
-            errorMessage
-          )
-        ){
-
-          throw new Error(
-            'Unable to connect to the TOFA server. Please check your internet connection and try again.'
-          );
-
-        }
-
-
-        /*
-         * Preserve meaningful errors such as:
-         * invalid response / empty response.
-         */
-
-        throw error;
-
-      }
-
-    }
-
-
-    /* ---------------------------------------------------------
-       SAFETY FALLBACK
-    --------------------------------------------------------- */
-
-    throw (
-      lastError ||
-      new Error(
-        'Unable to connect to the TOFA server.'
-      )
-    );
-
-  }
-  finally{
-
+    console.log('[TOFA API BRIDGE] START',action);
+    const result = await callTofaBridge(action,payload || {});
+    console.log('[TOFA API BRIDGE] SUCCESS',action,result);
+    return result;
+  }catch(error){
+    console.error('[TOFA API BRIDGE] FAILED',action,error);
+    throw error;
+  }finally{
     hideBusy();
-
   }
-
 }
 
 
