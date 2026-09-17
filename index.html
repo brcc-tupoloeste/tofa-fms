@@ -997,6 +997,49 @@ button.danger{
   }
 }
 
+
+/* =========================================================
+   OBLIGATIONS MANAGEMENT + PAYMENT TYPE REPORT
+========================================================= */
+.search-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;align-items:end}
+.search-row button{margin:0!important;width:auto!important}
+.obligation-action-row{display:flex;gap:5px;flex-wrap:wrap}
+.obligation-action-row button{margin:0!important;width:auto!important;padding:6px 8px!important;font-size:10px!important}
+.payment-type-print-header{text-align:center;margin-bottom:12px}
+.payment-type-association{font-weight:900;font-size:15px;letter-spacing:.2px}
+.payment-type-total{text-align:right;font-size:13px;margin-top:12px;font-weight:800}
+.payment-type-table th:last-child,.payment-type-table td:last-child{text-align:right}
+@media(max-width:619px){
+  .search-row{grid-template-columns:1fr}
+  .search-row button{width:100%!important}
+}
+@page{size:A4 portrait;margin:14mm}
+@media print{
+  body.print-payment-type #reportPanel,
+  body.print-payment-type #reportPanel *,
+  body.print-payment-type #outstandingPanel,
+  body.print-payment-type #outstandingPanel *{
+    visibility:hidden!important;
+  }
+  body.print-payment-type #paymentTypeReportPanel,
+  body.print-payment-type #paymentTypeReportPanel *{
+    visibility:visible!important;
+  }
+  body.print-payment-type #paymentTypeReportPanel{
+    position:absolute!important;left:0!important;top:0!important;width:100%!important;
+    box-shadow:none!important;border:0!important;margin:0!important;padding:0!important;
+  }
+  body.print-payment-type .payment-type-no-print{display:none!important}
+  body.print-payment-type .payment-type-table-wrap{overflow:visible!important;border:0!important}
+  body.print-payment-type .payment-type-table{min-width:0!important;width:100%!important}
+  body.print-payment-type .payment-type-table th,
+  body.print-payment-type .payment-type-table td{font-size:10pt!important;padding:6px!important}
+  body.print-payment-type .payment-type-association{font-size:14pt!important}
+  body.print-payment-type #paymentTypePrintArea .panel-title{font-size:13pt!important;margin:4px 0!important}
+  body.print-payment-type #paymentTypePrintMeta{font-size:10pt!important;color:#000!important}
+  body.print-payment-type .payment-type-total{font-size:11pt!important}
+}
+
 </style>
 
 </head>
@@ -1253,6 +1296,18 @@ button.danger{
       class="quick-btn"
       onclick="openMemberList()">
       👥 Member List
+    </button>
+
+    <button
+      class="quick-btn"
+      onclick="openObligationsManagement()">
+      📌 Obligations Management
+    </button>
+
+    <button
+      class="quick-btn"
+      onclick="openPaymentTypeReport()">
+      🧾 Payment Type Report
     </button>
 
   </div>
@@ -1921,17 +1976,7 @@ button.danger{
       Registration Fee
     </option>
 
-    <option value="Rice">
-      Rice
-    </option>
-
-    <option value="Fertilizer">
-      Fertilizer
-    </option>
-
-    <option value="Other Obligation Payment">
-      Other Obligation Payment
-    </option>
+    <!-- Outstanding member obligations are appended dynamically. -->
 
   </select>
 
@@ -2057,6 +2102,135 @@ button.danger{
 
   </div>
 
+</div>
+
+
+<!-- =======================================================
+     OBLIGATIONS MANAGEMENT
+======================================================= -->
+<div id="obligationsManagementPanel" class="card hidden">
+  <div class="panel-nav">
+    <button type="button" class="back-dashboard" onclick="backToDashboard()">← Back to Dashboard</button>
+  </div>
+
+  <h3 class="panel-title">📌 Obligations Management</h3>
+  <div class="panel-note">Search a member, then add, edit or delete an obligation.</div>
+
+  <label>Search Member</label>
+  <div class="search-row">
+    <input id="obligationMemberSearch" autocomplete="off" placeholder="Member name or Member ID">
+    <button type="button" onclick="searchObligationMembers()">SEARCH</button>
+  </div>
+  <div id="obligationMemberResults" class="results"></div>
+  <div id="obligationManagementMsg"></div>
+
+  <div id="obligationSelectedMember" class="hidden">
+    <div class="report-section">
+      <h4 id="obligationSelectedMemberName">Selected Member</h4>
+      <div id="obligationSelectedMemberMeta" class="panel-note"></div>
+    </div>
+
+    <div class="form-grid">
+      <input id="manageObligationId" type="hidden">
+
+      <div class="full">
+        <label>Obligation / Description</label>
+        <input id="manageObligationDescription" autocomplete="off"
+               placeholder="Example: Uniform, Rice, Fertilizer"
+               oninput="obligationDescriptionChanged()">
+      </div>
+
+      <div>
+        <label>Amount</label>
+        <input id="manageObligationAmount" type="number" min="0.01" step="0.01" inputmode="decimal">
+      </div>
+
+      <div id="uniformSizeWrap" class="hidden">
+        <label>Uniform Size</label>
+        <select id="manageUniformSize">
+          <option value="">Select size</option>
+          <option>XS</option><option>S</option><option>M</option><option>L</option>
+          <option>XL</option><option>2XL</option><option>3XL</option>
+          <option value="CUSTOM">Other / Custom</option>
+        </select>
+      </div>
+
+      <div id="uniformCustomSizeWrap" class="full hidden">
+        <label>Custom Uniform Size</label>
+        <input id="manageUniformCustomSize" autocomplete="off">
+      </div>
+
+      <div class="full">
+        <label>Remarks</label>
+        <textarea id="manageObligationRemarks"></textarea>
+      </div>
+    </div>
+
+    <div class="form-actions-row">
+      <button type="button" onclick="saveManagedObligation()">💾 SAVE OBLIGATION</button>
+      <button type="button" class="alt" onclick="clearManagedObligationForm()">CLEAR</button>
+    </div>
+
+    <div class="report-section">
+      <h4>Member Obligations</h4>
+      <div class="table-wrap">
+        <table class="member-table">
+          <thead>
+            <tr>
+              <th>Description</th><th>Due</th><th>Paid</th><th>Balance</th>
+              <th>Status</th><th>Remarks</th><th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="managedObligationsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =======================================================
+     PAYMENT TYPE REPORT
+======================================================= -->
+<div id="paymentTypeReportPanel" class="card hidden">
+  <div class="panel-nav payment-type-no-print">
+    <button type="button" class="back-dashboard" onclick="backToDashboard()">← Back to Dashboard</button>
+  </div>
+
+  <div id="paymentTypePrintArea">
+    <div class="payment-type-print-header">
+      <div class="payment-type-association">TUPOL OESTE FARMER'S ASSOCIATION</div>
+      <h3 class="panel-title">PAYMENT TYPE REPORT</h3>
+      <div id="paymentTypePrintMeta" class="panel-note"></div>
+    </div>
+
+    <div id="paymentTypeReportControls" class="payment-type-no-print">
+      <label>Search / Select Payment Type</label>
+      <input id="paymentTypeSearch" list="paymentTypeOptions" autocomplete="off"
+             placeholder="Example: Monthly Payment, Registration Fee, Uniform">
+      <datalist id="paymentTypeOptions"></datalist>
+      <div class="form-actions-row">
+        <button type="button" onclick="generatePaymentTypeReport()">GENERATE REPORT</button>
+        <button type="button" class="alt" onclick="backToDashboard()">CANCEL</button>
+      </div>
+    </div>
+
+    <div id="paymentTypeReportMsg" class="payment-type-no-print"></div>
+
+    <div id="paymentTypeReportOutput" class="hidden">
+      <div class="table-wrap payment-type-table-wrap">
+        <table class="report-table payment-type-table">
+          <thead><tr><th>No.</th><th>Member Name</th><th>Remarks</th><th>Amount</th></tr></thead>
+          <tbody id="paymentTypeReportBody"></tbody>
+        </table>
+      </div>
+      <div class="payment-type-total">
+        TOTAL COLLECTION: <strong id="paymentTypeReportTotal">₱0.00</strong>
+      </div>
+      <div class="form-actions-row payment-type-no-print">
+        <button type="button" class="print-btn" onclick="printPaymentTypeReport()">🖨️ PRINT</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 
@@ -3766,59 +3940,51 @@ function backToSearch(){
    OBLIGATIONS
 ========================================================= */
 
-function fillObligations(
-  list
-){
+function fillObligations(list){
 
-  const s =
-    document.getElementById(
-      'obligationId'
-    );
+  const paymentType = document.getElementById('paymentType');
+  const obligationSelect = document.getElementById('obligationId');
 
+  if(!paymentType) return;
 
-  s.innerHTML =
-    '<option value="">' +
-    'Select obligation' +
-    '</option>' +
+  paymentType.innerHTML =
+    '<option value="">Select payment type</option>' +
+    '<option value="Monthly Payment">Monthly Payment</option>' +
+    '<option value="Registration Fee">Registration Fee</option>';
 
-    list
-      .filter(
-        o =>
-          Number(
-            o.balance || 0
-          ) > 0
-      )
-      .map(
-        o => {
+  if(obligationSelect){
+    obligationSelect.innerHTML =
+      '<option value="">Select obligation</option>';
+  }
 
-          const id =
-            o.obligationId ||
-            o.id ||
-            '';
+  (list || [])
+    .filter(o => Number(o.balance || 0) > 0)
+    .forEach(o => {
 
-          const description =
-            o.description ||
-            'Obligation';
+      const id = String(o.obligationId || o.id || '').trim();
+      const description = String(o.description || 'Obligation').trim();
+      const remarks = String(o.remarks || '').trim();
 
-          return (
+      if(!id || !description) return;
 
-            '<option value="' +
-            esc(id) +
-            '">' +
+      const option = document.createElement('option');
+      option.value = description;
+      option.textContent =
+        description + ' — Balance ' + money(o.balance);
+      option.dataset.obligationId = id;
+      option.dataset.obligationRemarks = remarks;
+      option.dataset.obligationBalance = String(Number(o.balance || 0));
+      paymentType.appendChild(option);
 
-            esc(
-              description +
-              ' — ' +
-              money(o.balance)
-            ) +
+      if(obligationSelect){
+        const legacy = document.createElement('option');
+        legacy.value = id;
+        legacy.textContent =
+          description + ' — ' + money(o.balance);
+        obligationSelect.appendChild(legacy);
+      }
 
-            '</option>'
-
-          );
-
-        }
-      )
-      .join('');
+    });
 
 }
 
@@ -3829,25 +3995,73 @@ function fillObligations(
 
 function paymentTypeChanged(){
 
-  const type =
-    document
-      .getElementById(
-        'paymentType'
-      )
-      .value;
+  const select = document.getElementById('paymentType');
+  const option = select && select.options[select.selectedIndex];
+  const obligationId =
+    option && option.dataset
+      ? String(option.dataset.obligationId || '')
+      : '';
+
+  const legacySelect = document.getElementById('obligationId');
+  if(legacySelect) legacySelect.value = obligationId;
+
+  const wrap = document.getElementById('obligationWrap');
+  if(wrap) wrap.classList.add('hidden');
+
+}
 
 
-  document
-    .getElementById(
-      'obligationWrap'
-    )
-    .classList
-    .toggle(
-      'hidden',
-      type !==
-        'Other Obligation Payment'
-    );
+/* =========================================================
+   PAYMENT OBLIGATION HELPERS
+========================================================= */
 
+function selectedPaymentObligation(){
+
+  const select = document.getElementById('paymentType');
+  if(!select) return null;
+
+  const option = select.options[select.selectedIndex];
+  if(!option || !option.dataset) return null;
+
+  const id = String(option.dataset.obligationId || '').trim();
+  if(!id) return null;
+
+  return {
+    id:id,
+    remarks:String(option.dataset.obligationRemarks || '').trim(),
+    balance:Number(option.dataset.obligationBalance || 0)
+  };
+}
+
+function cleanInternalObligationId(text){
+  return String(text || '')
+    .replace(/\s*\|?\s*Obligation\s*ID\s*:\s*OBL-[A-Za-z0-9-]+/ig,'')
+    .replace(/\s*\|\s*$/,'')
+    .trim();
+}
+
+function mergePaymentObligationRemarks(userRemarks, obligation){
+
+  let parts = [];
+  const base = cleanInternalObligationId(
+    obligation ? obligation.remarks : ''
+  );
+  const user = cleanInternalObligationId(userRemarks);
+
+  const sizeMatch = base.match(/(?:^|\|)\s*Size\s*:\s*([^|]+)/i);
+  if(sizeMatch){
+    parts.push('Size: ' + String(sizeMatch[1] || '').trim());
+  }
+
+  if(user && parts.indexOf(user) === -1){
+    parts.push(user);
+  }
+
+  if(obligation && obligation.id){
+    parts.push('Obligation ID: ' + obligation.id);
+  }
+
+  return parts.filter(Boolean).join(' | ');
 }
 
 
@@ -3907,208 +4121,99 @@ function fillHistory(
 
 async function savePayment(){
 
-  if(!selectedMember)
-    return;
-
+  if(!selectedMember) return;
 
   const type =
-    document
-      .getElementById(
-        'paymentType'
-      )
-      .value;
-
+    document.getElementById('paymentType').value;
 
   const amount =
-    Number(
-      document
-        .getElementById(
-          'amount'
-        )
-        .value || 0
-    );
+    Number(document.getElementById('amount').value || 0);
 
-
-  const obligationId =
-    document
-      .getElementById(
-        'obligationId'
-      )
-      .value;
-
+  const obligation =
+    selectedPaymentObligation();
 
   if(!type){
-
-    msg(
-      'paymentMsg',
-      'Select payment type.',
-      'error'
-    );
-
+    msg('paymentMsg','Select payment type.','error');
     return;
-
   }
-
 
   if(amount <= 0){
-
-    msg(
-      'paymentMsg',
-      'Enter a valid amount.',
-      'error'
-    );
-
+    msg('paymentMsg','Enter a valid amount.','error');
     return;
-
   }
-
 
   if(
-    type ===
-      'Other Obligation Payment' &&
-    !obligationId
+    obligation &&
+    obligation.balance > 0 &&
+    amount > obligation.balance
   ){
-
     msg(
       'paymentMsg',
-      'Select the specific obligation.',
+      'Payment cannot exceed the obligation balance of ' +
+        money(obligation.balance) + '.',
       'error'
     );
-
     return;
-
   }
 
-
   const saveBtn =
-    document.getElementById(
-      'saveBtn'
-    );
+    document.getElementById('saveBtn');
 
-
-  saveBtn.disabled =
-    true;
-
+  saveBtn.disabled = true;
 
   try{
 
+    const userRemarks =
+      document.getElementById('remarks').value.trim();
+
+    const finalRemarks =
+      obligation
+        ? mergePaymentObligationRemarks(userRemarks, obligation)
+        : userRemarks;
+
     const r =
       await api(
-
         'savePayment',
-
         {
-
           token:token,
-
           paymentData:{
-
-            memberId:
-              selectedMember.id,
-
-            transactionType:
-              type,
-
+            memberId:selectedMember.id,
+            transactionType:type,
             amount:amount,
-
-            obligationId:
-              type ===
-              'Other Obligation Payment'
-                ? obligationId
-                : '',
-
-            remarks:
-              document
-                .getElementById(
-                  'remarks'
-                )
-                .value
-                .trim()
-
+            obligationId:obligation ? obligation.id : '',
+            remarks:finalRemarks
           }
-
         },
-
         'Saving Payment...',
-
         'Please wait'
-
       );
 
+    selectedMember = r.profile;
+    renderProfile(r.profile);
 
-    /* Update profile */
-
-    selectedMember =
-      r.profile;
-
-
-    renderProfile(
-      r.profile
-    );
-
-
-    /* Server message */
-
-    msg(
-      'paymentMsg',
-      r.message,
-      'ok'
-    );
-
-
-    /* Success */
+    msg('paymentMsg',r.message,'ok');
 
     document
-      .getElementById(
-        'paymentSuccess'
-      )
-      .classList
-      .remove('hidden');
+      .getElementById('paymentSuccess')
+      .classList.remove('hidden');
 
+    document.getElementById('amount').value = '';
+    document.getElementById('remarks').value = '';
+    document.getElementById('paymentType').value = '';
 
-    /* Clear fields */
+    const obligationWrap =
+      document.getElementById('obligationWrap');
 
-    document
-      .getElementById(
-        'amount'
-      )
-      .value = '';
-
-
-    document
-      .getElementById(
-        'remarks'
-      )
-      .value = '';
-
-
-    document
-      .getElementById(
-        'paymentType'
-      )
-      .value = '';
-
-
-    document
-      .getElementById(
-        'obligationWrap'
-      )
-      .classList
-      .add('hidden');
-
+    if(obligationWrap)
+      obligationWrap.classList.add('hidden');
 
   }catch(e){
 
-    fail(
-      e,
-      'paymentMsg'
-    );
-
+    fail(e,'paymentMsg');
 
   }finally{
 
-    saveBtn.disabled =
-      false;
+    saveBtn.disabled = false;
 
   }
 
@@ -4536,7 +4641,9 @@ function hideAppPanels(){
     'reportPanel',
     'expensePanel',
     'bankPanel',
-    'editMemberPanel'
+    'editMemberPanel',
+    'obligationsManagementPanel',
+    'paymentTypeReportPanel'
   ].forEach(function(id){
     const el = document.getElementById(id);
     if(el) el.classList.add('hidden');
@@ -5286,6 +5393,513 @@ async function generateOnlineFinancialReport(){
     msg('reportMsg','Report generated successfully.','ok');
   }catch(e){fail(e,'reportMsg');}
 }
+
+
+/* =========================================================
+   OBLIGATIONS MANAGEMENT
+========================================================= */
+
+let obligationAdminMember = null;
+let obligationAdminRows = [];
+
+function obligationApiRows(response){
+  if(Array.isArray(response)) return response;
+  if(response && Array.isArray(response.obligations)) return response.obligations;
+  if(response && Array.isArray(response.rows)) return response.rows;
+  return [];
+}
+
+async function openObligationsManagement(){
+  hideAppPanels();
+  document.getElementById('obligationsManagementPanel').classList.remove('hidden');
+  document.getElementById('searchTopBar').classList.remove('hidden');
+  obligationAdminMember = null;
+  obligationAdminRows = [];
+  document.getElementById('obligationMemberSearch').value = '';
+  document.getElementById('obligationMemberResults').innerHTML = '';
+  document.getElementById('obligationSelectedMember').classList.add('hidden');
+  clearManagedObligationForm();
+  msg('obligationManagementMsg','','');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+async function searchObligationMembers(){
+
+  const text =
+    document.getElementById('obligationMemberSearch').value.trim();
+
+  if(!text){
+    msg('obligationManagementMsg','Enter a member name or Member ID.','error');
+    return;
+  }
+
+  try{
+    const rows =
+      await api(
+        'searchMembers',
+        {token:token,searchText:text},
+        'Searching Members...',
+        'Please wait'
+      );
+
+    const list =
+      Array.isArray(rows)
+        ? rows
+        : (rows && (rows.members || rows.results)) || [];
+
+    document.getElementById('obligationMemberResults').innerHTML =
+      list.length
+        ? list.map(x => {
+            const id = x.id || x.memberId || '';
+            const name = x.name || x.memberName || '';
+            const address = x.address || x.sitio || '';
+            return '<button type="button" class="result-item" ' +
+              'onclick="selectObligationMember(' +
+              JSON.stringify(String(id)) + ')">' +
+              '<strong>' + esc(name) + '</strong>' +
+              '<span>' + esc(id + (address ? ' • ' + address : '')) + '</span>' +
+              '</button>';
+          }).join('')
+        : '<div class="panel-note">No member found.</div>';
+
+    msg('obligationManagementMsg','','');
+
+  }catch(e){
+    fail(e,'obligationManagementMsg');
+  }
+}
+
+async function selectObligationMember(memberId){
+
+  try{
+    const p =
+      await api(
+        'getMemberProfile',
+        {token:token,memberId:memberId},
+        'Loading Member...',
+        'Please wait'
+      );
+
+    obligationAdminMember = p;
+    document.getElementById('obligationSelectedMember').classList.remove('hidden');
+    document.getElementById('obligationSelectedMemberName').textContent =
+      p.name || p.memberName || memberId;
+    document.getElementById('obligationSelectedMemberMeta').textContent =
+      (p.id || p.memberId || memberId) +
+      ((p.address || p.sitio) ? ' • ' + (p.address || p.sitio) : '');
+
+    await loadManagedObligations();
+    clearManagedObligationForm();
+
+  }catch(e){
+    fail(e,'obligationManagementMsg');
+  }
+}
+
+async function loadManagedObligations(){
+
+  if(!obligationAdminMember) return;
+
+  const memberId =
+    obligationAdminMember.id ||
+    obligationAdminMember.memberId ||
+    '';
+
+  const r =
+    await api(
+      'getObligations',
+      {token:token,memberId:memberId},
+      'Loading Obligations...',
+      'Please wait'
+    );
+
+  obligationAdminRows = obligationApiRows(r);
+  renderManagedObligations();
+}
+
+function obligationRowId(o){
+  return String(o.obligationId || o.id || '').trim();
+}
+
+function obligationRowPaid(o){
+  return Number(o.paid || o.paidAmount || o.totalPaid || 0);
+}
+
+function obligationRowDue(o){
+  return Number(o.due || o.dueAmount || o.amount || 0);
+}
+
+function obligationRowBalance(o){
+  if(o.balance !== undefined && o.balance !== null && o.balance !== ''){
+    return Number(o.balance || 0);
+  }
+  return Math.max(0, obligationRowDue(o) - obligationRowPaid(o));
+}
+
+function renderManagedObligations(){
+
+  const body = document.getElementById('managedObligationsBody');
+
+  body.innerHTML =
+    obligationAdminRows.length
+      ? obligationAdminRows.map((o,index) => {
+          const id = obligationRowId(o);
+          const due = obligationRowDue(o);
+          const paid = obligationRowPaid(o);
+          const balance = obligationRowBalance(o);
+          const status =
+            o.status ||
+            (paid <= 0 ? 'UNPAID' : (balance > 0 ? 'PARTIAL' : 'PAID'));
+
+          return '<tr>' +
+            '<td>' + esc(o.description || '') + '</td>' +
+            '<td>' + money(due) + '</td>' +
+            '<td>' + money(paid) + '</td>' +
+            '<td>' + money(balance) + '</td>' +
+            '<td>' + esc(status) + '</td>' +
+            '<td>' + esc(cleanInternalObligationId(o.remarks || '')) + '</td>' +
+            '<td><div class="obligation-action-row">' +
+              '<button type="button" onclick="editManagedObligation(' + index + ')">EDIT</button>' +
+              '<button type="button" class="danger" onclick="deleteManagedObligation(' +
+                JSON.stringify(id) + ')">DELETE</button>' +
+            '</div></td>' +
+          '</tr>';
+        }).join('')
+      : '<tr><td colspan="7">No obligations found for this member.</td></tr>';
+}
+
+function obligationDescriptionChanged(){
+  const description =
+    document.getElementById('manageObligationDescription').value.trim();
+  const isUniform = /^uniform$/i.test(description);
+
+  document.getElementById('uniformSizeWrap')
+    .classList.toggle('hidden',!isUniform);
+
+  if(!isUniform){
+    document.getElementById('uniformCustomSizeWrap').classList.add('hidden');
+    document.getElementById('manageUniformSize').value = '';
+    document.getElementById('manageUniformCustomSize').value = '';
+  }
+}
+
+document.getElementById('manageUniformSize').addEventListener('change',function(){
+  document.getElementById('uniformCustomSizeWrap')
+    .classList.toggle('hidden',this.value !== 'CUSTOM');
+});
+
+function parseUniformSize(remarks){
+  const m = String(remarks || '').match(/(?:^|\|)\s*Size\s*:\s*([^|]+)/i);
+  return m ? String(m[1] || '').trim() : '';
+}
+
+function remarksWithoutSize(remarks){
+  return String(remarks || '')
+    .replace(/(?:^|\|)\s*Size\s*:\s*[^|]+/ig,'')
+    .replace(/^\s*\|\s*|\s*\|\s*$/g,'')
+    .trim();
+}
+
+function editManagedObligation(index){
+
+  const o = obligationAdminRows[index];
+  if(!o) return;
+
+  document.getElementById('manageObligationId').value = obligationRowId(o);
+  document.getElementById('manageObligationDescription').value = o.description || '';
+  document.getElementById('manageObligationAmount').value = obligationRowDue(o) || '';
+  document.getElementById('manageObligationRemarks').value =
+    remarksWithoutSize(cleanInternalObligationId(o.remarks || ''));
+
+  obligationDescriptionChanged();
+
+  if(/^uniform$/i.test(String(o.description || '').trim())){
+    const size = parseUniformSize(o.remarks || '');
+    const standard = ['XS','S','M','L','XL','2XL','3XL'];
+    if(standard.indexOf(size.toUpperCase()) >= 0){
+      document.getElementById('manageUniformSize').value = size.toUpperCase();
+    }else if(size){
+      document.getElementById('manageUniformSize').value = 'CUSTOM';
+      document.getElementById('manageUniformCustomSize').value = size;
+      document.getElementById('uniformCustomSizeWrap').classList.remove('hidden');
+    }
+  }
+
+  window.scrollTo({
+    top:document.getElementById('obligationSelectedMember').offsetTop,
+    behavior:'smooth'
+  });
+}
+
+function clearManagedObligationForm(){
+  ['manageObligationId','manageObligationDescription','manageObligationAmount',
+   'manageObligationRemarks','manageUniformCustomSize'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  const size = document.getElementById('manageUniformSize');
+  if(size) size.value = '';
+  const sw = document.getElementById('uniformSizeWrap');
+  const cw = document.getElementById('uniformCustomSizeWrap');
+  if(sw) sw.classList.add('hidden');
+  if(cw) cw.classList.add('hidden');
+}
+
+async function saveManagedObligation(){
+
+  if(!obligationAdminMember){
+    msg('obligationManagementMsg','Select a member first.','error');
+    return;
+  }
+
+  const obligationId =
+    document.getElementById('manageObligationId').value.trim();
+  const description =
+    document.getElementById('manageObligationDescription').value.trim();
+  const amount =
+    Number(document.getElementById('manageObligationAmount').value || 0);
+  let remarks =
+    document.getElementById('manageObligationRemarks').value.trim();
+
+  if(!description){
+    msg('obligationManagementMsg','Enter the obligation description.','error');
+    return;
+  }
+
+  if(!(amount > 0)){
+    msg('obligationManagementMsg','Enter a valid amount.','error');
+    return;
+  }
+
+  let uniformSize = '';
+  if(/^uniform$/i.test(description)){
+    uniformSize = document.getElementById('manageUniformSize').value;
+    if(uniformSize === 'CUSTOM'){
+      uniformSize = document.getElementById('manageUniformCustomSize').value.trim();
+    }
+    if(!uniformSize){
+      msg('obligationManagementMsg','Select or enter the Uniform Size.','error');
+      return;
+    }
+  }
+
+  const memberId =
+    obligationAdminMember.id ||
+    obligationAdminMember.memberId ||
+    '';
+
+  const memberName =
+    obligationAdminMember.name ||
+    obligationAdminMember.memberName ||
+    '';
+
+  const data = {
+    obligationId:obligationId,
+    memberId:memberId,
+    memberName:memberName,
+    description:description,
+    amount:amount,
+    dueAmount:amount,
+    remarks:remarks,
+    uniformSize:uniformSize
+  };
+
+  try{
+    const action = obligationId ? 'editObligation' : 'addObligation';
+
+    const r =
+      await api(
+        action,
+        {token:token,obligationData:data},
+        obligationId ? 'Updating Obligation...' : 'Saving Obligation...',
+        'Please wait'
+      );
+
+    msg(
+      'obligationManagementMsg',
+      (r && r.message) ||
+        (obligationId ? 'Obligation updated.' : 'Obligation added.'),
+      'ok'
+    );
+
+    await loadManagedObligations();
+    clearManagedObligationForm();
+
+  }catch(e){
+    fail(e,'obligationManagementMsg');
+  }
+}
+
+async function deleteManagedObligation(obligationId){
+
+  if(!obligationId) return;
+
+  if(!confirm(
+    'Delete this obligation?\n\n' +
+    'Deletion will be blocked by the server if linked payment records exist.'
+  )) return;
+
+  try{
+    const r =
+      await api(
+        'deleteObligation',
+        {token:token,obligationId:obligationId},
+        'Deleting Obligation...',
+        'Please wait'
+      );
+
+    msg(
+      'obligationManagementMsg',
+      (r && r.message) || 'Obligation deleted.',
+      'ok'
+    );
+
+    await loadManagedObligations();
+    clearManagedObligationForm();
+
+  }catch(e){
+    fail(e,'obligationManagementMsg');
+  }
+}
+
+
+/* =========================================================
+   PAYMENT TYPE REPORT
+========================================================= */
+
+let paymentTypeReportTypes = [];
+
+async function openPaymentTypeReport(){
+
+  hideAppPanels();
+  document.getElementById('paymentTypeReportPanel').classList.remove('hidden');
+  document.getElementById('searchTopBar').classList.remove('hidden');
+  document.getElementById('paymentTypeSearch').value = '';
+  document.getElementById('paymentTypeReportOutput').classList.add('hidden');
+  document.getElementById('paymentTypeReportBody').innerHTML = '';
+  document.getElementById('paymentTypePrintMeta').textContent = '';
+  msg('paymentTypeReportMsg','','');
+
+  try{
+    const r =
+      await api(
+        'getPaymentTypes',
+        {token:token},
+        'Loading Payment Types...',
+        'Please wait'
+      );
+
+    paymentTypeReportTypes =
+      Array.isArray(r)
+        ? r
+        : (r && (r.paymentTypes || r.types)) || [];
+
+    paymentTypeReportTypes =
+      paymentTypeReportTypes
+        .map(x => typeof x === 'string' ? x : (x.type || x.transactionType || ''))
+        .map(x => String(x || '').trim())
+        .filter(Boolean)
+        .filter((x,i,a) => a.indexOf(x) === i)
+        .sort((a,b) => a.localeCompare(b));
+
+    document.getElementById('paymentTypeOptions').innerHTML =
+      paymentTypeReportTypes
+        .map(x => '<option value="' + esc(x) + '"></option>')
+        .join('');
+
+  }catch(e){
+    fail(e,'paymentTypeReportMsg');
+  }
+
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function paymentTypeReportRows(response){
+  if(Array.isArray(response)) return response;
+  if(response && Array.isArray(response.rows)) return response.rows;
+  if(response && Array.isArray(response.transactions)) return response.transactions;
+  if(response && Array.isArray(response.payments)) return response.payments;
+  return [];
+}
+
+async function generatePaymentTypeReport(){
+
+  const type =
+    document.getElementById('paymentTypeSearch').value.trim();
+
+  if(!type){
+    msg('paymentTypeReportMsg','Select or enter a Payment Type.','error');
+    return;
+  }
+
+  try{
+    const r =
+      await api(
+        'getPaymentTypeReport',
+        {token:token,paymentType:type},
+        'Generating Payment Type Report...',
+        'Please wait'
+      );
+
+    const rows = paymentTypeReportRows(r);
+
+    let total = 0;
+
+    document.getElementById('paymentTypeReportBody').innerHTML =
+      rows.length
+        ? rows.map((x,index) => {
+            const amount = Number(x.amount || 0);
+            total += amount;
+            return '<tr>' +
+              '<td>' + (index + 1) + '</td>' +
+              '<td>' + esc(x.memberName || x.name || '') + '</td>' +
+              '<td>' + esc(cleanInternalObligationId(x.remarks || '')) + '</td>' +
+              '<td>' + money(amount) + '</td>' +
+            '</tr>';
+          }).join('')
+        : '<tr><td colspan="4">No payment transactions found.</td></tr>';
+
+    if(r && !Array.isArray(r) && r.total !== undefined){
+      total = Number(r.total || 0);
+    }
+
+    document.getElementById('paymentTypeReportTotal').textContent =
+      money(total);
+
+    const now = new Date();
+    const asOf =
+      now.toLocaleDateString('en-PH',{
+        year:'numeric',month:'long',day:'numeric'
+      });
+
+    document.getElementById('paymentTypePrintMeta').innerHTML =
+      'Payment Type: <strong>' + esc(type) + '</strong><br>' +
+      'As of: ' + esc(asOf);
+
+    document.getElementById('paymentTypeReportOutput').classList.remove('hidden');
+
+    msg(
+      'paymentTypeReportMsg',
+      rows.length + ' transaction(s) found.',
+      'ok'
+    );
+
+  }catch(e){
+    fail(e,'paymentTypeReportMsg');
+  }
+}
+
+function printPaymentTypeReport(){
+  document.body.classList.add('print-payment-type');
+  const cleanup = () => {
+    document.body.classList.remove('print-payment-type');
+    window.removeEventListener('afterprint',cleanup);
+  };
+  window.addEventListener('afterprint',cleanup);
+  window.print();
+  setTimeout(cleanup,1000);
+}
+
 
 </script>
 
