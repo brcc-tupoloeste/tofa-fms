@@ -5450,7 +5450,7 @@ function obligationApiRows(response){
   return [];
 }
 
-async let batchObligationMembers = [];
+let batchObligationMembers = [];
 
 function batchMemberId(m){
   return String((m && (m.id || m.memberId)) || '').trim();
