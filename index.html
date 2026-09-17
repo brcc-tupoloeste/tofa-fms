@@ -3037,7 +3037,7 @@ async function openMember(
 
   try{
 
-    const profileResponse =
+    const p =
       await api(
 
         'getMemberProfile',
@@ -3054,30 +3054,11 @@ async function openMember(
       );
 
 
-    /*
-     * MEMBER PROFILE COMPATIBILITY FIX
-     *
-     * Normal getMemberProfile returns the accounting profile directly.
-     * Some bridge/API wrapper versions may return { profile: {...} }.
-     * Always render the actual accounting profile so Monthly Membership,
-     * Registration Fee, Other Obligations and Payment History stay intact.
-     */
-    const p =
-      profileResponse &&
-      profileResponse.profile &&
-      typeof profileResponse.profile === 'object'
-        ? profileResponse.profile
-        : (profileResponse || {});
+    selectedMember =
+      p;
 
 
-    /* Preserve the exact selected Member ID without replacing accounting data. */
-    selectedMember = Object.assign({}, p, {
-      id: p.id || p.memberId || id,
-      memberId: p.memberId || p.id || id
-    });
-
-
-    renderProfile(selectedMember);
+    renderProfile(p);
 
 
     /* =====================================================
