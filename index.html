@@ -2204,10 +2204,10 @@ button.danger{
     </div>
 
     <div id="paymentTypeReportControls" class="payment-type-no-print">
-      <label>Search / Select Payment Type</label>
-      <input id="paymentTypeSearch" list="paymentTypeOptions" autocomplete="off"
-             placeholder="Example: Monthly Payment, Registration Fee, Uniform">
-      <datalist id="paymentTypeOptions"></datalist>
+      <label>Select Payment Type</label>
+      <select id="paymentTypeSearch">
+        <option value="">Select payment type</option>
+      </select>
       <div class="form-actions-row">
         <button type="button" onclick="generatePaymentTypeReport()">GENERATE REPORT</button>
         <button type="button" class="alt" onclick="backToDashboard()">CANCEL</button>
@@ -5454,8 +5454,8 @@ async function searchObligationMembers(){
             const name = x.name || x.memberName || '';
             const address = x.address || x.sitio || '';
             return '<button type="button" class="result-item" ' +
-              'onclick="selectObligationMember(' +
-              JSON.stringify(String(id)) + ')">' +
+              'onclick="selectObligationMember(\'' +
+              String(id).replace(/'/g,"\\'") + '\')">' +
               '<strong>' + esc(name) + '</strong>' +
               '<span>' + esc(id + (address ? ' • ' + address : '')) + '</span>' +
               '</button>';
@@ -5560,8 +5560,8 @@ function renderManagedObligations(){
             '<td>' + esc(cleanInternalObligationId(o.remarks || '')) + '</td>' +
             '<td><div class="obligation-action-row">' +
               '<button type="button" onclick="editManagedObligation(' + index + ')">EDIT</button>' +
-              '<button type="button" class="danger" onclick="deleteManagedObligation(' +
-                JSON.stringify(id) + ')">DELETE</button>' +
+              '<button type="button" class="danger" onclick="deleteManagedObligation(\'' +
+                String(id).replace(/'/g,"\\'") + '\')">DELETE</button>' +
             '</div></td>' +
           '</tr>';
         }).join('')
@@ -5802,9 +5802,10 @@ async function openPaymentTypeReport(){
         .filter((x,i,a) => a.indexOf(x) === i)
         .sort((a,b) => a.localeCompare(b));
 
-    document.getElementById('paymentTypeOptions').innerHTML =
+    document.getElementById('paymentTypeSearch').innerHTML =
+      '<option value="">Select payment type</option>' +
       paymentTypeReportTypes
-        .map(x => '<option value="' + esc(x) + '"></option>')
+        .map(x => '<option value="' + esc(x) + '">' + esc(x) + '</option>')
         .join('');
 
   }catch(e){
