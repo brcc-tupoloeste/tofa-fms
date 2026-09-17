@@ -2510,12 +2510,13 @@ function fail(
    Avoids browser CORS problems from direct fetch().
 ========================================================= */
 let tofaBridgeFrame = null;
+let tofaBridgeWindow = null;
 let tofaBridgeReady = false;
 let tofaBridgeWaiters = {};
 let tofaBridgeReadyPromise = null;
 
 function ensureTofaBridge(){
-  if(tofaBridgeReady && tofaBridgeFrame) return Promise.resolve();
+  if(tofaBridgeReady && tofaBridgeWindow) return Promise.resolve();
 
   if(tofaBridgeReadyPromise) return tofaBridgeReadyPromise;
 
@@ -2565,6 +2566,9 @@ window.addEventListener('message',function(ev){
 
   if(m.__onlineBridgeReady === true){
     console.log('[TOFA BRIDGE CLIENT] READY',ev.origin);
+    // IMPORTANT: Apps Script may run inside a nested googleusercontent frame.
+    // Save the exact window that sent READY and send API requests back to it.
+    tofaBridgeWindow = ev.source;
     tofaBridgeReady = true;
     window.dispatchEvent(new Event('tofa-bridge-ready-internal'));
     return;
@@ -2605,7 +2609,10 @@ function callTofaBridge(action,payload){
       };
 
       try{
-        tofaBridgeFrame.contentWindow.postMessage(
+        const bridgeTarget = tofaBridgeWindow || (tofaBridgeFrame && tofaBridgeFrame.contentWindow);
+        if(!bridgeTarget) throw new Error('TOFA server bridge window is unavailable.');
+
+        bridgeTarget.postMessage(
           {
             __onlineApiRequest:true,
             id:id,
