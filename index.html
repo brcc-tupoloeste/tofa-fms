@@ -1027,6 +1027,17 @@ button.danger{
 .batch-member-name{font-size:13px;font-weight:800;color:#14532d}
 .batch-member-meta{font-size:11px;color:#64748b;margin-top:2px}
 .batch-selected-count{font-size:12px;font-weight:800;color:#166534;margin:8px 0}
+
+.obligation-menu-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
+.obligation-menu-card{border:1px solid #cfe4d4;border-radius:12px;background:#f7fcf8;padding:14px;text-align:left;cursor:pointer;box-shadow:0 2px 7px rgba(20,83,45,.07)}
+.obligation-menu-card:hover{background:#eef9f0}
+.obligation-menu-card strong{display:block;color:#14532d;font-size:14px;margin-bottom:5px}
+.obligation-menu-card span{display:block;color:#64748b;font-size:11px;line-height:1.35}
+.obligation-mode-head{display:flex;gap:8px;align-items:center;margin:10px 0 12px}
+.obligation-mode-head button{width:auto!important;margin:0!important}
+.batch-show-members{display:flex;align-items:center;gap:7px;margin:10px 0;font-weight:800;font-size:12px}
+.batch-show-members input{width:auto;margin:0}
+@media(max-width:619px){.obligation-menu-grid{grid-template-columns:1fr}}
 @media(max-width:619px){.batch-member-toolbar{display:grid;grid-template-columns:1fr}.batch-select-all{padding:5px 2px}}
 
 @page{size:A4 portrait;margin:14mm}
@@ -2130,100 +2141,71 @@ button.danger{
   </div>
 
   <h3 class="panel-title">📌 Obligations Management</h3>
-  <div class="panel-note">Use Batch Add for many members, or search one member for individual add/edit/delete.</div>
 
-  <div class="batch-obligation-box">
-    <h4 style="margin:0 0 6px">Batch Add Obligation</h4>
-    <div class="panel-note">Enter one obligation, check the members who should receive it, then save once.</div>
-
-    <div class="form-grid">
-      <div class="full">
-        <label>Obligation / Description</label>
-        <input id="batchObligationDescription" autocomplete="off" placeholder="Example: Uniform, Rice, Fertilizer">
-      </div>
-      <div>
-        <label>Amount</label>
-        <input id="batchObligationAmount" type="number" min="0.01" step="0.01" inputmode="decimal">
-      </div>
-      <div class="full">
-        <label>Remarks</label>
-        <textarea id="batchObligationRemarks" placeholder="Optional. For Uniform, size may be entered/edited manually in Remarks."></textarea>
-      </div>
+  <div id="obligationModeMenu">
+    <div class="panel-note">Choose what you want to do.</div>
+    <div class="obligation-menu-grid">
+      <button type="button" class="obligation-menu-card" onclick="openObligationMode('batch')">
+        <strong>👥 Batch Add Obligation</strong>
+        <span>Add one obligation to several selected members at once.</span>
+      </button>
+      <button type="button" class="obligation-menu-card" onclick="openObligationMode('individual')">
+        <strong>➕ Member / Individual Add Obligation</strong>
+        <span>Search one member and add a new obligation.</span>
+      </button>
+      <button type="button" class="obligation-menu-card" onclick="openObligationMode('manage')">
+        <strong>✏️ Member Obligations Edit / Delete</strong>
+        <span>Search a member, review existing obligations, then edit or delete.</span>
+      </button>
     </div>
-
-    <label>Members</label>
-    <div class="batch-member-toolbar">
-      <input id="batchMemberFilter" type="search" autocomplete="off" placeholder="Search name or Member ID" oninput="filterBatchMembers()">
-      <label class="batch-select-all">
-        <input id="batchSelectAll" type="checkbox" onchange="toggleBatchSelectAll(this.checked)">
-        Select All Visible
-      </label>
-    </div>
-
-    <div id="batchSelectedCount" class="batch-selected-count">Selected: 0</div>
-    <div id="batchMemberList" class="batch-member-list">
-      <div class="panel-note" style="padding:10px">Open Obligations Management to load members.</div>
-    </div>
-
-    <div class="form-actions-row">
-      <button type="button" onclick="saveBatchObligations()">➕ ADD OBLIGATION TO SELECTED MEMBERS</button>
-      <button type="button" class="alt" onclick="clearBatchObligationForm()">CLEAR</button>
-    </div>
-    <div id="batchObligationMsg"></div>
   </div>
 
-  <label>Search Member</label>
-  <div class="search-row">
-    <input id="obligationMemberSearch" autocomplete="off" placeholder="Member name or Member ID">
-    <button type="button" onclick="searchObligationMembers()">SEARCH</button>
+  <div id="batchObligationMode" class="hidden">
+    <div class="obligation-mode-head"><button type="button" class="alt" onclick="backToObligationMenu()">← Back</button><strong>👥 Batch Add Obligation</strong></div>
+    <div class="batch-obligation-box">
+      <div class="panel-note">Enter one obligation, then show the member list only when you are ready to select members.</div>
+      <div class="form-grid">
+        <div class="full"><label>Obligation / Description</label><input id="batchObligationDescription" autocomplete="off" placeholder="Example: Uniform, Rice, Fertilizer"></div>
+        <div><label>Amount</label><input id="batchObligationAmount" type="number" min="0.01" step="0.01" inputmode="decimal"></div>
+        <div class="full"><label>Remarks</label><textarea id="batchObligationRemarks" placeholder="Optional. For Uniform, size may be entered/edited manually in Remarks."></textarea></div>
+      </div>
+      <label class="batch-show-members"><input id="batchShowMembers" type="checkbox" onchange="toggleBatchMemberList(this.checked)"> Show Member List</label>
+      <div id="batchMembersArea" class="hidden">
+        <label>Members</label>
+        <div class="batch-member-toolbar">
+          <input id="batchMemberFilter" type="search" autocomplete="off" placeholder="Search name or Member ID" oninput="filterBatchMembers()">
+          <label class="batch-select-all"><input id="batchSelectAll" type="checkbox" onchange="toggleBatchSelectAll(this.checked)"> Select All Visible</label>
+        </div>
+        <div id="batchSelectedCount" class="batch-selected-count">Selected: 0</div>
+        <div id="batchMemberList" class="batch-member-list"><div class="panel-note" style="padding:10px">Tick Show Member List to load members.</div></div>
+      </div>
+      <div class="form-actions-row">
+        <button type="button" onclick="saveBatchObligations()">➕ ADD OBLIGATION TO SELECTED MEMBERS</button>
+        <button type="button" class="alt" onclick="clearBatchObligationForm()">CLEAR</button>
+      </div>
+      <div id="batchObligationMsg"></div>
+    </div>
   </div>
-  <div id="obligationMemberResults" class="results"></div>
-  <div id="obligationManagementMsg"></div>
 
-  <div id="obligationSelectedMember" class="hidden">
-    <div class="report-section">
-      <h4 id="obligationSelectedMemberName">Selected Member</h4>
-      <div id="obligationSelectedMemberMeta" class="panel-note"></div>
-    </div>
-
-    <div class="form-grid">
-      <input id="manageObligationId" type="hidden">
-
-      <div class="full">
-        <label>Obligation / Description</label>
-        <input id="manageObligationDescription" autocomplete="off"
-               placeholder="Example: Uniform, Rice, Fertilizer"
-               oninput="obligationDescriptionChanged()">
+  <div id="individualObligationMode" class="hidden">
+    <div class="obligation-mode-head"><button type="button" class="alt" onclick="backToObligationMenu()">← Back</button><strong>➕ Member / Individual Add Obligation</strong></div>
+    <label>Search Member</label>
+    <div class="search-row"><input id="obligationMemberSearch" autocomplete="off" placeholder="Member name or Member ID"><button type="button" onclick="searchObligationMembers()">SEARCH</button></div>
+    <div id="obligationMemberResults" class="results"></div><div id="obligationManagementMsg"></div>
+    <div id="obligationSelectedMember" class="hidden">
+      <div class="report-section"><h4 id="obligationSelectedMemberName">Selected Member</h4><div id="obligationSelectedMemberMeta" class="panel-note"></div></div>
+      <div id="managedObligationForm">
+        <div class="form-grid">
+          <input id="manageObligationId" type="hidden">
+          <div class="full"><label>Obligation / Description</label><input id="manageObligationDescription" autocomplete="off" placeholder="Example: Uniform, Rice, Fertilizer" oninput="obligationDescriptionChanged()"></div>
+          <div><label>Amount</label><input id="manageObligationAmount" type="number" min="0.01" step="0.01" inputmode="decimal"></div>
+          <div class="full"><label>Remarks</label><textarea id="manageObligationRemarks"></textarea></div>
+        </div>
+        <div class="form-actions-row"><button type="button" onclick="saveManagedObligation()">💾 SAVE OBLIGATION</button><button type="button" class="alt" onclick="clearManagedObligationForm()">CLEAR</button></div>
       </div>
-
-      <div>
-        <label>Amount</label>
-        <input id="manageObligationAmount" type="number" min="0.01" step="0.01" inputmode="decimal">
-      </div>
-
-      <div class="full">
-        <label>Remarks</label>
-        <textarea id="manageObligationRemarks"></textarea>
-      </div>
-    </div>
-
-    <div class="form-actions-row">
-      <button type="button" onclick="saveManagedObligation()">💾 SAVE OBLIGATION</button>
-      <button type="button" class="alt" onclick="clearManagedObligationForm()">CLEAR</button>
-    </div>
-
-    <div class="report-section">
-      <h4>Member Obligations</h4>
-      <div class="table-wrap">
-        <table class="member-table">
-          <thead>
-            <tr>
-              <th>Description</th><th>Due</th><th>Paid</th><th>Balance</th>
-              <th>Status</th><th>Remarks</th><th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="managedObligationsBody"></tbody>
-        </table>
+      <div id="managedObligationsSection" class="report-section hidden">
+        <h4>Member Obligations</h4>
+        <div class="table-wrap"><table class="member-table"><thead><tr><th>Description</th><th>Due</th><th>Paid</th><th>Balance</th><th>Status</th><th>Remarks</th><th>Action</th></tr></thead><tbody id="managedObligationsBody"></tbody></table></div>
       </div>
     </div>
   </div>
@@ -5052,6 +5034,7 @@ async function generateOnlineFinancialReport(){
 
 let obligationAdminMember = null;
 let obligationAdminRows = [];
+let obligationManagementMode = 'menu';
 
 function obligationApiRows(response){
   if(Array.isArray(response)) return response;
@@ -5129,7 +5112,7 @@ function clearBatchObligationForm(){
   document.querySelectorAll('.batch-member-check').forEach(cb=>cb.checked=false);
   const all=document.getElementById('batchSelectAll'); if(all){all.checked=false;all.indeterminate=false;}
   msg('batchObligationMsg','','');
-  renderBatchMembers();
+  if(batchObligationMembers.length) renderBatchMembers();
 }
 async function saveBatchObligations(){
   const description=document.getElementById('batchObligationDescription').value.trim();
@@ -5168,20 +5151,53 @@ async function saveBatchObligations(){
   }
 }
 
+function resetObligationMemberArea(){
+  obligationAdminMember = null;
+  obligationAdminRows = [];
+  const search=document.getElementById('obligationMemberSearch'); if(search) search.value='';
+  const results=document.getElementById('obligationMemberResults'); if(results) results.innerHTML='';
+  const selected=document.getElementById('obligationSelectedMember'); if(selected) selected.classList.add('hidden');
+  const list=document.getElementById('managedObligationsSection'); if(list) list.classList.add('hidden');
+  const form=document.getElementById('managedObligationForm'); if(form) form.classList.remove('hidden');
+  clearManagedObligationForm();
+  msg('obligationManagementMsg','','');
+}
+
 function openObligationsManagement(){
   hideAppPanels();
   document.getElementById('obligationsManagementPanel').classList.remove('hidden');
   document.getElementById('searchTopBar').classList.remove('hidden');
-  obligationAdminMember = null;
-  obligationAdminRows = [];
-  document.getElementById('obligationMemberSearch').value = '';
-  document.getElementById('obligationMemberResults').innerHTML = '';
-  document.getElementById('obligationSelectedMember').classList.add('hidden');
-  clearManagedObligationForm();
-  msg('obligationManagementMsg','','');
-  msg('batchObligationMsg','','');
+  backToObligationMenu();
   window.scrollTo({top:0,behavior:'smooth'});
-  loadBatchObligationMembers();
+}
+
+function backToObligationMenu(){
+  obligationManagementMode='menu';
+  document.getElementById('obligationModeMenu').classList.remove('hidden');
+  document.getElementById('batchObligationMode').classList.add('hidden');
+  document.getElementById('individualObligationMode').classList.add('hidden');
+  resetObligationMemberArea();
+  msg('batchObligationMsg','','');
+}
+
+function openObligationMode(mode){
+  obligationManagementMode=mode;
+  document.getElementById('obligationModeMenu').classList.add('hidden');
+  document.getElementById('batchObligationMode').classList.toggle('hidden',mode!=='batch');
+  document.getElementById('individualObligationMode').classList.toggle('hidden',mode==='batch');
+  resetObligationMemberArea();
+  if(mode==='batch'){
+    const show=document.getElementById('batchShowMembers'); if(show) show.checked=false;
+    const area=document.getElementById('batchMembersArea'); if(area) area.classList.add('hidden');
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+async function toggleBatchMemberList(show){
+  const area=document.getElementById('batchMembersArea');
+  if(!area) return;
+  area.classList.toggle('hidden',!show);
+  if(show && !batchObligationMembers.length) await loadBatchObligationMembers();
 }
 
 async function searchObligationMembers(){
@@ -5249,8 +5265,18 @@ async function selectObligationMember(memberId){
       (p.id || p.memberId || memberId) +
       ((p.address || p.sitio) ? ' • ' + (p.address || p.sitio) : '');
 
-    await loadManagedObligations();
     clearManagedObligationForm();
+    const form=document.getElementById('managedObligationForm');
+    const list=document.getElementById('managedObligationsSection');
+    if(obligationManagementMode === 'manage'){
+      if(form) form.classList.add('hidden');
+      if(list) list.classList.remove('hidden');
+      await loadManagedObligations();
+    }else{
+      if(form) form.classList.remove('hidden');
+      if(list) list.classList.add('hidden');
+      obligationAdminRows=[];
+    }
 
   }catch(e){
     fail(e,'obligationManagementMsg');
@@ -5344,6 +5370,8 @@ function editManagedObligation(index){
   document.getElementById('manageObligationRemarks').value =
     remarksWithoutSize(cleanInternalObligationId(o.remarks || ''));
 
+  const form=document.getElementById('managedObligationForm');
+  if(form) form.classList.remove('hidden');
   obligationDescriptionChanged();
 
   window.scrollTo({
