@@ -2190,7 +2190,7 @@ button.danger{
   <div id="individualObligationMode" class="hidden">
     <div class="obligation-mode-head"><button type="button" class="alt" onclick="backToObligationMenu()">← Back</button><strong>➕ Member / Individual Add Obligation</strong></div>
     <label>Search Member</label>
-    <div class="search-row"><input id="obligationMemberSearch" autocomplete="off" placeholder="Member name or Member ID"><button type="button" onclick="searchObligationMembers()">SEARCH</button></div>
+    <div class="search-row"><input id="obligationMemberSearch" autocomplete="off" placeholder="Member name or Member ID"><button type="button" onclick="searchObligationMembers()">SEARCH</button><button id="showAllObligationsBtn" type="button" class="alt hidden" onclick="showAllManagedObligations()">SHOW ALL OBLIGATIONS</button></div>
     <div id="obligationMemberResults" class="results"></div><div id="obligationManagementMsg"></div>
     <div id="obligationSelectedMember" class="hidden">
       <div class="report-section"><h4 id="obligationSelectedMemberName">Selected Member</h4><div id="obligationSelectedMemberMeta" class="panel-note"></div></div>
@@ -2205,7 +2205,7 @@ button.danger{
       </div>
       <div id="managedObligationsSection" class="report-section hidden">
         <h4>Member Obligations</h4>
-        <div class="table-wrap"><table class="member-table"><thead><tr><th>Description</th><th>Due</th><th>Paid</th><th>Balance</th><th>Status</th><th>Remarks</th><th>Action</th></tr></thead><tbody id="managedObligationsBody"></tbody></table></div>
+        <div class="table-wrap"><table class="member-table"><thead><tr><th id="managedMemberHead" class="hidden">Member Name</th><th>Description</th><th>Due</th><th>Paid</th><th>Balance</th><th>Status</th><th>Remarks</th><th>Action</th></tr></thead><tbody id="managedObligationsBody"></tbody></table></div>
       </div>
     </div>
   </div>
@@ -3037,7 +3037,7 @@ async function openMember(
 
   try{
 
-    const p =
+    const profileResponse =
       await api(
 
         'getMemberProfile',
@@ -3054,11 +3054,30 @@ async function openMember(
       );
 
 
-    selectedMember =
-      p;
+    /*
+     * MEMBER PROFILE COMPATIBILITY FIX
+     *
+     * Normal getMemberProfile returns the accounting profile directly.
+     * Some bridge/API wrapper versions may return { profile: {...} }.
+     * Always render the actual accounting profile so Monthly Membership,
+     * Registration Fee, Other Obligations and Payment History stay intact.
+     */
+    const p =
+      profileResponse &&
+      profileResponse.profile &&
+      typeof profileResponse.profile === 'object'
+        ? profileResponse.profile
+        : (profileResponse || {});
 
 
-    renderProfile(p);
+    /* Preserve the exact selected Member ID without replacing accounting data. */
+    selectedMember = Object.assign({}, p, {
+      id: p.id || p.memberId || id,
+      memberId: p.memberId || p.id || id
+    });
+
+
+    renderProfile(selectedMember);
 
 
     /* =====================================================
@@ -5035,6 +5054,7 @@ async function generateOnlineFinancialReport(){
 let obligationAdminMember = null;
 let obligationAdminRows = [];
 let obligationManagementMode = 'menu';
+let managedObligationsShowAll = false;
 
 function obligationApiRows(response){
   if(Array.isArray(response)) return response;
@@ -5154,6 +5174,7 @@ async function saveBatchObligations(){
 function resetObligationMemberArea(){
   obligationAdminMember = null;
   obligationAdminRows = [];
+  managedObligationsShowAll=false;
   const search=document.getElementById('obligationMemberSearch'); if(search) search.value='';
   const results=document.getElementById('obligationMemberResults'); if(results) results.innerHTML='';
   const selected=document.getElementById('obligationSelectedMember'); if(selected) selected.classList.add('hidden');
@@ -5186,6 +5207,8 @@ function openObligationMode(mode){
   document.getElementById('batchObligationMode').classList.toggle('hidden',mode!=='batch');
   document.getElementById('individualObligationMode').classList.toggle('hidden',mode==='batch');
   resetObligationMemberArea();
+  const allBtn=document.getElementById('showAllObligationsBtn');
+  if(allBtn) allBtn.classList.toggle('hidden',mode!=='manage');
   if(mode==='batch'){
     const show=document.getElementById('batchShowMembers'); if(show) show.checked=false;
     const area=document.getElementById('batchMembersArea'); if(area) area.classList.add('hidden');
@@ -5257,18 +5280,26 @@ async function selectObligationMember(memberId){
         'Please wait'
       );
 
-    obligationAdminMember = p;
+    // Keep the exact ID from the clicked search result. Some profile responses
+    // do not expose id/memberId even though the profile itself loaded correctly.
+    obligationAdminMember = Object.assign({}, p || {}, {
+      id: (p && (p.id || p.memberId)) || memberId,
+      memberId: (p && (p.memberId || p.id)) || memberId
+    });
     document.getElementById('obligationSelectedMember').classList.remove('hidden');
     document.getElementById('obligationSelectedMemberName').textContent =
-      p.name || p.memberName || memberId;
+      obligationAdminMember.name || obligationAdminMember.memberName || memberId;
     document.getElementById('obligationSelectedMemberMeta').textContent =
-      (p.id || p.memberId || memberId) +
-      ((p.address || p.sitio) ? ' • ' + (p.address || p.sitio) : '');
+      memberId +
+      ((obligationAdminMember.address || obligationAdminMember.sitio) ? ' • ' + (obligationAdminMember.address || obligationAdminMember.sitio) : '');
+    const resultBox=document.getElementById('obligationMemberResults');
+    if(resultBox) resultBox.innerHTML='';
 
     clearManagedObligationForm();
     const form=document.getElementById('managedObligationForm');
     const list=document.getElementById('managedObligationsSection');
     if(obligationManagementMode === 'manage'){
+      managedObligationsShowAll=false;
       if(form) form.classList.add('hidden');
       if(list) list.classList.remove('hidden');
       await loadManagedObligations();
@@ -5301,7 +5332,35 @@ async function loadManagedObligations(){
     );
 
   obligationAdminRows = obligationApiRows(r);
+  managedObligationsShowAll=false;
   renderManagedObligations();
+}
+
+async function showAllManagedObligations(){
+  try{
+    obligationAdminMember=null;
+    managedObligationsShowAll=true;
+    const r=await api(
+      'getObligations',
+      {token:token},
+      'Loading All Obligations...',
+      'Please wait'
+    );
+    obligationAdminRows=obligationApiRows(r);
+    const selected=document.getElementById('obligationSelectedMember');
+    if(selected) selected.classList.remove('hidden');
+    const form=document.getElementById('managedObligationForm');
+    if(form) form.classList.add('hidden');
+    const section=document.getElementById('managedObligationsSection');
+    if(section) section.classList.remove('hidden');
+    document.getElementById('obligationSelectedMemberName').textContent='All Member Obligations';
+    document.getElementById('obligationSelectedMemberMeta').textContent=obligationAdminRows.length+' obligation record(s)';
+    const results=document.getElementById('obligationMemberResults');
+    if(results) results.innerHTML='';
+    renderManagedObligations();
+  }catch(e){
+    fail(e,'obligationManagementMsg');
+  }
 }
 
 function obligationRowId(o){
@@ -5326,6 +5385,8 @@ function obligationRowBalance(o){
 function renderManagedObligations(){
 
   const body = document.getElementById('managedObligationsBody');
+  const memberHead=document.getElementById('managedMemberHead');
+  if(memberHead) memberHead.classList.toggle('hidden',!managedObligationsShowAll);
 
   body.innerHTML =
     obligationAdminRows.length
@@ -5337,8 +5398,11 @@ function renderManagedObligations(){
           const status =
             o.status ||
             (paid <= 0 ? 'UNPAID' : (balance > 0 ? 'PARTIAL' : 'PAID'));
+          const memberCell=managedObligationsShowAll
+            ? '<td><strong>'+esc(o.memberName || '')+'</strong><br><small>'+esc(o.memberId || '')+'</small></td>'
+            : '';
 
-          return '<tr>' +
+          return '<tr>' + memberCell +
             '<td>' + esc(o.description || '') + '</td>' +
             '<td>' + money(due) + '</td>' +
             '<td>' + money(paid) + '</td>' +
@@ -5352,9 +5416,8 @@ function renderManagedObligations(){
             '</div></td>' +
           '</tr>';
         }).join('')
-      : '<tr><td colspan="7">No obligations found for this member.</td></tr>';
+      : '<tr><td colspan="'+(managedObligationsShowAll?8:7)+'">No obligations found.</td></tr>';
 }
-
 function obligationDescriptionChanged(){
   /* Uniform size is entered manually in Remarks. */
 }
@@ -5363,6 +5426,14 @@ function editManagedObligation(index){
 
   const o = obligationAdminRows[index];
   if(!o) return;
+
+  if(managedObligationsShowAll){
+    obligationAdminMember={id:o.memberId,memberId:o.memberId,name:o.memberName,memberName:o.memberName};
+    managedObligationsShowAll=false;
+    document.getElementById('obligationSelectedMemberName').textContent=o.memberName || o.memberId || 'Selected Member';
+    document.getElementById('obligationSelectedMemberMeta').textContent=o.memberId || '';
+    const head=document.getElementById('managedMemberHead'); if(head) head.classList.add('hidden');
+  }
 
   document.getElementById('manageObligationId').value = obligationRowId(o);
   document.getElementById('manageObligationDescription').value = o.description || '';
@@ -5452,7 +5523,9 @@ async function saveManagedObligation(){
       'ok'
     );
 
-    await loadManagedObligations();
+    if(obligationManagementMode === 'manage'){
+      await loadManagedObligations();
+    }
     clearManagedObligationForm();
 
   }catch(e){
