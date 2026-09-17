@@ -2260,12 +2260,14 @@ button.danger{
     <div id="paymentTypeReportOutput" class="hidden">
       <div class="table-wrap payment-type-table-wrap">
         <table class="report-table payment-type-table">
-          <thead><tr><th>No.</th><th>Member Name</th><th>Remarks</th><th>Amount</th></tr></thead>
+          <thead><tr><th>No.</th><th>Member Name</th><th>Remarks</th><th>Amount Due</th><th>Paid</th><th>Balance</th><th>Status</th></tr></thead>
           <tbody id="paymentTypeReportBody"></tbody>
         </table>
       </div>
       <div class="payment-type-total">
-        TOTAL COLLECTION: <strong id="paymentTypeReportTotal">₱0.00</strong>
+        TOTAL AMOUNT DUE: <strong id="paymentTypeReportDue">₱0.00</strong><br>
+        TOTAL PAID: <strong id="paymentTypeReportPaid">₱0.00</strong><br>
+        TOTAL BALANCE: <strong id="paymentTypeReportBalance">₱0.00</strong>
       </div>
       <div class="form-actions-row payment-type-no-print">
         <button type="button" class="print-btn" onclick="printPaymentTypeReport()">🖨️ PRINT</button>
@@ -5522,7 +5524,7 @@ async function generatePaymentTypeReport(){
     document.getElementById('paymentTypeSearch').value.trim();
 
   if(!type){
-    msg('paymentTypeReportMsg','Select or enter a Payment Type.','error');
+    msg('paymentTypeReportMsg','Select a Payment Type.','error');
     return;
   }
 
@@ -5536,29 +5538,40 @@ async function generatePaymentTypeReport(){
       );
 
     const rows = paymentTypeReportRows(r);
-
-    let total = 0;
+    let totalDue = 0;
+    let totalPaid = 0;
+    let totalBalance = 0;
 
     document.getElementById('paymentTypeReportBody').innerHTML =
       rows.length
         ? rows.map((x,index) => {
-            const amount = Number(x.amount || 0);
-            total += amount;
+            const due = Number(x.due || x.amountDue || 0);
+            const paid = Number(x.paid || 0);
+            const balance = Number(x.balance || 0);
+            totalDue += due;
+            totalPaid += paid;
+            totalBalance += balance;
             return '<tr>' +
               '<td>' + (index + 1) + '</td>' +
               '<td>' + esc(x.memberName || x.name || '') + '</td>' +
               '<td>' + esc(cleanInternalObligationId(x.remarks || '')) + '</td>' +
-              '<td>' + money(amount) + '</td>' +
+              '<td>' + money(due) + '</td>' +
+              '<td>' + money(paid) + '</td>' +
+              '<td>' + money(balance) + '</td>' +
+              '<td>' + esc(x.status || (balance <= 0 ? 'PAID' : (paid > 0 ? 'PARTIAL' : 'UNPAID'))) + '</td>' +
             '</tr>';
           }).join('')
-        : '<tr><td colspan="4">No payment transactions found.</td></tr>';
+        : '<tr><td colspan="7">No applicable members found for this payment type.</td></tr>';
 
-    if(r && !Array.isArray(r) && r.total !== undefined){
-      total = Number(r.total || 0);
+    if(r && !Array.isArray(r)){
+      if(r.totalDue !== undefined) totalDue = Number(r.totalDue || 0);
+      if(r.totalPaid !== undefined) totalPaid = Number(r.totalPaid || 0);
+      if(r.totalBalance !== undefined) totalBalance = Number(r.totalBalance || 0);
     }
 
-    document.getElementById('paymentTypeReportTotal').textContent =
-      money(total);
+    document.getElementById('paymentTypeReportDue').textContent = money(totalDue);
+    document.getElementById('paymentTypeReportPaid').textContent = money(totalPaid);
+    document.getElementById('paymentTypeReportBalance').textContent = money(totalBalance);
 
     const now = new Date();
     const asOf =
@@ -5574,7 +5587,7 @@ async function generatePaymentTypeReport(){
 
     msg(
       'paymentTypeReportMsg',
-      rows.length + ' transaction(s) found.',
+      rows.length + ' member(s) found.',
       'ok'
     );
 
