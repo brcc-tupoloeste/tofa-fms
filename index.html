@@ -1527,13 +1527,7 @@ button.danger{
   <div class="panel-note">
     Select recipients, prepare the announcement, preview it, then send.
   </div>
-
-  <div class="announcement-test-note">
-    <b>TEST MODE:</b> Selected members are for testing and recipient counting only.
-    Only one SMS will be sent to the configured administrator test number.
-  </div>
-
-  <div class="announcement-box">
+<div class="announcement-box">
 
     <label>Recipients</label>
 
@@ -6644,7 +6638,7 @@ function previewTextAnnouncement(){
 
   msg(
     'announcementMsg',
-    'Preview ready. TEST MODE will send only one SMS to the administrator test number.',
+    'Preview ready. The announcement will be sent to the selected members with valid SMS numbers.',
     'ok'
   );
 }
@@ -6685,14 +6679,43 @@ async function sendTextAnnouncement(){
     return;
   }
 
+  const validSelected =
+    selected.filter(
+      function(x){
+        return x.hasValidContact;
+      }
+    );
+
+  if(!validSelected.length){
+
+    msg(
+      'announcementMsg',
+      'None of the selected members has a valid SMS number.',
+      'error'
+    );
+
+    return;
+  }
+
+  const invalidSelected =
+    selected.length -
+    validSelected.length;
+
   const confirmed =
     confirm(
-      'TEST MODE\n\n' +
-      'Selected recipients: ' +
+      'Send this announcement now?\n\n' +
+      'Selected members: ' +
       selected.length +
-      '\n\n' +
-      'Only ONE SMS will be sent to the configured administrator test number.\n\n' +
-      'Send this announcement now?'
+      '\n' +
+      'Valid SMS recipients: ' +
+      validSelected.length +
+      (
+        invalidSelected > 0
+          ? '\nWill be skipped: ' +
+            invalidSelected
+          : ''
+      ) +
+      '\n\nEach valid selected member will receive this announcement.'
     );
 
   if(!confirmed){
@@ -6718,7 +6741,7 @@ async function sendTextAnnouncement(){
           }
         },
         'Sending Announcement...',
-        'TEST MODE: sending one SMS'
+        'Sending to selected members'
       );
 
     msg(
@@ -6728,14 +6751,6 @@ async function sendTextAnnouncement(){
         r.message
           ? r.message
           : 'Announcement processed.'
-      ) +
-      (
-        r &&
-        r.selectedRecipientCount !== undefined
-          ? ' Selected recipients: ' +
-            r.selectedRecipientCount +
-            '.'
-          : ''
       ),
       r && r.success === false
         ? 'error'
