@@ -1121,6 +1121,110 @@ button.danger{
   background:#166534!important;
 }
 
+
+/* =========================================================
+   TEXT ANNOUNCEMENT
+========================================================= */
+.announcement-box{
+  border:1px solid #d7e8da;
+  border-radius:12px;
+  padding:12px;
+  background:#f7fcf8;
+  margin-top:10px;
+}
+.announcement-toolbar{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  flex-wrap:wrap;
+  margin:8px 0;
+}
+.announcement-toolbar input[type="search"]{
+  flex:1;
+  min-width:180px;
+}
+.announcement-select-all{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin:0;
+  font-size:12px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.announcement-select-all input{
+  width:auto;
+  margin:0;
+}
+.announcement-member-list{
+  max-height:340px;
+  overflow:auto;
+  border:1px solid #d7e8da;
+  border-radius:10px;
+  background:#fff;
+}
+.announcement-member-item{
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+  padding:10px;
+  border-bottom:1px solid #e5eee7;
+  cursor:pointer;
+}
+.announcement-member-item:last-child{border-bottom:0}
+.announcement-member-item input{
+  width:auto;
+  margin:3px 0 0;
+}
+.announcement-member-name{
+  font-size:13px;
+  font-weight:800;
+  color:#14532d;
+}
+.announcement-member-meta{
+  font-size:11px;
+  color:#64748b;
+  margin-top:2px;
+}
+.announcement-selected-count{
+  font-size:12px;
+  font-weight:800;
+  color:#166534;
+  margin:8px 0;
+}
+.announcement-test-note{
+  border:1px solid #fde68a;
+  background:#fffbeb;
+  color:#92400e;
+  border-radius:10px;
+  padding:10px;
+  font-size:12px;
+  line-height:1.45;
+  margin:10px 0;
+}
+.announcement-char-count{
+  text-align:right;
+  font-size:11px;
+  color:#64748b;
+  margin-top:5px;
+}
+.announcement-preview{
+  border:1px solid #cfe4d4;
+  background:#fff;
+  border-radius:10px;
+  padding:12px;
+  margin-top:10px;
+  white-space:pre-wrap;
+  line-height:1.45;
+  font-size:13px;
+}
+@media(max-width:619px){
+  .announcement-toolbar{
+    display:grid;
+    grid-template-columns:1fr;
+  }
+}
+
 </style>
 
 </head>
@@ -1390,11 +1494,122 @@ button.danger{
       📌 Obligations Management
     </button>
 
+    <button
+      class="quick-btn"
+      onclick="openTextAnnouncement()">
+      📢 Text Announcement
+    </button>
+
 
 
   </div>
 
   <div id="dashboardMsg"></div>
+</div>
+
+
+<!-- =======================================================
+     TEXT ANNOUNCEMENT
+======================================================= -->
+<div id="textAnnouncementPanel" class="card hidden">
+
+  <div class="panel-nav">
+    <button
+      type="button"
+      class="back-dashboard"
+      onclick="backToDashboard()">
+      ← Back to Dashboard
+    </button>
+  </div>
+
+  <h3 class="panel-title">📢 Text Announcement</h3>
+
+  <div class="panel-note">
+    Select recipients, prepare the announcement, preview it, then send.
+  </div>
+
+  <div class="announcement-test-note">
+    <b>TEST MODE:</b> Selected members are for testing and recipient counting only.
+    Only one SMS will be sent to the configured administrator test number.
+  </div>
+
+  <div class="announcement-box">
+
+    <label>Recipients</label>
+
+    <div class="announcement-toolbar">
+      <input
+        id="announcementMemberSearch"
+        type="search"
+        placeholder="Search member name or Member ID"
+        oninput="filterAnnouncementMembers()">
+
+      <label class="announcement-select-all">
+        <input
+          id="announcementSelectAll"
+          type="checkbox"
+          onchange="toggleAnnouncementSelectAll(this.checked)">
+        Select All
+      </label>
+    </div>
+
+    <div
+      id="announcementSelectedCount"
+      class="announcement-selected-count">
+      0 selected
+    </div>
+
+    <div
+      id="announcementMemberList"
+      class="announcement-member-list">
+    </div>
+
+  </div>
+
+  <label>Announcement Message</label>
+
+  <textarea
+    id="announcementMessage"
+    maxlength="1000"
+    placeholder="Type your announcement here..."
+    oninput="updateAnnouncementCharacterCount()"></textarea>
+
+  <div
+    id="announcementCharCount"
+    class="announcement-char-count">
+    0 / 1000 characters
+  </div>
+
+  <div class="form-actions-row">
+    <button
+      type="button"
+      class="alt"
+      onclick="previewTextAnnouncement()">
+      👁️ PREVIEW
+    </button>
+
+    <button
+      type="button"
+      onclick="sendTextAnnouncement()">
+      📤 SEND ANNOUNCEMENT
+    </button>
+  </div>
+
+  <div
+    id="announcementPreviewWrap"
+    class="hidden">
+
+    <label>Preview</label>
+
+    <div
+      id="announcementPreview"
+      class="announcement-preview">
+    </div>
+
+  </div>
+
+  <div id="announcementMsg"></div>
+
 </div>
 
 <!-- =======================================================
@@ -4467,7 +4682,8 @@ function hideAppPanels(){
     'paymentTypeReportPanel',
     'memberManagementMenu',
     'reportsMenu',
-    'cashBankMenu'
+    'cashBankMenu',
+    'textAnnouncementPanel'
   ].forEach(function(id){
     const el = document.getElementById(id);
     if(el) el.classList.add('hidden');
@@ -5995,6 +6211,559 @@ function printPaymentTypeReport(){
   window.addEventListener('afterprint',cleanup);
   window.print();
   setTimeout(cleanup,1000);
+}
+
+
+
+
+/* =========================================================
+   TEXT ANNOUNCEMENT
+========================================================= */
+
+let announcementMembers = [];
+
+async function openTextAnnouncement(){
+
+  hideAppPanels();
+
+  const panel =
+    document.getElementById('textAnnouncementPanel');
+
+  panel.classList.remove('hidden');
+
+  document
+    .getElementById('searchTopBar')
+    .classList
+    .remove('hidden');
+
+  document.getElementById(
+    'announcementMemberSearch'
+  ).value = '';
+
+  document.getElementById(
+    'announcementSelectAll'
+  ).checked = false;
+
+  document.getElementById(
+    'announcementMessage'
+  ).value = '';
+
+  document.getElementById(
+    'announcementPreviewWrap'
+  ).classList.add('hidden');
+
+  document.getElementById(
+    'announcementPreview'
+  ).textContent = '';
+
+  msg(
+    'announcementMsg',
+    '',
+    ''
+  );
+
+  updateAnnouncementCharacterCount();
+
+  window.scrollTo({
+    top:0,
+    behavior:'smooth'
+  });
+
+  await loadAnnouncementMembers();
+}
+
+
+async function loadAnnouncementMembers(){
+
+  const list =
+    document.getElementById(
+      'announcementMemberList'
+    );
+
+  list.innerHTML =
+    '<div style="padding:12px;font-size:12px;color:#64748b">Loading members...</div>';
+
+  try{
+
+    const rows =
+      await api(
+        'getAnnouncementMembers',
+        {
+          token:token
+        },
+        'Loading Recipients...',
+        'Reading member contact records'
+      );
+
+    announcementMembers =
+      (rows || []).map(function(r){
+
+        return {
+          memberId:
+            String(
+              r.memberId ||
+              r.id ||
+              ''
+            ).trim(),
+
+          name:
+            String(
+              r.name ||
+              r.memberName ||
+              ''
+            ).trim(),
+
+          contact:
+            String(
+              r.contact ||
+              ''
+            ).trim(),
+
+          status:
+            String(
+              r.status ||
+              ''
+            ).trim(),
+
+          hasValidContact:
+            r.hasValidContact === true,
+
+          selected:false
+        };
+      });
+
+    renderAnnouncementMembers();
+
+  }catch(e){
+
+    announcementMembers = [];
+
+    list.innerHTML = '';
+
+    fail(
+      e,
+      'announcementMsg'
+    );
+  }
+}
+
+
+function renderAnnouncementMembers(){
+
+  const list =
+    document.getElementById(
+      'announcementMemberList'
+    );
+
+  const search =
+    String(
+      document.getElementById(
+        'announcementMemberSearch'
+      ).value ||
+      ''
+    )
+      .trim()
+      .toLowerCase();
+
+  const visible =
+    announcementMembers.filter(
+      function(r){
+
+        if(!search){
+          return true;
+        }
+
+        return (
+          String(r.name || '')
+            .toLowerCase()
+            .includes(search) ||
+          String(r.memberId || '')
+            .toLowerCase()
+            .includes(search)
+        );
+      }
+    );
+
+  if(!visible.length){
+
+    list.innerHTML =
+      '<div style="padding:12px;font-size:12px;color:#64748b">No members found.</div>';
+
+    updateAnnouncementSelectionCount();
+
+    return;
+  }
+
+  list.innerHTML =
+    visible.map(
+      function(r){
+
+        const index =
+          announcementMembers.indexOf(r);
+
+        const contactText =
+          r.contact
+            ? r.contact
+            : 'No contact number';
+
+        const contactState =
+          r.hasValidContact
+            ? ''
+            : ' • Invalid / unavailable SMS number';
+
+        return (
+          '<label class="announcement-member-item">' +
+            '<input ' +
+              'type="checkbox" ' +
+              'class="announcement-member-check" ' +
+              'data-index="' + index + '" ' +
+              (r.selected ? 'checked ' : '') +
+              'onchange="announcementMemberSelectionChanged(this)">' +
+            '<div>' +
+              '<div class="announcement-member-name">' +
+                esc(r.name || r.memberId) +
+              '</div>' +
+              '<div class="announcement-member-meta">' +
+                esc(r.memberId) +
+                ' • ' +
+                esc(contactText) +
+                contactState +
+                (
+                  r.status
+                    ? ' • ' + esc(r.status)
+                    : ''
+                ) +
+              '</div>' +
+            '</div>' +
+          '</label>'
+        );
+      }
+    ).join('');
+
+  updateAnnouncementSelectionCount();
+}
+
+
+function filterAnnouncementMembers(){
+
+  renderAnnouncementMembers();
+
+  const visibleChecks =
+    Array.from(
+      document.querySelectorAll(
+        '.announcement-member-check'
+      )
+    );
+
+  const selectAll =
+    document.getElementById(
+      'announcementSelectAll'
+    );
+
+  selectAll.checked =
+    visibleChecks.length > 0 &&
+    visibleChecks.every(
+      function(cb){
+        return cb.checked;
+      }
+    );
+}
+
+
+function announcementMemberSelectionChanged(
+  checkbox
+){
+
+  const index =
+    Number(
+      checkbox.dataset.index
+    );
+
+  if(
+    Number.isInteger(index) &&
+    announcementMembers[index]
+  ){
+    announcementMembers[index]
+      .selected =
+        checkbox.checked;
+  }
+
+  updateAnnouncementSelectionCount();
+
+  const visibleChecks =
+    Array.from(
+      document.querySelectorAll(
+        '.announcement-member-check'
+      )
+    );
+
+  document.getElementById(
+    'announcementSelectAll'
+  ).checked =
+    visibleChecks.length > 0 &&
+    visibleChecks.every(
+      function(cb){
+        return cb.checked;
+      }
+    );
+}
+
+
+function toggleAnnouncementSelectAll(
+  checked
+){
+
+  document
+    .querySelectorAll(
+      '.announcement-member-check'
+    )
+    .forEach(
+      function(cb){
+
+        cb.checked =
+          checked;
+
+        const index =
+          Number(
+            cb.dataset.index
+          );
+
+        if(
+          Number.isInteger(index) &&
+          announcementMembers[index]
+        ){
+          announcementMembers[index]
+            .selected =
+              checked;
+        }
+      }
+    );
+
+  updateAnnouncementSelectionCount();
+}
+
+
+function updateAnnouncementSelectionCount(){
+
+  const selected =
+    announcementMembers.filter(
+      function(r){
+        return r.selected;
+      }
+    );
+
+  const valid =
+    selected.filter(
+      function(r){
+        return r.hasValidContact;
+      }
+    );
+
+  document.getElementById(
+    'announcementSelectedCount'
+  ).textContent =
+    selected.length +
+    ' selected • ' +
+    valid.length +
+    ' with valid SMS number';
+}
+
+
+function updateAnnouncementCharacterCount(){
+
+  const message =
+    String(
+      document.getElementById(
+        'announcementMessage'
+      ).value ||
+      ''
+    );
+
+  document.getElementById(
+    'announcementCharCount'
+  ).textContent =
+    message.length +
+    ' / 1000 characters';
+}
+
+
+function getSelectedAnnouncementMembers(){
+
+  return announcementMembers.filter(
+    function(r){
+      return r.selected;
+    }
+  );
+}
+
+
+function previewTextAnnouncement(){
+
+  const selected =
+    getSelectedAnnouncementMembers();
+
+  const messageText =
+    String(
+      document.getElementById(
+        'announcementMessage'
+      ).value ||
+      ''
+    ).trim();
+
+  if(!selected.length){
+
+    msg(
+      'announcementMsg',
+      'Please select at least one recipient.',
+      'error'
+    );
+
+    return;
+  }
+
+  if(!messageText){
+
+    msg(
+      'announcementMsg',
+      'Please enter the announcement message.',
+      'error'
+    );
+
+    return;
+  }
+
+  document.getElementById(
+    'announcementPreview'
+  ).textContent =
+    'TOFA ANNOUNCEMENT: ' +
+    messageText;
+
+  document.getElementById(
+    'announcementPreviewWrap'
+  ).classList.remove('hidden');
+
+  msg(
+    'announcementMsg',
+    'Preview ready. TEST MODE will send only one SMS to the administrator test number.',
+    'ok'
+  );
+}
+
+
+async function sendTextAnnouncement(){
+
+  const selected =
+    getSelectedAnnouncementMembers();
+
+  const messageText =
+    String(
+      document.getElementById(
+        'announcementMessage'
+      ).value ||
+      ''
+    ).trim();
+
+  if(!selected.length){
+
+    msg(
+      'announcementMsg',
+      'Please select at least one recipient.',
+      'error'
+    );
+
+    return;
+  }
+
+  if(!messageText){
+
+    msg(
+      'announcementMsg',
+      'Please enter the announcement message.',
+      'error'
+    );
+
+    return;
+  }
+
+  const confirmed =
+    confirm(
+      'TEST MODE\n\n' +
+      'Selected recipients: ' +
+      selected.length +
+      '\n\n' +
+      'Only ONE SMS will be sent to the configured administrator test number.\n\n' +
+      'Send this announcement now?'
+    );
+
+  if(!confirmed){
+    return;
+  }
+
+  try{
+
+    const r =
+      await api(
+        'sendTextAnnouncement',
+        {
+          token:token,
+          announcementData:{
+            memberIds:
+              selected.map(
+                function(x){
+                  return x.memberId;
+                }
+              ),
+            message:
+              messageText
+          }
+        },
+        'Sending Announcement...',
+        'TEST MODE: sending one SMS'
+      );
+
+    msg(
+      'announcementMsg',
+      (
+        r &&
+        r.message
+          ? r.message
+          : 'Announcement processed.'
+      ) +
+      (
+        r &&
+        r.selectedRecipientCount !== undefined
+          ? ' Selected recipients: ' +
+            r.selectedRecipientCount +
+            '.'
+          : ''
+      ),
+      r && r.success === false
+        ? 'error'
+        : 'ok'
+    );
+
+    if(
+      r &&
+      r.success
+    ){
+      document.getElementById(
+        'announcementPreview'
+      ).textContent =
+        'TOFA ANNOUNCEMENT: ' +
+        messageText;
+
+      document.getElementById(
+        'announcementPreviewWrap'
+      ).classList.remove('hidden');
+    }
+
+  }catch(e){
+
+    fail(
+      e,
+      'announcementMsg'
+    );
+  }
 }
 
 
