@@ -1498,7 +1498,7 @@ button.danger{
   <div id="reportMsg"></div>
   <div id="reportOutput" class="hidden"></div>
   <div id="reportActions" class="form-actions-row hidden">
-    <button class="print-btn" onclick="window.print()">🖨️ PRINT</button>
+    <button class="print-btn" onclick="window.print()">🖨️ PRINT A4</button>
     <button class="alt" onclick="openReportsMenu()">← Dashboard</button>
   </div>
 </div>
@@ -3625,8 +3625,11 @@ function fillObligations(list){
 
       const option = document.createElement('option');
       option.value = description;
+      const displayRemarks = cleanInternalObligationId(remarks);
       option.textContent =
-        description + ' — Balance ' + money(o.balance);
+        description +
+        (displayRemarks ? ' — ' + displayRemarks : '') +
+        ' — Balance ' + money(o.balance);
       option.dataset.obligationId = id;
       option.dataset.obligationRemarks = remarks;
       option.dataset.obligationBalance = String(Number(o.balance || 0));
@@ -3636,7 +3639,9 @@ function fillObligations(list){
         const legacy = document.createElement('option');
         legacy.value = id;
         legacy.textContent =
-          description + ' — ' + money(o.balance);
+          description +
+          (displayRemarks ? ' — ' + displayRemarks : '') +
+          ' — ' + money(o.balance);
         obligationSelect.appendChild(legacy);
       }
 
