@@ -3409,7 +3409,8 @@ function renderProfile(
 
 
   fillObligations(
-    p.otherObligations || []
+    p.otherObligations || [],
+    p.paymentHistory || []
   );
 
 
@@ -3703,7 +3704,7 @@ function backToSearch(){
    OBLIGATIONS
 ========================================================= */
 
-function fillObligations(list){
+function fillObligations(list, paymentHistory){
 
   const paymentType = document.getElementById('paymentType');
   const obligationSelect = document.getElementById('obligationId');
@@ -3720,7 +3721,47 @@ function fillObligations(list){
       '<option value="">Select obligation</option>';
   }
 
+  /*
+   * Reconcile obligation balances with linked Payment History.
+   * This fixes migrated legacy payments such as Humi-N where the
+   * profile's old balance can be stale even though Collections
+   * already contains "Obligation ID: OBL-xxxxx".
+   */
+  const paidByObligation = {};
+
+  (paymentHistory || []).forEach(x => {
+    const remarks = String(x.remarks || '');
+    const match = remarks.match(/Obligation\s*ID\s*:\s*(OBL-[A-Za-z0-9-]+)/i);
+    if(!match) return;
+
+    const id = String(match[1] || '').trim().toUpperCase();
+    const amount = Number(x.amount || 0);
+    if(!id || !(amount > 0)) return;
+
+    paidByObligation[id] = (paidByObligation[id] || 0) + amount;
+  });
+
   (list || [])
+    .map(o => {
+      const id = String(o.obligationId || o.id || '').trim();
+      const due = Number(o.due || o.dueAmount || o.amount || 0);
+      const profilePaid = Number(o.paid || o.paidAmount || o.totalPaid || 0);
+      const linkedPaid = paidByObligation[id.toUpperCase()] || 0;
+      const paid = Math.max(profilePaid, linkedPaid);
+
+      let balance;
+      if(due > 0){
+        balance = Math.max(0, due - paid);
+      }else{
+        balance = Math.max(0, Number(o.balance || 0));
+      }
+
+      return Object.assign({}, o, {
+        id:id,
+        paid:paid,
+        balance:balance
+      });
+    })
     .filter(o => Number(o.balance || 0) > 0)
     .forEach(o => {
 
@@ -3732,28 +3773,27 @@ function fillObligations(list){
 
       const option = document.createElement('option');
       option.value = description;
+
       const displayRemarks = cleanInternalObligationId(remarks);
+
       option.textContent =
         description +
         (displayRemarks ? ' — ' + displayRemarks : '') +
         ' — Balance ' + money(o.balance);
+
       option.dataset.obligationId = id;
       option.dataset.obligationRemarks = remarks;
       option.dataset.obligationBalance = String(Number(o.balance || 0));
+
       paymentType.appendChild(option);
 
       if(obligationSelect){
-        const legacy = document.createElement('option');
-        legacy.value = id;
-        legacy.textContent =
-          description +
-          (displayRemarks ? ' — ' + displayRemarks : '') +
-          ' — ' + money(o.balance);
-        obligationSelect.appendChild(legacy);
+        const hiddenOption = document.createElement('option');
+        hiddenOption.value = id;
+        hiddenOption.textContent = description;
+        obligationSelect.appendChild(hiddenOption);
       }
-
     });
-
 }
 
 
