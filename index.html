@@ -1455,7 +1455,10 @@ button.danger{
       <tbody id="memberListBody"></tbody>
     </table>
   </div>
-  <button class="alt" onclick="openMemberManagementMenu()">← Back to Dashboard</button>
+  <div class="form-actions-row">
+    <button type="button" onclick="printMemberList()">🖨️ PRINT MEMBER LIST</button>
+    <button class="alt" type="button" onclick="openMemberManagementMenu()">← Back to Member Management</button>
+  </div>
 </div>
 
 <!-- =======================================================
@@ -4836,6 +4839,95 @@ async function saveNewMember(){
   }finally{
     b.disabled=false;
   }
+}
+
+/* =========================================================
+   PRINT MEMBER LIST
+========================================================= */
+function printMemberList(){
+  const body = document.getElementById('memberListBody');
+  if(!body || !body.querySelector('tr')){
+    alert('No member list to print.');
+    return;
+  }
+
+  const rows = Array.from(body.querySelectorAll('tr')).filter(function(tr){
+    return tr.querySelectorAll('td').length >= 5;
+  });
+
+  if(!rows.length){
+    alert('No member records to print.');
+    return;
+  }
+
+  const printedRows = rows.map(function(tr){
+    const cells = Array.from(tr.querySelectorAll('td'));
+    return '<tr>' +
+      '<td>' + cells[0].innerHTML + '</td>' +
+      '<td>' + cells[1].innerHTML + '</td>' +
+      '<td>' + cells[2].innerHTML + '</td>' +
+      '<td>' + cells[3].innerHTML + '</td>' +
+      '<td>' + cells[4].innerHTML + '</td>' +
+    '</tr>';
+  }).join('');
+
+  const now = new Date();
+  const dateText = now.toLocaleDateString('en-PH',{
+    year:'numeric', month:'long', day:'numeric'
+  });
+
+  const w = window.open('', '_blank', 'width=1000,height=750');
+  if(!w){
+    alert('Please allow pop-ups to print the Member List.');
+    return;
+  }
+
+  w.document.open();
+  w.document.write(`<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Member List</title>
+<style>
+  @page{size:A4 portrait;margin:12mm}
+  *{box-sizing:border-box}
+  body{font-family:Arial,sans-serif;color:#111;margin:0;font-size:11px}
+  .head{text-align:center;margin-bottom:12px}
+  .head h1{font-size:18px;margin:0 0 3px}
+  .head h2{font-size:15px;margin:0 0 3px}
+  .head p{margin:2px 0}
+  table{width:100%;border-collapse:collapse}
+  th,td{border:1px solid #222;padding:6px 5px;vertical-align:top}
+  th{font-weight:700;text-align:center;background:#eee}
+  td:first-child{text-align:center;width:7%}
+  td:nth-child(2){width:28%}
+  td:nth-child(3){width:29%}
+  td:nth-child(4){width:20%}
+  td:nth-child(5){text-align:center;width:16%}
+  .summary{margin-top:8px;font-weight:700}
+  @media print{.no-print{display:none}}
+</style>
+</head>
+<body>
+  <div class="head">
+    <h1>TUPOL OESTE FARMERS ASSOCIATION</h1>
+    <h2>MEMBER LIST</h2>
+    <p>Barangay Tupol Oeste, Cabatuan, Iloilo</p>
+    <p>As of ${dateText}</p>
+  </div>
+  <table>
+    <thead>
+      <tr><th>No.</th><th>Full Name</th><th>Address / Sitio</th><th>Contact</th><th>Status</th></tr>
+    </thead>
+    <tbody>${printedRows}</tbody>
+  </table>
+  <div class="summary">TOTAL MEMBERS: ${rows.length}</div>
+<script>
+window.onload=function(){ window.print(); };
+<\/script>
+</body>
+</html>`);
+  w.document.close();
 }
 
 /* =========================================================
