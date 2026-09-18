@@ -1297,14 +1297,8 @@ button.danger{
 
     <button
       class="quick-btn"
-      onclick="openExpensePanel()">
-      💸 Expenses
-    </button>
-
-    <button
-      class="quick-btn"
-      onclick="openBankPanel()">
-      🏦 Bank
+      onclick="openCashBankMenu()">
+      💰 Cash &amp; Bank Management
     </button>
 
     <button
@@ -1508,11 +1502,26 @@ button.danger{
 
 
 <!-- =======================================================
+     CASH & BANK MANAGEMENT MENU
+======================================================= -->
+<div id="cashBankMenu" class="card hidden">
+  <div class="panel-nav">
+    <button type="button" class="back-dashboard" onclick="backToDashboard()">← Back to Dashboard</button>
+  </div>
+  <h3 class="panel-title">💰 Cash &amp; Bank Management</h3>
+  <div class="panel-note">Select the financial transaction function you want to use.</div>
+  <div class="quick-grid">
+    <button class="quick-btn" type="button" onclick="openExpensePanel()">💸 Expenses</button>
+    <button class="quick-btn" type="button" onclick="openBankPanel()">🏦 Bank</button>
+  </div>
+</div>
+
+<!-- =======================================================
      EXPENSES
 ======================================================= -->
 <div id="expensePanel" class="card hidden">
   <div class="panel-nav">
-    <button type="button" class="back-dashboard" onclick="backToDashboard()">← Back to Dashboard</button>
+    <button type="button" class="back-dashboard" onclick="openCashBankMenu()">← Back to Cash &amp; Bank</button>
   </div>
 
   <h3 class="panel-title">💸 Record Expense</h3>
@@ -1552,7 +1561,7 @@ button.danger{
 
   <div class="form-actions-row">
     <button type="button" onclick="saveOnlineExpense()">SAVE EXPENSE</button>
-    <button type="button" class="alt" onclick="backToDashboard()">CANCEL</button>
+    <button type="button" class="alt" onclick="openCashBankMenu()">CANCEL</button>
   </div>
 
   <div id="expenseMsg"></div>
@@ -1563,7 +1572,7 @@ button.danger{
 ======================================================= -->
 <div id="bankPanel" class="card hidden">
   <div class="panel-nav">
-    <button type="button" class="back-dashboard" onclick="backToDashboard()">← Back to Dashboard</button>
+    <button type="button" class="back-dashboard" onclick="openCashBankMenu()">← Back to Cash &amp; Bank</button>
   </div>
 
   <h3 class="panel-title">🏦 Bank Transaction</h3>
@@ -1607,7 +1616,7 @@ button.danger{
 
   <div class="form-actions-row">
     <button type="button" onclick="saveOnlineBankTransaction()">SAVE BANK TRANSACTION</button>
-    <button type="button" class="alt" onclick="backToDashboard()">CANCEL</button>
+    <button type="button" class="alt" onclick="openCashBankMenu()">CANCEL</button>
   </div>
 
   <div id="bankMsg"></div>
@@ -4289,7 +4298,8 @@ function hideAppPanels(){
     'obligationsManagementPanel',
     'paymentTypeReportPanel',
     'memberManagementMenu',
-    'reportsMenu'
+    'reportsMenu',
+    'cashBankMenu'
   ].forEach(function(id){
     const el = document.getElementById(id);
     if(el) el.classList.add('hidden');
@@ -4335,6 +4345,13 @@ function openMemberManagementMenu(){
 function openReportsMenu(){
   hideAppPanels();
   document.getElementById('reportsMenu').classList.remove('hidden');
+  document.getElementById('searchTopBar').classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function openCashBankMenu(){
+  hideAppPanels();
+  document.getElementById('cashBankMenu').classList.remove('hidden');
   document.getElementById('searchTopBar').classList.remove('hidden');
   window.scrollTo({top:0,behavior:'smooth'});
 }
