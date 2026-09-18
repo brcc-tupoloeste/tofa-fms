@@ -1276,6 +1276,17 @@ button.danger{
   .fr-signatory-position{font-size:7.5pt!important}
 }
 
+/* Clean A4 print: official report only */
+@media print{
+  @page{size:A4 portrait;margin:8mm 10mm}
+  #reportPanel>.panel-title,#reportMsg,#reportControls,#reportActions{display:none!important}
+  #reportPanel{padding:0!important;margin:0!important}
+  #reportOutput{margin:0!important;padding:0!important}
+  #reportOutput .table-wrap{overflow:visible!important}
+  .fr-official-header{margin-top:0!important}
+  .fr-screen-only{display:none!important}
+}
+
 </style>
 
 </head>
@@ -1823,9 +1834,10 @@ button.danger{
   <h3 class="panel-title">📑 Financial Report</h3>
   <div id="reportControls">
     <div class="report-controls">
+      <div><label>Report Type</label><select id="reportType" onchange="financialReportTypeChanged()"><option value="monthly">Monthly Report</option><option value="annual">Annual Summary Report</option></select></div>
       <div><label>Year</label><select id="reportYear"></select></div>
-      <div><label>From Month</label><select id="reportFromMonth"></select></div>
-      <div><label>To Month</label><select id="reportToMonth"></select></div>
+      <div id="reportFromWrap"><label>From Month</label><select id="reportFromMonth"></select></div>
+      <div id="reportToWrap"><label>To Month</label><select id="reportToMonth"></select></div>
     </div>
     <div class="form-actions-row">
       <button onclick="generateOnlineFinancialReport()">GENERATE REPORT</button>
@@ -5517,6 +5529,27 @@ function populateReportMonths(){
   const y=new Date().getFullYear();
   document.getElementById('reportYear').innerHTML=Array.from({length:5},(_,i)=>y-i).map(v=>'<option value="'+v+'">'+v+'</option>').join('');
   document.getElementById('reportYear').value=String(y);
+  financialReportTypeChanged();
+}
+
+function financialReportTypeChanged(){
+  const type=String(document.getElementById('reportType')?.value||'monthly');
+  const fromWrap=document.getElementById('reportFromWrap');
+  const toWrap=document.getElementById('reportToWrap');
+  const from=document.getElementById('reportFromMonth');
+  const to=document.getElementById('reportToMonth');
+  if(type==='annual'){
+    if(fromWrap) fromWrap.style.display='none';
+    if(toWrap) toWrap.style.display='none';
+    if(from) from.value='1';
+    if(to) to.value='12';
+  }else{
+    if(fromWrap) fromWrap.style.display='block';
+    if(toWrap) toWrap.style.display='block';
+    const m=String(new Date().getMonth()+1);
+    if(from) from.value=m;
+    if(to) to.value=m;
+  }
 }
 
 function openFinancialReportPanel(){
@@ -5538,6 +5571,7 @@ function formatReportDate(v){
 }
 
 function renderFinancialReport(r){
+  const isAnnual=String(r.reportType||'').toLowerCase()==='annual';
   const cb=r.collectionBreakdown||[];
   const eb=r.expenseBreakdown||[];
   const ms=r.monthlySummary||[];
@@ -5572,7 +5606,7 @@ function renderFinancialReport(r){
       +'<div></div>'
     +'</div>'
 
-    +'<div class="fr-report-title">'+esc(r.title||'FINANCIAL REPORT')+'</div>'
+    +'<div class="fr-report-title">'+esc(isAnnual?'ANNUAL SUMMARY REPORT':(r.title||'MONTHLY FINANCIAL REPORT'))+'</div>'
     +'<div class="fr-report-period">'+esc(r.periodName||'')+'</div>'
 
     +'<div class="fr-section-heading">Financial Summary</div>'
@@ -5605,13 +5639,14 @@ function renderFinancialReport(r){
       +yearlyRows+
     '</tbody></table></div></div>'
 
-    +'<div class="report-section"><h4>Selected Collections</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Date</th><th>Member</th><th>Type</th><th>Amount</th></tr></thead><tbody>'
+    +(isAnnual ? '' :
+      '<div class="report-section"><h4>Selected Collections</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Date</th><th>Member</th><th>Type</th><th>Amount</th></tr></thead><tbody>'
       +(r.collections||[]).map(x=>'<tr><td>'+formatReportDate(x.date)+'</td><td>'+esc(x.memberName||x.memberId)+'</td><td>'+esc(x.type)+'</td><td>'+money(x.amount)+'</td></tr>').join('')
-    +'</tbody></table></div></div>'
-
-    +'<div class="report-section"><h4>Selected Expenses</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Date</th><th>Category</th><th>Particulars</th><th>Amount</th></tr></thead><tbody>'
+      +'</tbody></table></div></div>'
+      +'<div class="report-section"><h4>Selected Expenses</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Date</th><th>Category</th><th>Particulars</th><th>Amount</th></tr></thead><tbody>'
       +(r.expenses||[]).map(x=>'<tr><td>'+formatReportDate(x.date)+'</td><td>'+esc(x.category)+'</td><td>'+esc(x.particulars)+'</td><td>'+money(x.amount)+'</td></tr>').join('')
-    +'</tbody></table></div></div>'
+      +'</tbody></table></div></div>'
+    )
 
     +'<div class="fr-signatories">'
       +'<div class="fr-signatory"><div class="fr-signatory-label">Prepared by:</div><div class="fr-signatory-name">'+signName(r.signaturePreparedBy)+'</div><div class="fr-signatory-line"></div><div class="fr-signatory-position">TREASURER</div></div>'
@@ -5625,9 +5660,10 @@ function renderFinancialReport(r){
 }
 
 async function generateOnlineFinancialReport(){
+  const reportType=String(document.getElementById('reportType')?.value||'monthly');
   const year=Number(document.getElementById('reportYear').value);
-  const fromMonth=Number(document.getElementById('reportFromMonth').value);
-  const toMonth=Number(document.getElementById('reportToMonth').value);
+  const fromMonth=reportType==='annual'?1:Number(document.getElementById('reportFromMonth').value);
+  const toMonth=reportType==='annual'?12:Number(document.getElementById('reportToMonth').value);
 
   if(fromMonth>toMonth){
     msg('reportMsg','FROM MONTH cannot be later than TO MONTH.','error');
@@ -5645,7 +5681,7 @@ async function generateOnlineFinancialReport(){
       year:year,
       fromMonth:fromMonth,
       toMonth:toMonth,
-      reportType:fromMonth===toMonth?'monthly':'annual'
+      reportType:reportType
     });
 
     renderFinancialReport(r);
