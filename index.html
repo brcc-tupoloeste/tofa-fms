@@ -1067,6 +1067,60 @@ button.danger{
   body.print-payment-type .payment-type-total{font-size:11pt!important}
 }
 
+
+/* =========================================================
+   TRANSACTION ERROR MODAL
+========================================================= */
+.error-modal-overlay{
+  position:fixed;
+  inset:0;
+  z-index:10050;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(15,23,42,.50);
+  backdrop-filter:blur(2px);
+}
+.error-modal-box{
+  width:min(420px,92vw);
+  background:#fff;
+  border:1px solid #fecaca;
+  border-radius:16px;
+  padding:22px;
+  text-align:center;
+  box-shadow:0 14px 40px rgba(0,0,0,.24);
+}
+.error-modal-icon{
+  width:54px;
+  height:54px;
+  margin:0 auto 12px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#fee2e2;
+  color:#b91c1c;
+  font-size:28px;
+  font-weight:900;
+}
+.error-modal-title{
+  color:#991b1b;
+  font-size:18px;
+  font-weight:900;
+  margin-bottom:9px;
+}
+.error-modal-message{
+  color:#374151;
+  font-size:14px;
+  line-height:1.5;
+  white-space:pre-wrap;
+}
+.error-modal-ok{
+  margin-top:18px!important;
+  background:#166534!important;
+}
+
 </style>
 
 </head>
@@ -1104,6 +1158,29 @@ button.danger{
 </div>
 
 
+
+
+<!-- =======================================================
+     TRANSACTION ERROR MODAL
+======================================================= -->
+<div id="transactionErrorModal"
+     class="error-modal-overlay hidden"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="transactionErrorTitle">
+  <div class="error-modal-box">
+    <div class="error-modal-icon">!</div>
+    <div id="transactionErrorTitle" class="error-modal-title">
+      TRANSACTION BLOCKED
+    </div>
+    <div id="transactionErrorMessage" class="error-modal-message"></div>
+    <button type="button"
+            class="error-modal-ok"
+            onclick="closeTransactionErrorModal()">
+      OK
+    </button>
+  </div>
+</div>
 
 <div class="wrap">
 
@@ -2435,6 +2512,36 @@ function hideBusy(){
 
 }
 
+
+
+function showTransactionErrorModal(message, title){
+
+  const modal = document.getElementById('transactionErrorModal');
+  const titleEl = document.getElementById('transactionErrorTitle');
+  const messageEl = document.getElementById('transactionErrorMessage');
+
+  if(!modal || !messageEl){
+    alert(message || 'Transaction blocked.');
+    return;
+  }
+
+  titleEl.textContent = title || 'TRANSACTION BLOCKED';
+  messageEl.textContent = String(message || 'Transaction blocked.')
+    .replace(/^Error:\s*/i,'');
+
+  modal.classList.remove('hidden');
+  document.body.classList.add('busy');
+}
+
+function closeTransactionErrorModal(){
+
+  const modal = document.getElementById('transactionErrorModal');
+
+  if(modal)
+    modal.classList.add('hidden');
+
+  document.body.classList.remove('busy');
+}
 
 function lockSearch(v){
 
@@ -3870,7 +3977,20 @@ async function savePayment(){
 
   }catch(e){
 
-    fail(e,'paymentMsg');
+    const errorText =
+      e && e.message
+        ? e.message
+        : String(e || 'Unable to save payment.');
+
+    if(/transaction blocked|unpaid registration fee/i.test(errorText)){
+      msg('paymentMsg','','');
+      showTransactionErrorModal(
+        errorText,
+        '⚠️ TRANSACTION BLOCKED'
+      );
+    }else{
+      fail(e,'paymentMsg');
+    }
 
   }finally{
 
