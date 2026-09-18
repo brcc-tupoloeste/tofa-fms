@@ -1291,14 +1291,8 @@ button.danger{
 
     <button
       class="quick-btn"
-      onclick="openSearch()">
-      🔎 Search Member
-    </button>
-
-    <button
-      class="quick-btn"
-      onclick="openAddMember()">
-      ➕ Add Member
+      onclick="openMemberManagementMenu()">
+      👥 Member Management
     </button>
 
     <button
@@ -1315,14 +1309,8 @@ button.danger{
 
     <button
       class="quick-btn"
-      onclick="openFinancialReportPanel()">
-      📑 Financial Report
-    </button>
-
-    <button
-      class="quick-btn"
-      onclick="openMemberList()">
-      👥 Member List
+      onclick="openReportsMenu()">
+      📊 Reports
     </button>
 
     <button
@@ -1331,15 +1319,38 @@ button.danger{
       📌 Obligations Management
     </button>
 
-    <button
-      class="quick-btn"
-      onclick="openPaymentTypeReport()">
-      🧾 Payment Type Report
-    </button>
+
 
   </div>
 
   <div id="dashboardMsg"></div>
+</div>
+
+<!-- =======================================================
+     MEMBER MANAGEMENT MENU
+======================================================= -->
+<div id="memberManagementMenu" class="card hidden">
+  <div class="panel-nav"><button type="button" class="back-dashboard" onclick="backToDashboard()">← Back to Dashboard</button></div>
+  <h3 class="panel-title">👥 Member Management</h3>
+  <div class="panel-note">Select the member function you want to use.</div>
+  <div class="quick-grid">
+    <button class="quick-btn" type="button" onclick="openSearch()">🔎 Search Member</button>
+    <button class="quick-btn" type="button" onclick="openMemberList()">👥 Member List</button>
+    <button class="quick-btn" type="button" onclick="openAddMember()">➕ Add Member</button>
+  </div>
+</div>
+
+<!-- =======================================================
+     REPORTS MENU
+======================================================= -->
+<div id="reportsMenu" class="card hidden">
+  <div class="panel-nav"><button type="button" class="back-dashboard" onclick="backToDashboard()">← Back to Dashboard</button></div>
+  <h3 class="panel-title">📊 Reports</h3>
+  <div class="panel-note">Select the report you want to view or print.</div>
+  <div class="quick-grid">
+    <button class="quick-btn" type="button" onclick="openPaymentTypeReport()">🧾 Payment Type Report</button>
+    <button class="quick-btn" type="button" onclick="openFinancialReportPanel()">📑 Financial Report</button>
+  </div>
 </div>
 
 <!-- =======================================================
@@ -1351,7 +1362,7 @@ button.danger{
     <button
       type="button"
       class="back-dashboard"
-      onclick="backToDashboard()">
+      onclick="openMemberManagementMenu()">
       ← Back to Dashboard
     </button>
   </div>
@@ -1446,11 +1457,11 @@ button.danger{
   <div class="panel-note" id="memberListNote">Loading members...</div>
   <div class="table-wrap">
     <table class="member-table">
-      <thead><tr><th>Member ID</th><th>Full Name</th><th>Address / Sitio</th><th>Contact</th><th>Status</th></tr></thead>
+      <thead><tr><th>No.</th><th>Full Name</th><th>Address / Sitio</th><th>Contact</th><th>Status</th></tr></thead>
       <tbody id="memberListBody"></tbody>
     </table>
   </div>
-  <button class="alt" onclick="backToDashboard()">← Back to Dashboard</button>
+  <button class="alt" onclick="openMemberManagementMenu()">← Back to Dashboard</button>
 </div>
 
 <!-- =======================================================
@@ -1461,7 +1472,7 @@ button.danger{
   <div class="panel-note" id="outstandingNote">Loading outstanding balances...</div>
   <div class="table-wrap">
     <table class="member-table">
-      <thead><tr><th>Member ID</th><th>Full Name</th><th>Monthly Balance</th><th>Registration</th><th>Other</th><th>Total</th></tr></thead>
+      <thead><tr><th>No.</th><th>Full Name</th><th>Monthly Balance</th><th>Registration</th><th>Other</th><th>Total</th></tr></thead>
       <tbody id="outstandingBody"></tbody>
     </table>
   </div>
@@ -1484,14 +1495,14 @@ button.danger{
     </div>
     <div class="form-actions-row">
       <button onclick="generateOnlineFinancialReport()">GENERATE REPORT</button>
-      <button class="alt" onclick="backToDashboard()">CANCEL</button>
+      <button class="alt" onclick="openReportsMenu()">CANCEL</button>
     </div>
   </div>
   <div id="reportMsg"></div>
   <div id="reportOutput" class="hidden"></div>
   <div id="reportActions" class="form-actions-row hidden">
     <button class="print-btn" onclick="window.print()">🖨️ PRINT A4</button>
-    <button class="alt" onclick="backToDashboard()">← Dashboard</button>
+    <button class="alt" onclick="openReportsMenu()">← Dashboard</button>
   </div>
 </div>
 
@@ -1610,7 +1621,7 @@ button.danger{
     <button
       type="button"
       class="back-dashboard"
-      onclick="backToDashboard()">
+      onclick="openMemberManagementMenu()">
       ← Back to Dashboard
     </button>
   </div>
@@ -2216,7 +2227,7 @@ button.danger{
 ======================================================= -->
 <div id="paymentTypeReportPanel" class="card hidden">
   <div class="panel-nav payment-type-no-print">
-    <button type="button" class="back-dashboard" onclick="backToDashboard()">← Back to Dashboard</button>
+    <button type="button" class="back-dashboard" onclick="openReportsMenu()">← Back to Reports</button>
   </div>
 
   <div id="paymentTypePrintArea">
@@ -2233,7 +2244,7 @@ button.danger{
       </select>
       <div class="form-actions-row">
         <button type="button" onclick="generatePaymentTypeReport()">GENERATE REPORT</button>
-        <button type="button" class="alt" onclick="backToDashboard()">CANCEL</button>
+        <button type="button" class="alt" onclick="openReportsMenu()">CANCEL</button>
       </div>
     </div>
 
@@ -4276,7 +4287,9 @@ function hideAppPanels(){
     'bankPanel',
     'editMemberPanel',
     'obligationsManagementPanel',
-    'paymentTypeReportPanel'
+    'paymentTypeReportPanel',
+    'memberManagementMenu',
+    'reportsMenu'
   ].forEach(function(id){
     const el = document.getElementById(id);
     if(el) el.classList.add('hidden');
@@ -4310,6 +4323,20 @@ function backToDashboard(){
     silent:true
   });
 
+}
+
+function openMemberManagementMenu(){
+  hideAppPanels();
+  document.getElementById('memberManagementMenu').classList.remove('hidden');
+  document.getElementById('searchTopBar').classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function openReportsMenu(){
+  hideAppPanels();
+  document.getElementById('reportsMenu').classList.remove('hidden');
+  document.getElementById('searchTopBar').classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 function openSearch(){
@@ -4806,8 +4833,8 @@ async function openMemberList(){
   try{
     const rows=await api('getMemberList',{token:token},'Loading Member List...','Reading member records');
     document.getElementById('memberListNote').textContent=(rows.length||0)+' member record(s)';
-    document.getElementById('memberListBody').innerHTML=(rows||[]).map(r=>
-      '<tr><td>'+esc(r.id)+'</td><td><b>'+esc(r.name)+'</b></td><td>'+esc(r.address)+'</td><td>'+esc(r.contact)+'</td><td>'+esc(r.status)+'</td></tr>'
+    document.getElementById('memberListBody').innerHTML=(rows||[]).map((r,i)=>
+      '<tr><td>'+(i+1)+'</td><td><b>'+esc(r.name)+'</b></td><td>'+esc(r.address)+'</td><td>'+esc(r.contact)+'</td><td>'+esc(r.status)+'</td></tr>'
     ).join('') || '<tr><td colspan="5">No members found.</td></tr>';
   }catch(e){
     document.getElementById('memberListNote').textContent='';
@@ -4863,13 +4890,13 @@ async function openOutstandingList(){
     document.getElementById(
       'outstandingBody'
     ).innerHTML =
-      outstanding.map(function(r){
+      outstanding.map(function(r,i){
 
         return (
           '<tr>' +
 
             '<td>' +
-              esc(r.memberId || '') +
+              (i + 1) +
             '</td>' +
 
             '<td>' +
