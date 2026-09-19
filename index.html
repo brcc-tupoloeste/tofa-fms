@@ -1359,6 +1359,19 @@ button.danger{
 .ptr-status{border:1px solid #bbf7d0;background:#f0fdf4;color:#166534;border-radius:10px;padding:10px;font-size:12px;font-weight:800;margin-top:10px}
 @media(max-width:619px){.ptr-balance-grid{grid-template-columns:1fr}}
 
+/* =========================================================
+   PREVIOUS TREASURER — BANK / PASSBOOK RECORDS
+========================================================= */
+.ptr-submenu{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0 12px}
+.ptr-submenu button{margin:0!important;background:#f2faf4!important;color:#14532d!important;border:1px solid #c9e2cf!important}
+.ptr-submenu button.active{background:#166534!important;color:#fff!important;border-color:#166534!important}
+.ptr-passbook-summary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0}
+.ptr-passbook-kpi{border:1px solid #d7e8da;border-radius:10px;padding:10px;background:#fff}
+.ptr-passbook-kpi b{display:block;font-size:10px;color:#4b7256;margin-bottom:4px}
+.ptr-passbook-kpi span{display:block;font-size:17px;font-weight:900;color:#14532d}
+.ptr-passbook-note{border:1px solid #bfdbfe;background:#eff6ff;color:#1e3a8a;border-radius:10px;padding:10px;font-size:12px;line-height:1.45;margin:10px 0}
+@media(max-width:619px){.ptr-submenu,.ptr-passbook-summary{grid-template-columns:1fr}}
+
 </style>
 
 </head>
@@ -2726,7 +2739,12 @@ button.danger{
       <strong>🧾 Previous Treasurer Reconciliation</strong>
     </div>
 
-    <div class="ptr-box">
+    <div class="ptr-submenu">
+      <button id="ptrOldPaymentTab" type="button" class="active" onclick="showPTRSection('oldPayment')">🧾 Record Old Payment</button>
+      <button id="ptrPassbookTab" type="button" onclick="showPTRSection('passbook')">🏦 Bank / Passbook Records</button>
+    </div>
+
+    <div id="ptrOldPaymentSection" class="ptr-box">
       <div class="panel-note">
         Record only payments that were actually received by the Previous Treasurer.
         The member balance will be credited, but the money remains UNREMITTED until a separate turnover is recorded.
@@ -2798,6 +2816,58 @@ button.danger{
         <div class="form-actions-row">
           <button type="button" onclick="savePTRHistoricalPayment()">💾 RECORD OLD PAYMENT</button>
           <button type="button" class="alt" onclick="clearPTRPaymentForm(false)">CLEAR</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="ptrPassbookSection" class="ptr-box hidden">
+      <div class="panel-note">
+        Encode the Previous Treasurer's historical bank/passbook entries here. These records are for reconciliation only and do <b>not</b> change the current Bank Balance until an actual Bank Turnover is recorded.
+      </div>
+
+      <div class="ptr-passbook-summary">
+        <div class="ptr-passbook-kpi"><b>Validated Passbook Balance</b><span id="ptrPassbookBalance">₱0.00</span></div>
+        <div class="ptr-passbook-kpi"><b>Custody</b><span style="font-size:13px">Previous Treasurer</span></div>
+      </div>
+
+      <div class="form-grid">
+        <div><label>Transaction Date</label><input id="ptrPassbookDate" type="date"></div>
+        <div>
+          <label>Transaction Type</label>
+          <select id="ptrPassbookType">
+            <option value="">Select transaction type</option>
+            <option value="Opening Balance">Opening Balance</option>
+            <option value="Deposit">Deposit</option>
+            <option value="Withdrawal">Withdrawal</option>
+            <option value="Interest">Interest</option>
+            <option value="Bank Charge">Bank Charge</option>
+            <option value="Adjustment Increase">Adjustment Increase</option>
+            <option value="Adjustment Decrease">Adjustment Decrease</option>
+          </select>
+        </div>
+        <div class="full"><label>Description</label><input id="ptrPassbookDescription" autocomplete="off" placeholder="Example: Passbook opening balance, bank deposit, withdrawal"></div>
+        <div><label>Amount</label><input id="ptrPassbookAmount" type="number" min="0.01" step="0.01" inputmode="decimal"></div>
+        <div><label>Reference</label><input id="ptrPassbookReference" autocomplete="off" placeholder="Optional"></div>
+        <div class="full"><label>Remarks</label><textarea id="ptrPassbookRemarks" placeholder="Optional notes"></textarea></div>
+      </div>
+
+      <div class="ptr-passbook-note">
+        <b>Important:</b> This is a historical passbook ledger only. Saving a record here will not create Collections income, will not increase current Cash, and will not increase the current Bank Balance.
+      </div>
+
+      <div class="form-actions-row">
+        <button type="button" onclick="savePTRPassbookRecord()">💾 SAVE PASSBOOK RECORD</button>
+        <button type="button" class="alt" onclick="clearPTRPassbookForm()">CLEAR</button>
+      </div>
+      <div id="ptrPassbookMsg"></div>
+
+      <div class="report-section">
+        <h4>Passbook History</h4>
+        <div class="table-wrap">
+          <table class="member-table">
+            <thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Deposit</th><th>Withdrawal</th><th>Balance</th><th>Reference / Remarks</th></tr></thead>
+            <tbody id="ptrPassbookBody"><tr><td colspan="7">No passbook records yet.</td></tr></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -6273,6 +6343,14 @@ function ptrProfileBalance(p, keys){
 }
 
 function resetPTRArea(){
+  const oldTab=document.getElementById('ptrOldPaymentTab');
+  const passbookTab=document.getElementById('ptrPassbookTab');
+  const oldSection=document.getElementById('ptrOldPaymentSection');
+  const passbookSection=document.getElementById('ptrPassbookSection');
+  if(oldTab) oldTab.classList.add('active');
+  if(passbookTab) passbookTab.classList.remove('active');
+  if(oldSection) oldSection.classList.remove('hidden');
+  if(passbookSection) passbookSection.classList.add('hidden');
   ptrSelectedMember=null;
   ptrSelectedObligations=[];
   const s=document.getElementById('ptrMemberSearch'); if(s) s.value='';
@@ -6446,7 +6524,7 @@ async function savePTRHistoricalPayment(){
     await loadDashboard();
   }catch(e){fail(e,'ptrMsg');}
 }
-
+\n\n/* =========================================================\n   PREVIOUS TREASURER — PASSBOOK UI\n========================================================= */\nfunction showPTRSection(section){\n  const oldSection=document.getElementById('ptrOldPaymentSection');\n  const passbookSection=document.getElementById('ptrPassbookSection');\n  const oldTab=document.getElementById('ptrOldPaymentTab');\n  const passbookTab=document.getElementById('ptrPassbookTab');\n\n  const isPassbook=section==='passbook';\n  if(oldSection) oldSection.classList.toggle('hidden',isPassbook);\n  if(passbookSection) passbookSection.classList.toggle('hidden',!isPassbook);\n  if(oldTab) oldTab.classList.toggle('active',!isPassbook);\n  if(passbookTab) passbookTab.classList.toggle('active',isPassbook);\n\n  if(isPassbook) loadPTRPassbookRecords();\n}\n\nfunction clearPTRPassbookForm(){\n  ['ptrPassbookDate','ptrPassbookType','ptrPassbookDescription','ptrPassbookAmount','ptrPassbookReference','ptrPassbookRemarks']\n    .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});\n  msg('ptrPassbookMsg','','');\n}\n\nfunction ptrPassbookDateDisplay(v){\n  if(!v) return '';\n  const m=String(v).match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);\n  if(m){\n    const d=new Date(Number(m[1]),Number(m[2])-1,Number(m[3]));\n    return d.toLocaleDateString('en-PH',{month:'short',day:'2-digit',year:'numeric'});\n  }\n  const d=new Date(v);\n  return isNaN(d.getTime())?String(v):d.toLocaleDateString('en-PH',{month:'short',day:'2-digit',year:'numeric'});\n}\n\nasync function loadPTRPassbookRecords(){\n  try{\n    const r=await api(\n      'getPreviousTreasurerPassbook',\n      {token:token},\n      'Loading Passbook...',\n      'Reading Previous Treasurer bank/passbook records'\n    );\n    const rows=(r&&r.records)||[];\n    set('ptrPassbookBalance',ptrMoney(r&&r.balance));\n    const body=document.getElementById('ptrPassbookBody');\n    if(body){\n      body.innerHTML=rows.length?rows.map(x=>\n        '<tr>'+\n        '<td>'+esc(ptrPassbookDateDisplay(x.transactionDate))+'</td>'+\n        '<td>'+esc(x.transactionType||'')+'</td>'+\n        '<td>'+esc(x.description||'')+'</td>'+\n        '<td>'+money(x.deposit||0)+'</td>'+\n        '<td>'+money(x.withdrawal||0)+'</td>'+\n        '<td><b>'+money(x.runningBalance||0)+'</b></td>'+\n        '<td>'+esc([x.reference,x.remarks].filter(Boolean).join(' | '))+'</td>'+\n        '</tr>'\n      ).join(''):'<tr><td colspan="7">No passbook records yet.</td></tr>';\n    }\n    msg('ptrPassbookMsg','','');\n  }catch(e){fail(e,'ptrPassbookMsg');}\n}\n\nasync function savePTRPassbookRecord(){\n  const transactionDate=(document.getElementById('ptrPassbookDate').value||'').trim();\n  const transactionType=(document.getElementById('ptrPassbookType').value||'').trim();\n  const description=(document.getElementById('ptrPassbookDescription').value||'').trim();\n  const amount=Number(document.getElementById('ptrPassbookAmount').value||0);\n  const reference=(document.getElementById('ptrPassbookReference').value||'').trim();\n  const remarks=(document.getElementById('ptrPassbookRemarks').value||'').trim();\n\n  if(!transactionDate){msg('ptrPassbookMsg','Enter the transaction date.','error');return;}\n  if(!transactionType){msg('ptrPassbookMsg','Select the transaction type.','error');return;}\n  if(!(amount>0)){msg('ptrPassbookMsg','Enter a valid amount.','error');return;}\n\n  if(!confirm(\n    'Save this Previous Treasurer PASSBOOK record?\\n\\n'+\n    'Date: '+transactionDate+'\\n'+\n    'Type: '+transactionType+'\\n'+\n    'Amount: '+ptrMoney(amount)+'\\n\\n'+\n    'This will NOT change the current Bank Balance.')) return;\n\n  try{\n    const r=await api(\n      'recordPreviousTreasurerPassbook',\n      {token:token,passbookData:{\n        transactionDate:transactionDate,\n        transactionType:transactionType,\n        description:description,\n        amount:amount,\n        reference:reference,\n        remarks:remarks\n      }},\n      'Saving Passbook Record...',\n      'Updating historical passbook ledger'\n    );\n    clearPTRPassbookForm();\n    msg('ptrPassbookMsg',(r&&r.message)||'Passbook record saved.','ok');\n    await loadPTRPassbookRecords();\n  }catch(e){fail(e,'ptrPassbookMsg');}\n}\n
 
 async function toggleBatchMemberList(show){
   const area=document.getElementById('batchMembersArea');
