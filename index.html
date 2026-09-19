@@ -2743,6 +2743,7 @@ button.danger{
       <button id="ptrOldPaymentTab" type="button" class="active" onclick="showPTRSection('oldPayment')">🧾 Record Old Payment</button>
       <button id="ptrUnremittedTab" type="button" onclick="showPTRSection('unremitted')">💵 Unremitted Collections</button>
       <button id="ptrPassbookTab" type="button" onclick="showPTRSection('passbook')">🏦 Bank / Passbook Records</button>
+      <button id="ptrTurnoverTab" type="button" onclick="showPTRSection('turnover')">🔄 Record Turnover</button>
     </div>
 
     <div id="ptrOldPaymentSection" class="ptr-box">
@@ -2851,6 +2852,72 @@ button.danger{
           <tbody id="ptrUnremittedBody">
             <tr><td colspan="8">No validated old payments yet.</td></tr>
           </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="ptrTurnoverSection" class="ptr-box hidden">
+      <div class="panel-note">
+        Record only funds actually turned over by the Previous Treasurer. CASH turnover is allocated to specific unremitted old member payments. BANK turnover is recorded as a Previous Treasurer Bank Turnover and must not be treated as new income or a new member collection.
+      </div>
+
+      <div class="ptr-passbook-summary">
+        <div class="ptr-passbook-kpi"><b>Unremitted Member Collections</b><span id="ptrTurnoverCashAvailable">₱0.00</span></div>
+        <div class="ptr-passbook-kpi"><b>Bank Funds Pending Turnover</b><span id="ptrTurnoverBankAvailable">₱0.00</span></div>
+      </div>
+
+      <div class="form-grid">
+        <div>
+          <label>Turnover Date</label>
+          <input id="ptrTurnoverDate" type="date">
+        </div>
+        <div>
+          <label>Turnover Type</label>
+          <select id="ptrTurnoverType" onchange="ptrTurnoverTypeChanged()">
+            <option value="">Select turnover type</option>
+            <option value="CASH">Cash</option>
+            <option value="BANK">Bank</option>
+          </select>
+        </div>
+        <div>
+          <label>Amount</label>
+          <input id="ptrTurnoverAmount" type="number" min="0.01" step="0.01" inputmode="decimal">
+        </div>
+        <div>
+          <label>Received By</label>
+          <input id="ptrTurnoverReceivedBy" autocomplete="off" placeholder="Name of current Treasurer / receiver">
+        </div>
+        <div class="full">
+          <label>Reference</label>
+          <input id="ptrTurnoverReference" autocomplete="off" placeholder="Optional receipt, deposit slip, transfer reference">
+        </div>
+        <div class="full">
+          <label>Remarks</label>
+          <textarea id="ptrTurnoverRemarks" placeholder="Optional turnover notes"></textarea>
+        </div>
+      </div>
+
+      <div id="ptrTurnoverCashAllocation" class="hidden">
+        <label>Select Unremitted Old Payments Included in This Cash Turnover</label>
+        <div id="ptrTurnoverPaymentList" class="results"></div>
+        <div class="panel-note">Selected amount: <b id="ptrTurnoverSelectedTotal">₱0.00</b>. For partial turnover, enter the actual Amount above; the system allocates up to that amount across the selected records.</div>
+      </div>
+
+      <div class="ptr-warning">
+        Turnover does not create another member payment. Member balances were already credited when the old payment was validated.
+      </div>
+
+      <div class="form-actions-row">
+        <button type="button" onclick="savePTRTurnover()">💾 RECORD TURNOVER</button>
+        <button type="button" class="alt" onclick="clearPTRTurnoverForm()">CLEAR</button>
+      </div>
+      <div id="ptrTurnoverMsg"></div>
+
+      <h4 style="margin:16px 0 8px">Turnover History</h4>
+      <div class="table-wrap">
+        <table class="member-table">
+          <thead><tr><th>Date</th><th>Turnover ID</th><th>Type</th><th>Amount</th><th>Received By</th><th>Reference / Remarks</th><th>Status</th></tr></thead>
+          <tbody id="ptrTurnoverHistoryBody"><tr><td colspan="7">No turnover records yet.</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -6381,15 +6448,19 @@ function resetPTRArea(){
   const oldTab=document.getElementById('ptrOldPaymentTab');
   const unremittedTab=document.getElementById('ptrUnremittedTab');
   const passbookTab=document.getElementById('ptrPassbookTab');
+  const turnoverTab=document.getElementById('ptrTurnoverTab');
   const oldSection=document.getElementById('ptrOldPaymentSection');
   const unremittedSection=document.getElementById('ptrUnremittedSection');
   const passbookSection=document.getElementById('ptrPassbookSection');
+  const turnoverSection=document.getElementById('ptrTurnoverSection');
   if(oldTab) oldTab.classList.add('active');
   if(unremittedTab) unremittedTab.classList.remove('active');
   if(passbookTab) passbookTab.classList.remove('active');
+  if(turnoverTab) turnoverTab.classList.remove('active');
   if(oldSection) oldSection.classList.remove('hidden');
   if(unremittedSection) unremittedSection.classList.add('hidden');
   if(passbookSection) passbookSection.classList.add('hidden');
+  if(turnoverSection) turnoverSection.classList.add('hidden');
   ptrSelectedMember=null;
   ptrSelectedObligations=[];
   const s=document.getElementById('ptrMemberSearch'); if(s) s.value='';
@@ -6572,24 +6643,30 @@ function showPTRSection(section){
   const oldSection=document.getElementById('ptrOldPaymentSection');
   const unremittedSection=document.getElementById('ptrUnremittedSection');
   const passbookSection=document.getElementById('ptrPassbookSection');
+  const turnoverSection=document.getElementById('ptrTurnoverSection');
   const oldTab=document.getElementById('ptrOldPaymentTab');
   const unremittedTab=document.getElementById('ptrUnremittedTab');
   const passbookTab=document.getElementById('ptrPassbookTab');
+  const turnoverTab=document.getElementById('ptrTurnoverTab');
 
   const isOld=section==='oldPayment';
   const isUnremitted=section==='unremitted';
   const isPassbook=section==='passbook';
+  const isTurnover=section==='turnover';
 
   if(oldSection) oldSection.classList.toggle('hidden',!isOld);
   if(unremittedSection) unremittedSection.classList.toggle('hidden',!isUnremitted);
   if(passbookSection) passbookSection.classList.toggle('hidden',!isPassbook);
+  if(turnoverSection) turnoverSection.classList.toggle('hidden',!isTurnover);
 
   if(oldTab) oldTab.classList.toggle('active',isOld);
   if(unremittedTab) unremittedTab.classList.toggle('active',isUnremitted);
   if(passbookTab) passbookTab.classList.toggle('active',isPassbook);
+  if(turnoverTab) turnoverTab.classList.toggle('active',isTurnover);
 
   if(isUnremitted) loadPTRUnremittedCollections();
   if(isPassbook) loadPTRPassbookRecords();
+  if(isTurnover) loadPTRTurnover();
 }
 
 function ptrUnremittedDateDisplay(v){
@@ -6761,6 +6838,107 @@ async function savePTRPassbookRecord(){
     msg('ptrPassbookMsg',(r&&r.message)||'Passbook record saved.','ok');
     await loadPTRPassbookRecords();
   }catch(e){fail(e,'ptrPassbookMsg');}
+}
+
+
+let ptrTurnoverUnremittedRows=[];
+
+function clearPTRTurnoverForm(){
+  ['ptrTurnoverDate','ptrTurnoverType','ptrTurnoverAmount','ptrTurnoverReceivedBy','ptrTurnoverReference','ptrTurnoverRemarks']
+    .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.querySelectorAll('.ptr-turnover-check').forEach(x=>x.checked=false);
+  const a=document.getElementById('ptrTurnoverCashAllocation'); if(a) a.classList.add('hidden');
+  set('ptrTurnoverSelectedTotal',ptrMoney(0));
+  msg('ptrTurnoverMsg','','');
+}
+
+function ptrTurnoverTypeChanged(){
+  const type=(document.getElementById('ptrTurnoverType').value||'').trim();
+  const area=document.getElementById('ptrTurnoverCashAllocation');
+  if(area) area.classList.toggle('hidden',type!=='CASH');
+  if(type==='CASH') renderPTRTurnoverPaymentList();
+}
+
+function ptrTurnoverSelectionChanged(){
+  let total=0;
+  document.querySelectorAll('.ptr-turnover-check:checked').forEach(el=>{
+    total+=Number(el.getAttribute('data-unremitted')||0);
+  });
+  set('ptrTurnoverSelectedTotal',ptrMoney(total));
+  const amount=document.getElementById('ptrTurnoverAmount');
+  if(amount && !(Number(amount.value)>0) && total>0) amount.value=total.toFixed(2);
+}
+
+function renderPTRTurnoverPaymentList(){
+  const box=document.getElementById('ptrTurnoverPaymentList');
+  if(!box) return;
+  const rows=ptrTurnoverUnremittedRows.filter(x=>Number(x.unremittedBalance||0)>0);
+  box.innerHTML=rows.length?rows.map(x=>{
+    const id=String(x.historicalPaymentId||x.id||'');
+    const un=Number(x.unremittedBalance||0);
+    return '<label class="result-item" style="display:flex;gap:8px;align-items:flex-start">'+
+      '<input class="ptr-turnover-check" type="checkbox" data-id="'+esc(id)+'" data-unremitted="'+un+'" onchange="ptrTurnoverSelectionChanged()" style="width:auto;margin-top:3px">'+
+      '<span><strong>'+esc(x.memberName||x.memberId||'')+'</strong><span>'+
+      esc((x.paymentType||'')+' • '+ptrMoney(un)+' unremitted'+(x.paymentDate?' • '+x.paymentDate:''))+
+      '</span></span></label>';
+  }).join(''):'<div class="panel-note">No unremitted old member payments.</div>';
+  ptrTurnoverSelectionChanged();
+}
+
+async function loadPTRTurnover(){
+  try{
+    const r=await api('getPreviousTreasurerTurnover',{token:token},'Loading Turnover...','Reading Previous Treasurer accountability');
+    ptrTurnoverUnremittedRows=(r&&r.unremittedPayments)||[];
+    set('ptrTurnoverCashAvailable',ptrMoney(r&&r.cashAvailable));
+    set('ptrTurnoverBankAvailable',ptrMoney(r&&r.bankAvailable));
+    renderPTRTurnoverPaymentList();
+
+    const body=document.getElementById('ptrTurnoverHistoryBody');
+    const rows=(r&&r.turnovers)||[];
+    if(body){
+      body.innerHTML=rows.length?rows.map(x=>
+        '<tr><td>'+esc(x.turnoverDate||'')+'</td>'+
+        '<td>'+esc(x.turnoverId||'')+'</td>'+
+        '<td>'+esc(x.turnoverType||'')+'</td>'+
+        '<td><b>'+money(x.amount||0)+'</b></td>'+
+        '<td>'+esc(x.receivedBy||'')+'</td>'+
+        '<td>'+esc([x.reference,x.remarks].filter(Boolean).join(' | '))+'</td>'+
+        '<td>'+esc(x.status||'')+'</td></tr>'
+      ).join(''):'<tr><td colspan="7">No turnover records yet.</td></tr>';
+    }
+    msg('ptrTurnoverMsg','','');
+  }catch(e){fail(e,'ptrTurnoverMsg');}
+}
+
+async function savePTRTurnover(){
+  const turnoverDate=(document.getElementById('ptrTurnoverDate').value||'').trim();
+  const turnoverType=(document.getElementById('ptrTurnoverType').value||'').trim();
+  const amount=Number(document.getElementById('ptrTurnoverAmount').value||0);
+  const receivedBy=(document.getElementById('ptrTurnoverReceivedBy').value||'').trim();
+  const reference=(document.getElementById('ptrTurnoverReference').value||'').trim();
+  const remarks=(document.getElementById('ptrTurnoverRemarks').value||'').trim();
+
+  if(!turnoverDate){msg('ptrTurnoverMsg','Enter the turnover date.','error');return;}
+  if(!turnoverType){msg('ptrTurnoverMsg','Select CASH or BANK.','error');return;}
+  if(!(amount>0)){msg('ptrTurnoverMsg','Enter a valid turnover amount.','error');return;}
+  if(!receivedBy){msg('ptrTurnoverMsg','Enter Received By.','error');return;}
+
+  let historicalPaymentIds=[];
+  if(turnoverType==='CASH'){
+    historicalPaymentIds=Array.from(document.querySelectorAll('.ptr-turnover-check:checked')).map(x=>x.getAttribute('data-id')).filter(Boolean);
+    if(!historicalPaymentIds.length){msg('ptrTurnoverMsg','Select at least one unremitted old payment for CASH turnover.','error');return;}
+  }
+
+  if(!confirm('Record '+turnoverType+' turnover of '+ptrMoney(amount)+'?\n\nThis is a custody/turnover transaction, not a new member payment or new income.')) return;
+
+  try{
+    const r=await api('recordPreviousTreasurerTurnover',{token:token,turnoverData:{
+      turnoverDate,turnoverType,amount,receivedBy,reference,remarks,historicalPaymentIds
+    }},'Recording Turnover...','Updating Previous Treasurer reconciliation');
+    clearPTRTurnoverForm();
+    msg('ptrTurnoverMsg',(r&&r.message)||'Turnover recorded.','ok');
+    await loadPTRTurnover();
+  }catch(e){fail(e,'ptrTurnoverMsg');}
 }
 
 async function toggleBatchMemberList(show){
