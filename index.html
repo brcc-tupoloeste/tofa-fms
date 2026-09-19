@@ -1287,6 +1287,62 @@ button.danger{
   .fr-screen-only{display:none!important}
 }
 
+
+/* =========================================================
+   CASH / CHANGE CALCULATOR — RECEIVE PAYMENT
+   UI-only. Cash received and change are NOT saved.
+========================================================= */
+.cash-change-box{
+  margin-top:12px;
+  padding:12px;
+  border:1px solid #cfe4d4;
+  border-radius:12px;
+  background:#f7fcf8;
+}
+.cash-change-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.cash-change-result{
+  margin-top:10px;
+  padding:12px;
+  border-radius:10px;
+  background:#eaf6ed;
+  border:1px solid #bbdfc4;
+  text-align:center;
+}
+.cash-change-label{
+  display:block;
+  font-size:11px;
+  font-weight:800;
+  color:#4b7256;
+  margin-bottom:4px;
+}
+.cash-change-value{
+  display:block;
+  font-size:24px;
+  line-height:1.15;
+  font-weight:900;
+  color:#14532d;
+}
+.cash-change-result.short{
+  background:#fff7ed;
+  border-color:#fed7aa;
+}
+.cash-change-result.short .cash-change-value{
+  color:#c2410c;
+}
+.cash-change-note{
+  margin-top:7px;
+  font-size:10px;
+  color:#64748b;
+  text-align:center;
+}
+@media(max-width:619px){
+  .cash-change-grid{grid-template-columns:1fr}
+}
+
 </style>
 
 </head>
@@ -2399,7 +2455,7 @@ button.danger{
 
 
   <label>
-    Amount Received
+    Amount to Pay
   </label>
 
   <input
@@ -2407,7 +2463,69 @@ button.danger{
     type="number"
     min="0.01"
     step="0.01"
-    inputmode="decimal">
+    inputmode="decimal"
+    oninput="calculatePaymentChange()">
+
+
+  <!-- CASH / CHANGE CALCULATOR — DISPLAY ONLY -->
+
+  <div class="cash-change-box">
+
+    <div class="cash-change-grid">
+
+      <div>
+        <label style="margin-top:0">
+          Cash Received
+        </label>
+
+        <input
+          id="cashReceived"
+          type="number"
+          min="0"
+          step="0.01"
+          inputmode="decimal"
+          placeholder="0.00"
+          oninput="calculatePaymentChange()">
+      </div>
+
+      <div>
+        <label style="margin-top:0">
+          Amount to Pay
+        </label>
+
+        <input
+          id="calculatorAmountDue"
+          type="text"
+          value="₱0.00"
+          readonly
+          tabindex="-1">
+      </div>
+
+    </div>
+
+    <div
+      id="cashChangeResult"
+      class="cash-change-result">
+
+      <span
+        id="cashChangeLabel"
+        class="cash-change-label">
+        CHANGE
+      </span>
+
+      <span
+        id="cashChangeValue"
+        class="cash-change-value">
+        ₱0.00
+      </span>
+
+    </div>
+
+    <div class="cash-change-note">
+      Calculator only — Cash Received and Change are not saved to Collections.
+    </div>
+
+  </div>
 
 
   <label>
@@ -4088,6 +4206,126 @@ function paymentTypeChanged(){
   const wrap = document.getElementById('obligationWrap');
   if(wrap) wrap.classList.add('hidden');
 
+  /*
+   * Convenience only:
+   * Fill Amount to Pay with the CURRENT balance for the selected type.
+   * The user may still edit it for a partial payment.
+   */
+  const amountInput = document.getElementById('amount');
+
+  if(amountInput){
+
+    let suggestedAmount = 0;
+    const type = select ? String(select.value || '') : '';
+
+    if(obligationId && option && option.dataset){
+      suggestedAmount =
+        Number(option.dataset.obligationBalance || 0);
+    }else if(type === 'Monthly Payment'){
+      suggestedAmount =
+        Number(
+          selectedMember &&
+          (
+            selectedMember.yearBalance ??
+            selectedMember.monthlyBalance ??
+            0
+          )
+        );
+    }else if(type === 'Registration Fee'){
+      suggestedAmount =
+        Number(
+          selectedMember &&
+          selectedMember.registrationBalance
+        );
+    }
+
+    amountInput.value =
+      suggestedAmount > 0
+        ? suggestedAmount.toFixed(2)
+        : '';
+  }
+
+  resetCashChangeCalculator(false);
+}
+
+
+/* =========================================================
+   CASH / CHANGE CALCULATOR
+   Display only — does not change saved transaction amount.
+========================================================= */
+
+function calculatePaymentChange(){
+
+  const amountInput =
+    document.getElementById('amount');
+
+  const cashInput =
+    document.getElementById('cashReceived');
+
+  const dueDisplay =
+    document.getElementById('calculatorAmountDue');
+
+  const result =
+    document.getElementById('cashChangeResult');
+
+  const label =
+    document.getElementById('cashChangeLabel');
+
+  const value =
+    document.getElementById('cashChangeValue');
+
+  if(!amountInput || !cashInput || !dueDisplay || !result || !label || !value){
+    return;
+  }
+
+  const amountToPay =
+    Math.max(0, Number(amountInput.value || 0));
+
+  const cashReceived =
+    Math.max(0, Number(cashInput.value || 0));
+
+  dueDisplay.value =
+    money(amountToPay);
+
+  if(!cashInput.value){
+    result.classList.remove('short');
+    label.textContent = 'CHANGE';
+    value.textContent = money(0);
+    return;
+  }
+
+  const difference =
+    Math.round((cashReceived - amountToPay) * 100) / 100;
+
+  if(difference >= 0){
+    result.classList.remove('short');
+    label.textContent = 'CHANGE';
+    value.textContent = money(difference);
+  }else{
+    result.classList.add('short');
+    label.textContent = 'SHORT';
+    value.textContent = money(Math.abs(difference));
+  }
+}
+
+
+function resetCashChangeCalculator(clearAmount){
+
+  const amountInput =
+    document.getElementById('amount');
+
+  const cashInput =
+    document.getElementById('cashReceived');
+
+  if(clearAmount && amountInput){
+    amountInput.value = '';
+  }
+
+  if(cashInput){
+    cashInput.value = '';
+  }
+
+  calculatePaymentChange();
 }
 
 
@@ -4280,6 +4518,7 @@ async function savePayment(){
     document.getElementById('amount').value = '';
     document.getElementById('remarks').value = '';
     document.getElementById('paymentType').value = '';
+    resetCashChangeCalculator(true);
 
     const obligationWrap =
       document.getElementById('obligationWrap');
