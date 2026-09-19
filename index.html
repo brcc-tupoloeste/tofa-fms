@@ -4053,11 +4053,52 @@ async function saveEditedMember(){
 
     }
 
+    /*
+     * Successful save:
+     * close the Edit Member panel immediately so the same
+     * unchanged form cannot be submitted again.
+     */
+    document
+      .getElementById('editMemberPanel')
+      .classList
+      .add('hidden');
+
+    document
+      .getElementById('profileCard')
+      .classList
+      .remove('hidden');
+
+    document
+      .getElementById('paymentCard')
+      .classList
+      .remove('hidden');
+
+    document
+      .getElementById('historyCard')
+      .classList
+      .remove('hidden');
+
+    document
+      .getElementById('searchTopBar')
+      .classList
+      .add('hidden');
+
+    msg(
+      'editMemberMsg',
+      '',
+      ''
+    );
+
     msg(
       'photoMsg',
       'Member details successfully updated.',
       'ok'
     );
+
+    window.scrollTo({
+      top:0,
+      behavior:'smooth'
+    });
 
   }catch(e){
 
