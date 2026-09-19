@@ -1448,6 +1448,58 @@ button.danger{
   .ptr-reverse-actions{grid-template-columns:1fr}
 }
 
+
+/* =========================================================
+   PREVIOUS TREASURER — RECONCILIATION REPORT
+========================================================= */
+.ptr-report-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0 14px}
+.ptr-report-kpi{border:1px solid #d7e8da;border-radius:10px;padding:10px;background:#fff}
+.ptr-report-kpi b{display:block;font-size:10px;color:#4b7256;margin-bottom:4px}
+.ptr-report-kpi span{display:block;font-size:16px;font-weight:900;color:#14532d}
+.ptr-report-status{padding:10px;border-radius:10px;font-weight:900;text-align:center;margin:10px 0}
+.ptr-report-status.pending{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+.ptr-report-status.reconciled{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
+.ptr-report-header{text-align:center;margin-bottom:12px}
+.ptr-report-org{font-size:16px;font-weight:900;color:#14532d}
+.ptr-report-address{font-size:11px;margin-top:2px}
+.ptr-report-title{font-size:18px;font-weight:900;margin-top:9px}
+.ptr-report-meta{font-size:10px;color:#64748b;margin-top:3px}
+.ptr-report-section-title{font-size:13px;font-weight:900;color:#14532d;margin:15px 0 7px}
+.ptr-report-audit-note{font-size:10px;color:#64748b;margin-top:7px}
+.ptr-report-signatories{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;margin-top:44px;page-break-inside:avoid}
+.ptr-report-signatory{text-align:center}
+.ptr-report-signatory-label{text-align:left;font-size:10px;margin-bottom:34px}
+.ptr-report-signatory-line{border-top:1px solid #111;width:92%;margin:0 auto 4px}
+.ptr-report-signatory-position{font-size:9px;font-weight:800}
+.ptr-report-no-print{margin-top:10px}
+@media(max-width:619px){
+  .ptr-report-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ptr-report-signatories{grid-template-columns:1fr;gap:28px}
+}
+@media print{
+  body.print-ptr-report *{visibility:hidden!important}
+  body.print-ptr-report #ptrReportSection,
+  body.print-ptr-report #ptrReportSection *{visibility:visible!important}
+  body.print-ptr-report #ptrReportSection{
+    position:absolute!important;left:0!important;top:0!important;width:100%!important;
+    margin:0!important;padding:0!important;border:0!important;box-shadow:none!important;background:#fff!important
+  }
+  body.print-ptr-report .ptr-report-no-print{display:none!important}
+  body.print-ptr-report .table-wrap{overflow:visible!important;border:0!important}
+  body.print-ptr-report table{min-width:0!important;width:100%!important}
+  body.print-ptr-report th,body.print-ptr-report td{font-size:7.5pt!important;padding:4px!important;color:#000!important}
+  body.print-ptr-report .ptr-report-summary{grid-template-columns:repeat(3,1fr)!important;gap:5pt!important}
+  body.print-ptr-report .ptr-report-kpi{padding:6pt!important;border:1px solid #bbb!important}
+  body.print-ptr-report .ptr-report-kpi b{font-size:7pt!important;color:#000!important}
+  body.print-ptr-report .ptr-report-kpi span{font-size:9pt!important;color:#000!important}
+  body.print-ptr-report .ptr-report-org{font-size:13pt!important;color:#000!important}
+  body.print-ptr-report .ptr-report-title{font-size:14pt!important}
+  body.print-ptr-report .ptr-report-meta,body.print-ptr-report .ptr-report-address{font-size:8pt!important;color:#000!important}
+  body.print-ptr-report .ptr-report-section-title{font-size:9pt!important;color:#000!important;margin:9pt 0 4pt!important}
+  body.print-ptr-report .ptr-report-signatories{grid-template-columns:repeat(3,1fr)!important;gap:18pt!important;margin-top:34pt!important}
+  body.print-ptr-report .ptr-report-status{font-size:9pt!important;padding:6pt!important}
+}
+
 </style>
 
 </head>
@@ -2860,6 +2912,7 @@ button.danger{
       <button id="ptrUnremittedTab" type="button" onclick="showPTRSection('unremitted')">💵 Unremitted Collections</button>
       <button id="ptrPassbookTab" type="button" onclick="showPTRSection('passbook')">🏦 Bank / Passbook Records</button>
       <button id="ptrTurnoverTab" type="button" onclick="showPTRSection('turnover')">🔄 Record Turnover</button>
+      <button id="ptrReportTab" type="button" onclick="showPTRSection('report')">📄 Reconciliation Report</button>
     </div>
 
     <div id="ptrOldPaymentSection" class="ptr-box">
@@ -3086,6 +3139,67 @@ button.danger{
             <thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Deposit</th><th>Withdrawal</th><th>Balance</th><th>Reference / Remarks</th></tr></thead>
             <tbody id="ptrPassbookBody"><tr><td colspan="7">No passbook records yet.</td></tr></tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <div id="ptrReportSection" class="ptr-box hidden">
+      <div class="ptr-report-no-print">
+        <div class="panel-note">
+          Read-only Previous Treasurer accountability report. Reversed turnovers remain in the audit history but are excluded from confirmed turnover totals.
+        </div>
+        <button type="button" class="print-btn" onclick="printPTRReconciliationReport()">🖨 PRINT A4 REPORT</button>
+        <div id="ptrReportMsg"></div>
+      </div>
+
+      <div id="ptrReportPrintArea">
+        <div class="ptr-report-header">
+          <div class="ptr-report-org">TUPOL OESTE FARMERS ASSOCIATION</div>
+          <div class="ptr-report-address">Tupol Oeste, Cabatuan, Iloilo</div>
+          <div class="ptr-report-title">PREVIOUS TREASURER RECONCILIATION REPORT</div>
+          <div id="ptrReportGenerated" class="ptr-report-meta"></div>
+        </div>
+
+        <div class="ptr-report-summary">
+          <div class="ptr-report-kpi"><b>Total Accountability</b><span id="ptrReportAccountability">₱0.00</span></div>
+          <div class="ptr-report-kpi"><b>Confirmed Turnover</b><span id="ptrReportConfirmed">₱0.00</span></div>
+          <div class="ptr-report-kpi"><b>Pending Turnover</b><span id="ptrReportPending">₱0.00</span></div>
+          <div class="ptr-report-kpi"><b>Unremitted Member Collections</b><span id="ptrReportUnremitted">₱0.00</span></div>
+          <div class="ptr-report-kpi"><b>Verified Bank Funds</b><span id="ptrReportBankFunds">₱0.00</span></div>
+          <div class="ptr-report-kpi"><b>Bank Pending Turnover</b><span id="ptrReportBankPending">₱0.00</span></div>
+        </div>
+
+        <div id="ptrReportStatus" class="ptr-report-status pending">PENDING TURNOVER</div>
+
+        <div class="ptr-report-section-title">Historical Member Payments</div>
+        <div class="table-wrap">
+          <table class="member-table">
+            <thead><tr><th>Date</th><th>Member</th><th>Payment Type</th><th>Amount</th><th>Turned Over</th><th>Unremitted</th><th>Status</th><th>Reference / Remarks</th></tr></thead>
+            <tbody id="ptrReportPaymentsBody"><tr><td colspan="8">No historical payments.</td></tr></tbody>
+          </table>
+        </div>
+
+        <div class="ptr-report-section-title">Bank Accountability</div>
+        <div class="table-wrap">
+          <table class="member-table">
+            <thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Amount / Deposit</th><th>Withdrawal</th><th>Balance</th><th>Reference / Remarks</th></tr></thead>
+            <tbody id="ptrReportBankBody"><tr><td colspan="7">No bank records.</td></tr></tbody>
+          </table>
+        </div>
+
+        <div class="ptr-report-section-title">Turnover Audit History</div>
+        <div class="table-wrap">
+          <table class="member-table">
+            <thead><tr><th>Date</th><th>Turnover ID</th><th>Type</th><th>Amount</th><th>Received By</th><th>Reference / Remarks</th><th>Status</th></tr></thead>
+            <tbody id="ptrReportTurnoverBody"><tr><td colspan="7">No turnover records.</td></tr></tbody>
+          </table>
+        </div>
+        <div id="ptrReportAuditNote" class="ptr-report-audit-note"></div>
+
+        <div class="ptr-report-signatories">
+          <div class="ptr-report-signatory"><div class="ptr-report-signatory-label">Prepared By:</div><div class="ptr-report-signatory-line"></div><div class="ptr-report-signatory-position">PREVIOUS TREASURER</div></div>
+          <div class="ptr-report-signatory"><div class="ptr-report-signatory-label">Received By:</div><div class="ptr-report-signatory-line"></div><div class="ptr-report-signatory-position">TREASURER</div></div>
+          <div class="ptr-report-signatory"><div class="ptr-report-signatory-label">Verified By:</div><div class="ptr-report-signatory-line"></div><div class="ptr-report-signatory-position">AUDITOR / PRESIDENT</div></div>
         </div>
       </div>
     </div>
@@ -6760,29 +6874,139 @@ function showPTRSection(section){
   const unremittedSection=document.getElementById('ptrUnremittedSection');
   const passbookSection=document.getElementById('ptrPassbookSection');
   const turnoverSection=document.getElementById('ptrTurnoverSection');
+  const reportSection=document.getElementById('ptrReportSection');
   const oldTab=document.getElementById('ptrOldPaymentTab');
   const unremittedTab=document.getElementById('ptrUnremittedTab');
   const passbookTab=document.getElementById('ptrPassbookTab');
   const turnoverTab=document.getElementById('ptrTurnoverTab');
+  const reportTab=document.getElementById('ptrReportTab');
 
   const isOld=section==='oldPayment';
   const isUnremitted=section==='unremitted';
   const isPassbook=section==='passbook';
   const isTurnover=section==='turnover';
+  const isReport=section==='report';
 
   if(oldSection) oldSection.classList.toggle('hidden',!isOld);
   if(unremittedSection) unremittedSection.classList.toggle('hidden',!isUnremitted);
   if(passbookSection) passbookSection.classList.toggle('hidden',!isPassbook);
   if(turnoverSection) turnoverSection.classList.toggle('hidden',!isTurnover);
+  if(reportSection) reportSection.classList.toggle('hidden',!isReport);
 
   if(oldTab) oldTab.classList.toggle('active',isOld);
   if(unremittedTab) unremittedTab.classList.toggle('active',isUnremitted);
   if(passbookTab) passbookTab.classList.toggle('active',isPassbook);
   if(turnoverTab) turnoverTab.classList.toggle('active',isTurnover);
+  if(reportTab) reportTab.classList.toggle('active',isReport);
 
   if(isUnremitted) loadPTRUnremittedCollections();
   if(isPassbook) loadPTRPassbookRecords();
   if(isTurnover) loadPTRTurnover();
+  if(isReport) loadPTRReconciliationReport();
+}
+
+function ptrReportVal(obj,names,fallback){
+  obj=obj||{};
+  for(const name of names){
+    if(obj[name]!==undefined && obj[name]!==null && obj[name]!=='') return obj[name];
+  }
+  return fallback===undefined?'':fallback;
+}
+
+async function loadPTRReconciliationReport(){
+  try{
+    const r=await api(
+      'getPreviousTreasurerReconciliationReport',
+      {token:token},
+      'Loading Reconciliation Report...',
+      'Reading Previous Treasurer accountability'
+    );
+    const sum=(r&&r.summary)||{};
+    set('ptrReportGenerated',r&&r.generatedAt ? 'Generated: '+r.generatedAt : '');
+    set('ptrReportAccountability',ptrMoney(sum.totalAccountability));
+    set('ptrReportConfirmed',ptrMoney(sum.totalConfirmedTurnover));
+    set('ptrReportPending',ptrMoney(sum.totalPendingTurnover));
+    set('ptrReportUnremitted',ptrMoney(sum.unremittedMemberCollections));
+    set('ptrReportBankFunds',ptrMoney(sum.verifiedBankFunds));
+    set('ptrReportBankPending',ptrMoney(sum.bankPendingTurnover));
+
+    const status=String(sum.reconciliationStatus||'').trim()||'PENDING TURNOVER';
+    const statusEl=document.getElementById('ptrReportStatus');
+    if(statusEl){
+      statusEl.textContent=status;
+      statusEl.classList.toggle('reconciled',status==='FULLY RECONCILED');
+      statusEl.classList.toggle('pending',status!=='FULLY RECONCILED');
+    }
+
+    const payments=Array.isArray(r&&r.historicalPayments)?r.historicalPayments:[];
+    const pb=document.getElementById('ptrReportPaymentsBody');
+    if(pb){
+      pb.innerHTML=payments.length?payments.map(x=>
+        '<tr>'+
+        '<td>'+esc(x.paymentDate||'')+'</td>'+
+        '<td>'+esc(x.memberName||x.memberId||'')+'</td>'+
+        '<td>'+esc(x.paymentType||'')+'</td>'+
+        '<td><b>'+ptrMoney(x.amount)+'</b></td>'+
+        '<td>'+ptrMoney(x.turnedOverAmount)+'</td>'+
+        '<td><b>'+ptrMoney(x.unremittedBalance)+'</b></td>'+
+        '<td>'+esc(x.turnoverStatus||x.validationStatus||'')+'</td>'+
+        '<td>'+esc([x.reference,x.remarks].filter(Boolean).join(' | '))+'</td>'+
+        '</tr>'
+      ).join(''):'<tr><td colspan="8">No historical payments.</td></tr>';
+    }
+
+    const banks=Array.isArray(r&&r.bankRecords)?r.bankRecords:[];
+    const bb=document.getElementById('ptrReportBankBody');
+    if(bb){
+      bb.innerHTML=banks.length?banks.map(x=>{
+        const type=ptrReportVal(x,['transactionType','type'],'');
+        const amount=Number(ptrReportVal(x,['amount','deposit'],0)||0);
+        const deposit=Number(ptrReportVal(x,['deposit'],type&&String(type).toLowerCase().includes('withdraw')?0:amount)||0);
+        const withdrawal=Number(ptrReportVal(x,['withdrawal'],String(type).toLowerCase().includes('withdraw')?amount:0)||0);
+        return '<tr>'+
+          '<td>'+esc(ptrReportVal(x,['transactionDate','date'],'')||'')+'</td>'+
+          '<td>'+esc(type)+'</td>'+
+          '<td>'+esc(ptrReportVal(x,['description','particulars'],'')||'')+'</td>'+
+          '<td>'+ptrMoney(deposit)+'</td>'+
+          '<td>'+ptrMoney(withdrawal)+'</td>'+
+          '<td><b>'+ptrMoney(ptrReportVal(x,['runningBalance','balance'],0))+'</b></td>'+
+          '<td>'+esc([ptrReportVal(x,['reference'],'')||'',ptrReportVal(x,['remarks'],'')||''].filter(Boolean).join(' | '))+'</td>'+
+          '</tr>';
+      }).join(''):'<tr><td colspan="7">No bank records.</td></tr>';
+    }
+
+    const turns=Array.isArray(r&&r.turnovers)?r.turnovers:[];
+    const tb=document.getElementById('ptrReportTurnoverBody');
+    if(tb){
+      tb.innerHTML=turns.length?turns.map(x=>
+        '<tr>'+
+        '<td>'+esc(x.turnoverDate||'')+'</td>'+
+        '<td>'+esc(x.turnoverId||'')+'</td>'+
+        '<td>'+esc(x.turnoverType||'')+'</td>'+
+        '<td><b>'+ptrMoney(x.amount)+'</b></td>'+
+        '<td>'+esc(x.receivedBy||'')+'</td>'+
+        '<td>'+esc([x.reference,x.remarks].filter(Boolean).join(' | '))+'</td>'+
+        '<td><b>'+esc(x.status||'')+'</b></td>'+
+        '</tr>'
+      ).join(''):'<tr><td colspan="7">No turnover records.</td></tr>';
+    }
+
+    const audit=(r&&r.audit)||{};
+    set(
+      'ptrReportAuditNote',
+      'Reversed turnover audit total: '+ptrMoney(audit.reversedTotal||0)+
+      '. Reversed transactions are shown for audit purposes and are excluded from confirmed turnover totals.'
+    );
+    msg('ptrReportMsg','','');
+  }catch(e){fail(e,'ptrReportMsg');}
+}
+
+function printPTRReconciliationReport(){
+  document.body.classList.add('print-ptr-report');
+  const cleanup=()=>document.body.classList.remove('print-ptr-report');
+  window.addEventListener('afterprint',cleanup,{once:true});
+  window.print();
+  setTimeout(cleanup,1200);
 }
 
 function ptrUnremittedDateDisplay(v){
