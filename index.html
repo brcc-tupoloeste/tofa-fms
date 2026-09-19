@@ -6524,7 +6524,109 @@ async function savePTRHistoricalPayment(){
     await loadDashboard();
   }catch(e){fail(e,'ptrMsg');}
 }
-\n\n/* =========================================================\n   PREVIOUS TREASURER — PASSBOOK UI\n========================================================= */\nfunction showPTRSection(section){\n  const oldSection=document.getElementById('ptrOldPaymentSection');\n  const passbookSection=document.getElementById('ptrPassbookSection');\n  const oldTab=document.getElementById('ptrOldPaymentTab');\n  const passbookTab=document.getElementById('ptrPassbookTab');\n\n  const isPassbook=section==='passbook';\n  if(oldSection) oldSection.classList.toggle('hidden',isPassbook);\n  if(passbookSection) passbookSection.classList.toggle('hidden',!isPassbook);\n  if(oldTab) oldTab.classList.toggle('active',!isPassbook);\n  if(passbookTab) passbookTab.classList.toggle('active',isPassbook);\n\n  if(isPassbook) loadPTRPassbookRecords();\n}\n\nfunction clearPTRPassbookForm(){\n  ['ptrPassbookDate','ptrPassbookType','ptrPassbookDescription','ptrPassbookAmount','ptrPassbookReference','ptrPassbookRemarks']\n    .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});\n  msg('ptrPassbookMsg','','');\n}\n\nfunction ptrPassbookDateDisplay(v){\n  if(!v) return '';\n  const m=String(v).match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);\n  if(m){\n    const d=new Date(Number(m[1]),Number(m[2])-1,Number(m[3]));\n    return d.toLocaleDateString('en-PH',{month:'short',day:'2-digit',year:'numeric'});\n  }\n  const d=new Date(v);\n  return isNaN(d.getTime())?String(v):d.toLocaleDateString('en-PH',{month:'short',day:'2-digit',year:'numeric'});\n}\n\nasync function loadPTRPassbookRecords(){\n  try{\n    const r=await api(\n      'getPreviousTreasurerPassbook',\n      {token:token},\n      'Loading Passbook...',\n      'Reading Previous Treasurer bank/passbook records'\n    );\n    const rows=(r&&r.records)||[];\n    set('ptrPassbookBalance',ptrMoney(r&&r.balance));\n    const body=document.getElementById('ptrPassbookBody');\n    if(body){\n      body.innerHTML=rows.length?rows.map(x=>\n        '<tr>'+\n        '<td>'+esc(ptrPassbookDateDisplay(x.transactionDate))+'</td>'+\n        '<td>'+esc(x.transactionType||'')+'</td>'+\n        '<td>'+esc(x.description||'')+'</td>'+\n        '<td>'+money(x.deposit||0)+'</td>'+\n        '<td>'+money(x.withdrawal||0)+'</td>'+\n        '<td><b>'+money(x.runningBalance||0)+'</b></td>'+\n        '<td>'+esc([x.reference,x.remarks].filter(Boolean).join(' | '))+'</td>'+\n        '</tr>'\n      ).join(''):'<tr><td colspan="7">No passbook records yet.</td></tr>';\n    }\n    msg('ptrPassbookMsg','','');\n  }catch(e){fail(e,'ptrPassbookMsg');}\n}\n\nasync function savePTRPassbookRecord(){\n  const transactionDate=(document.getElementById('ptrPassbookDate').value||'').trim();\n  const transactionType=(document.getElementById('ptrPassbookType').value||'').trim();\n  const description=(document.getElementById('ptrPassbookDescription').value||'').trim();\n  const amount=Number(document.getElementById('ptrPassbookAmount').value||0);\n  const reference=(document.getElementById('ptrPassbookReference').value||'').trim();\n  const remarks=(document.getElementById('ptrPassbookRemarks').value||'').trim();\n\n  if(!transactionDate){msg('ptrPassbookMsg','Enter the transaction date.','error');return;}\n  if(!transactionType){msg('ptrPassbookMsg','Select the transaction type.','error');return;}\n  if(!(amount>0)){msg('ptrPassbookMsg','Enter a valid amount.','error');return;}\n\n  if(!confirm(\n    'Save this Previous Treasurer PASSBOOK record?\\n\\n'+\n    'Date: '+transactionDate+'\\n'+\n    'Type: '+transactionType+'\\n'+\n    'Amount: '+ptrMoney(amount)+'\\n\\n'+\n    'This will NOT change the current Bank Balance.')) return;\n\n  try{\n    const r=await api(\n      'recordPreviousTreasurerPassbook',\n      {token:token,passbookData:{\n        transactionDate:transactionDate,\n        transactionType:transactionType,\n        description:description,\n        amount:amount,\n        reference:reference,\n        remarks:remarks\n      }},\n      'Saving Passbook Record...',\n      'Updating historical passbook ledger'\n    );\n    clearPTRPassbookForm();\n    msg('ptrPassbookMsg',(r&&r.message)||'Passbook record saved.','ok');\n    await loadPTRPassbookRecords();\n  }catch(e){fail(e,'ptrPassbookMsg');}\n}\n
+
+
+/* =========================================================
+   PREVIOUS TREASURER — PASSBOOK UI
+========================================================= */
+function showPTRSection(section){
+  const oldSection=document.getElementById('ptrOldPaymentSection');
+  const passbookSection=document.getElementById('ptrPassbookSection');
+  const oldTab=document.getElementById('ptrOldPaymentTab');
+  const passbookTab=document.getElementById('ptrPassbookTab');
+
+  const isPassbook=section==='passbook';
+  if(oldSection) oldSection.classList.toggle('hidden',isPassbook);
+  if(passbookSection) passbookSection.classList.toggle('hidden',!isPassbook);
+  if(oldTab) oldTab.classList.toggle('active',!isPassbook);
+  if(passbookTab) passbookTab.classList.toggle('active',isPassbook);
+
+  if(isPassbook) loadPTRPassbookRecords();
+}
+
+function clearPTRPassbookForm(){
+  ['ptrPassbookDate','ptrPassbookType','ptrPassbookDescription','ptrPassbookAmount','ptrPassbookReference','ptrPassbookRemarks']
+    .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  msg('ptrPassbookMsg','','');
+}
+
+function ptrPassbookDateDisplay(v){
+  if(!v) return '';
+  const m=String(v).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if(m){
+    const d=new Date(Number(m[1]),Number(m[2])-1,Number(m[3]));
+    return d.toLocaleDateString('en-PH',{month:'short',day:'2-digit',year:'numeric'});
+  }
+  const d=new Date(v);
+  return isNaN(d.getTime())?String(v):d.toLocaleDateString('en-PH',{month:'short',day:'2-digit',year:'numeric'});
+}
+
+async function loadPTRPassbookRecords(){
+  try{
+    const r=await api(
+      'getPreviousTreasurerPassbook',
+      {token:token},
+      'Loading Passbook...',
+      'Reading Previous Treasurer bank/passbook records'
+    );
+    const rows=(r&&r.records)||[];
+    set('ptrPassbookBalance',ptrMoney(r&&r.balance));
+    const body=document.getElementById('ptrPassbookBody');
+    if(body){
+      body.innerHTML=rows.length?rows.map(x=>
+        '<tr>'+
+        '<td>'+esc(ptrPassbookDateDisplay(x.transactionDate))+'</td>'+
+        '<td>'+esc(x.transactionType||'')+'</td>'+
+        '<td>'+esc(x.description||'')+'</td>'+
+        '<td>'+money(x.deposit||0)+'</td>'+
+        '<td>'+money(x.withdrawal||0)+'</td>'+
+        '<td><b>'+money(x.runningBalance||0)+'</b></td>'+
+        '<td>'+esc([x.reference,x.remarks].filter(Boolean).join(' | '))+'</td>'+
+        '</tr>'
+      ).join(''):'<tr><td colspan="7">No passbook records yet.</td></tr>';
+    }
+    msg('ptrPassbookMsg','','');
+  }catch(e){fail(e,'ptrPassbookMsg');}
+}
+
+async function savePTRPassbookRecord(){
+  const transactionDate=(document.getElementById('ptrPassbookDate').value||'').trim();
+  const transactionType=(document.getElementById('ptrPassbookType').value||'').trim();
+  const description=(document.getElementById('ptrPassbookDescription').value||'').trim();
+  const amount=Number(document.getElementById('ptrPassbookAmount').value||0);
+  const reference=(document.getElementById('ptrPassbookReference').value||'').trim();
+  const remarks=(document.getElementById('ptrPassbookRemarks').value||'').trim();
+
+  if(!transactionDate){msg('ptrPassbookMsg','Enter the transaction date.','error');return;}
+  if(!transactionType){msg('ptrPassbookMsg','Select the transaction type.','error');return;}
+  if(!(amount>0)){msg('ptrPassbookMsg','Enter a valid amount.','error');return;}
+
+  if(!confirm(
+    'Save this Previous Treasurer PASSBOOK record?\n\n'+
+    'Date: '+transactionDate+'\n'+
+    'Type: '+transactionType+'\n'+
+    'Amount: '+ptrMoney(amount)+'\n\n'+
+    'This will NOT change the current Bank Balance.')) return;
+
+  try{
+    const r=await api(
+      'recordPreviousTreasurerPassbook',
+      {token:token,passbookData:{
+        transactionDate:transactionDate,
+        transactionType:transactionType,
+        description:description,
+        amount:amount,
+        reference:reference,
+        remarks:remarks
+      }},
+      'Saving Passbook Record...',
+      'Updating historical passbook ledger'
+    );
+    clearPTRPassbookForm();
+    msg('ptrPassbookMsg',(r&&r.message)||'Passbook record saved.','ok');
+    await loadPTRPassbookRecords();
+  }catch(e){fail(e,'ptrPassbookMsg');}
+}
 
 async function toggleBatchMemberList(show){
   const area=document.getElementById('batchMembersArea');
