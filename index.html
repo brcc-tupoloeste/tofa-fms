@@ -1372,6 +1372,82 @@ button.danger{
 .ptr-passbook-note{border:1px solid #bfdbfe;background:#eff6ff;color:#1e3a8a;border-radius:10px;padding:10px;font-size:12px;line-height:1.45;margin:10px 0}
 @media(max-width:619px){.ptr-submenu,.ptr-passbook-summary{grid-template-columns:1fr}}
 
+
+/* =========================================================
+   PREVIOUS TREASURER — TURNOVER REVERSAL MODAL
+========================================================= */
+.ptr-reverse-overlay{
+  position:fixed;
+  inset:0;
+  z-index:10060;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:rgba(15,23,42,.55);
+  backdrop-filter:blur(2px);
+}
+.ptr-reverse-box{
+  width:min(440px,94vw);
+  background:#fff;
+  border:1px solid #fecaca;
+  border-radius:16px;
+  padding:20px;
+  box-shadow:0 14px 40px rgba(0,0,0,.24);
+}
+.ptr-reverse-title{
+  color:#991b1b;
+  font-size:18px;
+  font-weight:900;
+  margin-bottom:8px;
+}
+.ptr-reverse-summary{
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+  padding:10px;
+  background:#f8fafc;
+  font-size:12px;
+  line-height:1.55;
+  margin:10px 0;
+}
+.ptr-reverse-warning{
+  border:1px solid #fde68a;
+  background:#fffbeb;
+  color:#92400e;
+  border-radius:10px;
+  padding:10px;
+  font-size:12px;
+  line-height:1.45;
+  margin:10px 0;
+}
+.ptr-reverse-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:12px;
+}
+.ptr-reverse-actions button{margin:0!important}
+.ptr-reverse-confirm{background:#b91c1c!important}
+.ptr-history-action{
+  width:auto!important;
+  margin:0!important;
+  padding:6px 9px!important;
+  font-size:10px!important;
+  background:#b91c1c!important;
+  white-space:nowrap;
+}
+.ptr-status-reversed{
+  color:#991b1b;
+  font-weight:900;
+}
+.ptr-status-confirmed{
+  color:#166534;
+  font-weight:900;
+}
+@media(max-width:619px){
+  .ptr-reverse-actions{grid-template-columns:1fr}
+}
+
 </style>
 
 </head>
@@ -1430,6 +1506,46 @@ button.danger{
             onclick="closeTransactionErrorModal()">
       OK
     </button>
+  </div>
+
+</div>
+
+<!-- =======================================================
+     PREVIOUS TREASURER — TURNOVER REVERSAL MODAL
+======================================================= -->
+<div id="ptrReverseModal"
+     class="ptr-reverse-overlay hidden"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="ptrReverseTitle">
+  <div class="ptr-reverse-box">
+    <div id="ptrReverseTitle" class="ptr-reverse-title">↩ Reverse Turnover</div>
+
+    <div id="ptrReverseSummary" class="ptr-reverse-summary"></div>
+
+    <div class="ptr-reverse-warning">
+      This keeps the original turnover in the audit trail. For CASH, the member payment remains credited/paid and only the custody turnover is reversed. For BANK, a linked bank reversal transaction is created.
+    </div>
+
+    <label for="ptrReverseReason">Reason for Reversal *</label>
+    <textarea id="ptrReverseReason"
+              placeholder="Enter the reason for reversing this turnover"></textarea>
+
+    <div id="ptrReverseMsg"></div>
+
+    <div class="ptr-reverse-actions">
+      <button id="ptrReverseConfirmBtn"
+              type="button"
+              class="ptr-reverse-confirm"
+              onclick="confirmPTRTurnoverReversal()">
+        CONFIRM REVERSAL
+      </button>
+      <button type="button"
+              class="alt"
+              onclick="closePTRReverseModal()">
+        CANCEL
+      </button>
+    </div>
   </div>
 </div>
 
@@ -2916,8 +3032,8 @@ button.danger{
       <h4 style="margin:16px 0 8px">Turnover History</h4>
       <div class="table-wrap">
         <table class="member-table">
-          <thead><tr><th>Date</th><th>Turnover ID</th><th>Type</th><th>Amount</th><th>Received By</th><th>Reference / Remarks</th><th>Status</th></tr></thead>
-          <tbody id="ptrTurnoverHistoryBody"><tr><td colspan="7">No turnover records yet.</td></tr></tbody>
+          <thead><tr><th>Date</th><th>Turnover ID</th><th>Type</th><th>Amount</th><th>Received By</th><th>Reference / Remarks</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="ptrTurnoverHistoryBody"><tr><td colspan="8">No turnover records yet.</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -6885,6 +7001,104 @@ function renderPTRTurnoverPaymentList(){
   ptrTurnoverSelectionChanged();
 }
 
+let ptrReverseTurnoverTarget=null;
+let ptrReverseTurnoverBusy=false;
+
+function openPTRReverseModal(turnoverId,turnoverType,amount){
+  ptrReverseTurnoverTarget={
+    turnoverId:String(turnoverId||'').trim(),
+    turnoverType:String(turnoverType||'').trim().toUpperCase(),
+    amount:Number(amount||0)
+  };
+
+  const summary=document.getElementById('ptrReverseSummary');
+  if(summary){
+    summary.innerHTML=
+      '<b>Turnover ID:</b> '+esc(ptrReverseTurnoverTarget.turnoverId)+'<br>'+
+      '<b>Type:</b> '+esc(ptrReverseTurnoverTarget.turnoverType)+'<br>'+
+      '<b>Amount:</b> '+ptrMoney(ptrReverseTurnoverTarget.amount);
+  }
+
+  const reason=document.getElementById('ptrReverseReason');
+  if(reason) reason.value='';
+
+  msg('ptrReverseMsg','','');
+
+  const btn=document.getElementById('ptrReverseConfirmBtn');
+  if(btn) btn.disabled=false;
+
+  const modal=document.getElementById('ptrReverseModal');
+  if(modal) modal.classList.remove('hidden');
+
+  setTimeout(()=>{if(reason) reason.focus();},50);
+}
+
+function closePTRReverseModal(){
+  if(ptrReverseTurnoverBusy) return;
+  const modal=document.getElementById('ptrReverseModal');
+  if(modal) modal.classList.add('hidden');
+  const reason=document.getElementById('ptrReverseReason');
+  if(reason) reason.value='';
+  msg('ptrReverseMsg','','');
+  ptrReverseTurnoverTarget=null;
+}
+
+async function confirmPTRTurnoverReversal(){
+  if(ptrReverseTurnoverBusy) return;
+
+  const target=ptrReverseTurnoverTarget;
+  const reason=(document.getElementById('ptrReverseReason').value||'').trim();
+
+  if(!target || !target.turnoverId){
+    msg('ptrReverseMsg','Turnover record is not selected.','error');
+    return;
+  }
+
+  if(!reason){
+    msg('ptrReverseMsg','Reason for Reversal is required.','error');
+    return;
+  }
+
+  const btn=document.getElementById('ptrReverseConfirmBtn');
+
+  try{
+    ptrReverseTurnoverBusy=true;
+    if(btn) btn.disabled=true;
+
+    const r=await api(
+      'reversePreviousTreasurerTurnover',
+      {
+        token:token,
+        data:{
+          turnoverId:target.turnoverId,
+          reason:reason
+        }
+      },
+      'Reversing Turnover...',
+      'Restoring Previous Treasurer accountability and audit trail'
+    );
+
+    const modal=document.getElementById('ptrReverseModal');
+    if(modal) modal.classList.add('hidden');
+
+    ptrReverseTurnoverTarget=null;
+    msg('ptrTurnoverMsg',(r&&r.message)||'Turnover reversed successfully.','ok');
+
+    await loadPTRTurnover();
+
+    /* Refresh dashboard figures next time dashboard is shown. */
+    try{
+      if(typeof loadDashboard==='function') await loadDashboard();
+    }catch(_dashboardRefreshError){}
+
+  }catch(e){
+    fail(e,'ptrReverseMsg');
+  }finally{
+    ptrReverseTurnoverBusy=false;
+    if(btn) btn.disabled=false;
+  }
+}
+
 async function loadPTRTurnover(){
   try{
     const r=await api('getPreviousTreasurerTurnover',{token:token},'Loading Turnover...','Reading Previous Treasurer accountability');
@@ -6896,15 +7110,37 @@ async function loadPTRTurnover(){
     const body=document.getElementById('ptrTurnoverHistoryBody');
     const rows=(r&&r.turnovers)||[];
     if(body){
-      body.innerHTML=rows.length?rows.map(x=>
-        '<tr><td>'+esc(x.turnoverDate||'')+'</td>'+
-        '<td>'+esc(x.turnoverId||'')+'</td>'+
-        '<td>'+esc(x.turnoverType||'')+'</td>'+
-        '<td><b>'+money(x.amount||0)+'</b></td>'+
-        '<td>'+esc(x.receivedBy||'')+'</td>'+
-        '<td>'+esc([x.reference,x.remarks].filter(Boolean).join(' | '))+'</td>'+
-        '<td>'+esc(x.status||'')+'</td></tr>'
-      ).join(''):'<tr><td colspan="7">No turnover records yet.</td></tr>';
+      body.innerHTML=rows.length?rows.map(x=>{
+        const status=String(x.status||'').trim().toUpperCase();
+        const turnoverId=String(x.turnoverId||'');
+        const turnoverType=String(x.turnoverType||'');
+        const amount=Number(x.amount||0);
+
+        const statusHtml=status==='REVERSED'
+          ? '<span class="ptr-status-reversed">REVERSED</span>'
+          : status==='CONFIRMED'
+            ? '<span class="ptr-status-confirmed">CONFIRMED</span>'
+            : esc(status);
+
+        const actionHtml=status==='CONFIRMED'
+          ? '<button type="button" class="ptr-history-action" onclick="openPTRReverseModal('+
+              JSON.stringify(turnoverId)+','+
+              JSON.stringify(turnoverType)+','+
+              String(Number.isFinite(amount)?amount:0)+
+            ')">↩ REVERSE</button>'
+          : '';
+
+        return '<tr>'+
+          '<td>'+esc(x.turnoverDate||'')+'</td>'+
+          '<td>'+esc(turnoverId)+'</td>'+
+          '<td>'+esc(turnoverType)+'</td>'+
+          '<td><b>'+money(amount)+'</b></td>'+
+          '<td>'+esc(x.receivedBy||'')+'</td>'+
+          '<td>'+esc([x.reference,x.remarks].filter(Boolean).join(' | '))+'</td>'+
+          '<td>'+statusHtml+'</td>'+
+          '<td>'+actionHtml+'</td>'+
+          '</tr>';
+      }).join(''):'<tr><td colspan="8">No turnover records yet.</td></tr>';
     }
     msg('ptrTurnoverMsg','','');
   }catch(e){fail(e,'ptrTurnoverMsg');}
