@@ -4533,15 +4533,17 @@ async function savePayment(){
         ? e.message
         : String(e || 'Unable to save payment.');
 
-    if(/transaction blocked|unpaid registration fee/i.test(errorText)){
-      msg('paymentMsg','','');
-      showTransactionErrorModal(
-        errorText,
-        '⚠️ TRANSACTION BLOCKED'
-      );
-    }else{
-      fail(e,'paymentMsg');
-    }
+    /*
+     * All Receive Payment errors use the existing modal.
+     * This keeps validation errors consistent and avoids
+     * the small red inline error below SAVE PAYMENT.
+     */
+    msg('paymentMsg','','');
+
+    showTransactionErrorModal(
+      errorText,
+      '⚠️ TRANSACTION BLOCKED'
+    );
 
   }finally{
 
