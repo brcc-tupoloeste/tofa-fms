@@ -1343,6 +1343,22 @@ button.danger{
   .cash-change-grid{grid-template-columns:1fr}
 }
 
+
+/* =========================================================
+   PREVIOUS TREASURER RECONCILIATION — RECORD OLD PAYMENT
+========================================================= */
+.ptr-box{border:1px solid #d7e8da;border-radius:12px;padding:12px;background:#f7fcf8;margin-top:10px}
+.ptr-selected{border:1px solid #bbdfc4;border-radius:11px;padding:11px;background:#fff;margin-top:10px}
+.ptr-selected-name{font-size:15px;font-weight:900;color:#14532d}
+.ptr-selected-meta{font-size:11px;color:#64748b;margin-top:3px}
+.ptr-balance-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:10px 0}
+.ptr-balance{border:1px solid #d7e8da;border-radius:9px;padding:9px;background:#fff}
+.ptr-balance b{display:block;font-size:10px;color:#4b7256;margin-bottom:3px}
+.ptr-balance span{display:block;font-size:14px;font-weight:900;color:#14532d}
+.ptr-warning{border:1px solid #fde68a;background:#fffbeb;color:#92400e;border-radius:10px;padding:10px;font-size:12px;line-height:1.45;margin:10px 0}
+.ptr-status{border:1px solid #bbf7d0;background:#f0fdf4;color:#166534;border-radius:10px;padding:10px;font-size:12px;font-weight:800;margin-top:10px}
+@media(max-width:619px){.ptr-balance-grid{grid-template-columns:1fr}}
+
 </style>
 
 </head>
@@ -2647,6 +2663,10 @@ button.danger{
         <strong>✏️ Member Obligations Edit / Delete</strong>
         <span>Search a member, review existing obligations, then edit or delete.</span>
       </button>
+      <button type="button" class="obligation-menu-card" onclick="openObligationMode('previousTreasurer')">
+        <strong>🧾 Previous Treasurer Reconciliation</strong>
+        <span>Record validated old member payments received by the Previous Treasurer.</span>
+      </button>
     </div>
   </div>
 
@@ -2696,6 +2716,89 @@ button.danger{
       <div id="managedObligationsSection" class="report-section hidden">
         <h4>Member Obligations</h4>
         <div class="table-wrap"><table class="member-table"><thead><tr><th id="managedMemberHead" class="hidden">Member Name</th><th>Description</th><th>Due</th><th>Paid</th><th>Balance</th><th>Status</th><th>Remarks</th><th>Action</th></tr></thead><tbody id="managedObligationsBody"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="previousTreasurerMode" class="hidden">
+    <div class="obligation-mode-head">
+      <button type="button" class="alt" onclick="backToObligationMenu()">← Back</button>
+      <strong>🧾 Previous Treasurer Reconciliation</strong>
+    </div>
+
+    <div class="ptr-box">
+      <div class="panel-note">
+        Record only payments that were actually received by the Previous Treasurer.
+        The member balance will be credited, but the money remains UNREMITTED until a separate turnover is recorded.
+      </div>
+
+      <label>Search Member</label>
+      <div class="search-row">
+        <input id="ptrMemberSearch" autocomplete="off" placeholder="Member name or Member ID">
+        <button type="button" onclick="searchPTRMembers()">SEARCH</button>
+      </div>
+      <div id="ptrMemberResults" class="results"></div>
+      <div id="ptrMsg"></div>
+
+      <div id="ptrSelectedArea" class="hidden">
+        <div class="ptr-selected">
+          <div id="ptrSelectedName" class="ptr-selected-name">Selected Member</div>
+          <div id="ptrSelectedMeta" class="ptr-selected-meta"></div>
+
+          <div class="ptr-balance-grid">
+            <div class="ptr-balance"><b>Registration Balance</b><span id="ptrRegistrationBalance">₱0.00</span></div>
+            <div class="ptr-balance"><b>Monthly Dues Balance</b><span id="ptrMonthlyBalance">₱0.00</span></div>
+            <div class="ptr-balance"><b>Other Obligations</b><span id="ptrOtherBalance">₱0.00</span></div>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="full">
+            <label>Payment Type</label>
+            <select id="ptrPaymentType" onchange="ptrPaymentTypeChanged()">
+              <option value="">Select payment type</option>
+              <option value="Registration Fee">Registration Fee</option>
+              <option value="Monthly Membership">Monthly Dues</option>
+            </select>
+          </div>
+
+          <div id="ptrObligationWrap" class="full hidden">
+            <label>Other Obligation</label>
+            <select id="ptrObligationId" onchange="ptrObligationChanged()">
+              <option value="">Select obligation</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Actual Old Payment Date</label>
+            <input id="ptrPaymentDate" type="date">
+          </div>
+
+          <div>
+            <label>Amount Paid</label>
+            <input id="ptrAmount" type="number" min="0.01" step="0.01" inputmode="decimal">
+          </div>
+
+          <div class="full">
+            <label>Receipt / Reference</label>
+            <input id="ptrReference" autocomplete="off" placeholder="Optional">
+          </div>
+
+          <div class="full">
+            <label>Remarks</label>
+            <textarea id="ptrRemarks" placeholder="Optional notes about the old payment"></textarea>
+          </div>
+        </div>
+
+        <div class="ptr-warning">
+          This records a historical member payment as <b>VALIDATED – UNREMITTED</b>.
+          It must not be added to current cash, bank, or association balance until actual turnover.
+        </div>
+
+        <div class="form-actions-row">
+          <button type="button" onclick="savePTRHistoricalPayment()">💾 RECORD OLD PAYMENT</button>
+          <button type="button" class="alt" onclick="clearPTRPaymentForm(false)">CLEAR</button>
+        </div>
       </div>
     </div>
   </div>
@@ -6127,7 +6230,9 @@ function backToObligationMenu(){
   document.getElementById('obligationModeMenu').classList.remove('hidden');
   document.getElementById('batchObligationMode').classList.add('hidden');
   document.getElementById('individualObligationMode').classList.add('hidden');
+  document.getElementById('previousTreasurerMode').classList.add('hidden');
   resetObligationMemberArea();
+  resetPTRArea();
   msg('batchObligationMsg','','');
 }
 
@@ -6135,8 +6240,10 @@ function openObligationMode(mode){
   obligationManagementMode=mode;
   document.getElementById('obligationModeMenu').classList.add('hidden');
   document.getElementById('batchObligationMode').classList.toggle('hidden',mode!=='batch');
-  document.getElementById('individualObligationMode').classList.toggle('hidden',mode==='batch');
+  document.getElementById('individualObligationMode').classList.toggle('hidden',!(mode==='individual' || mode==='manage'));
+  document.getElementById('previousTreasurerMode').classList.toggle('hidden',mode!=='previousTreasurer');
   resetObligationMemberArea();
+  resetPTRArea();
   const allBtn=document.getElementById('showAllObligationsBtn');
   if(allBtn) allBtn.classList.toggle('hidden',mode!=='manage');
   if(mode==='batch'){
@@ -6145,6 +6252,201 @@ function openObligationMode(mode){
   }
   window.scrollTo({top:0,behavior:'smooth'});
 }
+
+
+let ptrSelectedMember = null;
+let ptrSelectedObligations = [];
+
+function ptrMoney(v){
+  const n=Number(v||0);
+  return '₱'+n.toLocaleString('en-PH',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function ptrProfileBalance(p, keys){
+  for(const k of keys){
+    if(p && p[k] !== undefined && p[k] !== null && p[k] !== ''){
+      const n=Number(p[k]);
+      if(Number.isFinite(n)) return Math.max(0,n);
+    }
+  }
+  return 0;
+}
+
+function resetPTRArea(){
+  ptrSelectedMember=null;
+  ptrSelectedObligations=[];
+  const s=document.getElementById('ptrMemberSearch'); if(s) s.value='';
+  const r=document.getElementById('ptrMemberResults'); if(r) r.innerHTML='';
+  const a=document.getElementById('ptrSelectedArea'); if(a) a.classList.add('hidden');
+  clearPTRPaymentForm(true);
+  msg('ptrMsg','','');
+}
+
+function clearPTRPaymentForm(keepMember){
+  const ids=['ptrPaymentType','ptrObligationId','ptrPaymentDate','ptrAmount','ptrReference','ptrRemarks'];
+  ids.forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
+  const ow=document.getElementById('ptrObligationWrap'); if(ow) ow.classList.add('hidden');
+  if(!keepMember){
+    ptrSelectedMember=null;
+    ptrSelectedObligations=[];
+    const a=document.getElementById('ptrSelectedArea'); if(a) a.classList.add('hidden');
+    const r=document.getElementById('ptrMemberResults'); if(r) r.innerHTML='';
+    const s=document.getElementById('ptrMemberSearch'); if(s) s.value='';
+  }
+  msg('ptrMsg','','');
+}
+
+async function searchPTRMembers(){
+  const text=(document.getElementById('ptrMemberSearch').value||'').trim();
+  if(!text){msg('ptrMsg','Enter a member name or Member ID.','error');return;}
+  try{
+    const rows=await api('searchMembers',{token:token,searchText:text},'Searching Members...','Please wait');
+    const list=Array.isArray(rows)?rows:(rows&&(rows.members||rows.results))||[];
+    document.getElementById('ptrMemberResults').innerHTML=list.length
+      ? list.map(x=>{
+          const id=x.id||x.memberId||'';
+          const name=x.name||x.memberName||'';
+          const address=x.address||x.sitio||'';
+          return '<button type="button" class="result-item" onclick="selectPTRMember(\''+
+            String(id).replace(/'/g,"\\'")+'\')"><strong>'+esc(name)+'</strong><span>'+
+            esc(id+(address?' • '+address:''))+'</span></button>';
+        }).join('')
+      : '<div class="panel-note">No member found.</div>';
+    msg('ptrMsg','','');
+  }catch(e){fail(e,'ptrMsg');}
+}
+
+async function selectPTRMember(memberId){
+  try{
+    const p=await api('getMemberProfile',{token:token,memberId:memberId},'Loading Member...','Please wait');
+    ptrSelectedMember=Object.assign({},p||{},{
+      id:(p&&(p.id||p.memberId))||memberId,
+      memberId:(p&&(p.memberId||p.id))||memberId
+    });
+
+    const obs=await api('getObligations',{token:token,memberId:memberId},'Loading Balances...','Please wait');
+    ptrSelectedObligations=obligationApiRows(obs).filter(o=>obligationRowBalance(o)>0);
+
+    document.getElementById('ptrSelectedArea').classList.remove('hidden');
+    document.getElementById('ptrSelectedName').textContent=ptrSelectedMember.name||ptrSelectedMember.memberName||memberId;
+    document.getElementById('ptrSelectedMeta').textContent=memberId+
+      ((ptrSelectedMember.address||ptrSelectedMember.sitio)?' • '+(ptrSelectedMember.address||ptrSelectedMember.sitio):'');
+
+    const reg=ptrProfileBalance(ptrSelectedMember,['registrationBalance','registrationFeeBalance']);
+    const monthly=ptrProfileBalance(ptrSelectedMember,['yearBalance','monthlyBalance','membershipBalance']);
+    const other=ptrSelectedObligations.reduce((s,o)=>s+obligationRowBalance(o),0);
+
+    document.getElementById('ptrRegistrationBalance').textContent=ptrMoney(reg);
+    document.getElementById('ptrMonthlyBalance').textContent=ptrMoney(monthly);
+    document.getElementById('ptrOtherBalance').textContent=ptrMoney(other);
+
+    const sel=document.getElementById('ptrPaymentType');
+    sel.innerHTML='<option value="">Select payment type</option>'+
+      '<option value="Registration Fee">Registration Fee — '+ptrMoney(reg)+'</option>'+
+      '<option value="Monthly Membership">Monthly Dues — '+ptrMoney(monthly)+'</option>'+
+      (ptrSelectedObligations.length?'<option value="Other Obligation">Other Obligation</option>':'');
+
+    const os=document.getElementById('ptrObligationId');
+    os.innerHTML='<option value="">Select obligation</option>'+
+      ptrSelectedObligations.map(o=>'<option value="'+esc(obligationRowId(o))+'" data-balance="'+obligationRowBalance(o)+'">'+
+        esc(String(o.description||o.obligation||'Other Obligation'))+' — '+ptrMoney(obligationRowBalance(o))+
+        (o.remarks?' — '+esc(String(o.remarks)):'')+'</option>').join('');
+
+    document.getElementById('ptrMemberResults').innerHTML='';
+    clearPTRPaymentForm(true);
+  }catch(e){fail(e,'ptrMsg');}
+}
+
+function obligationRowBalance(o){
+  if(o && o.balance !== undefined && o.balance !== null && o.balance !== ''){
+    const n=Number(o.balance); if(Number.isFinite(n)) return Math.max(0,n);
+  }
+  return Math.max(0,obligationRowDue(o)-obligationRowPaid(o));
+}
+
+function ptrPaymentTypeChanged(){
+  const type=document.getElementById('ptrPaymentType').value;
+  const wrap=document.getElementById('ptrObligationWrap');
+  wrap.classList.toggle('hidden',type!=='Other Obligation');
+  document.getElementById('ptrObligationId').value='';
+  const amount=document.getElementById('ptrAmount');
+  if(type==='Registration Fee'){
+    amount.value=ptrProfileBalance(ptrSelectedMember,['registrationBalance','registrationFeeBalance'])||'';
+  }else if(type==='Monthly Membership'){
+    amount.value=ptrProfileBalance(ptrSelectedMember,['yearBalance','monthlyBalance','membershipBalance'])||'';
+  }else{
+    amount.value='';
+  }
+}
+
+function ptrObligationChanged(){
+  const s=document.getElementById('ptrObligationId');
+  const opt=s.options[s.selectedIndex];
+  document.getElementById('ptrAmount').value=opt&&opt.dataset.balance?opt.dataset.balance:'';
+}
+
+async function savePTRHistoricalPayment(){
+  if(!ptrSelectedMember){msg('ptrMsg','Select a member first.','error');return;}
+
+  const memberId=ptrSelectedMember.memberId||ptrSelectedMember.id||'';
+  const memberName=ptrSelectedMember.name||ptrSelectedMember.memberName||memberId;
+  const type=document.getElementById('ptrPaymentType').value;
+  const obligationId=type==='Other Obligation'?document.getElementById('ptrObligationId').value:'';
+  const paymentDate=document.getElementById('ptrPaymentDate').value;
+  const amount=Number(document.getElementById('ptrAmount').value||0);
+  const receiptReference=(document.getElementById('ptrReference').value||'').trim();
+  const remarks=(document.getElementById('ptrRemarks').value||'').trim();
+
+  if(!type){msg('ptrMsg','Select a payment type.','error');return;}
+  if(type==='Other Obligation'&&!obligationId){msg('ptrMsg','Select the exact Other Obligation.','error');return;}
+  if(!paymentDate){msg('ptrMsg','Enter the actual old payment date.','error');return;}
+  if(!(amount>0)){msg('ptrMsg','Enter a valid amount paid.','error');return;}
+
+  let maxBalance=0;
+  if(type==='Registration Fee') maxBalance=ptrProfileBalance(ptrSelectedMember,['registrationBalance','registrationFeeBalance']);
+  else if(type==='Monthly Membership') maxBalance=ptrProfileBalance(ptrSelectedMember,['yearBalance','monthlyBalance','membershipBalance']);
+  else{
+    const row=ptrSelectedObligations.find(o=>obligationRowId(o)===obligationId);
+    maxBalance=row?obligationRowBalance(row):0;
+  }
+  if(maxBalance>0 && amount>maxBalance+0.0001){
+    msg('ptrMsg','Amount exceeds the current balance of '+ptrMoney(maxBalance)+'.','error');
+    return;
+  }
+
+  const label=type==='Monthly Membership'?'Monthly Dues':type;
+  if(!confirm(
+    'Record this OLD PAYMENT?\n\n'+
+    'Member: '+memberName+'\n'+
+    'Payment Type: '+label+'\n'+
+    'Amount: '+ptrMoney(amount)+'\n'+
+    'Actual Payment Date: '+paymentDate+'\n\n'+
+    'Status after recording: VALIDATED – UNREMITTED\n\n'+
+    'This will credit the member balance but will NOT add money to current cash/bank.'
+  )) return;
+
+  try{
+    const r=await api(
+      'recordPreviousTreasurerPayment',
+      {token:token,paymentData:{
+        memberId:memberId,
+        memberName:memberName,
+        paymentDate:paymentDate,
+        paymentType:type,
+        obligationId:obligationId,
+        amount:amount,
+        receiptReference:receiptReference,
+        remarks:remarks
+      }},
+      'Recording Old Payment...',
+      'Validating historical payment'
+    );
+    msg('ptrMsg',(r&&r.message)||'Old payment recorded successfully as VALIDATED – UNREMITTED.','ok');
+    await selectPTRMember(memberId);
+    await loadDashboard();
+  }catch(e){fail(e,'ptrMsg');}
+}
+
 
 async function toggleBatchMemberList(show){
   const area=document.getElementById('batchMembersArea');
