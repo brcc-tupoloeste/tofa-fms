@@ -2741,6 +2741,7 @@ button.danger{
 
     <div class="ptr-submenu">
       <button id="ptrOldPaymentTab" type="button" class="active" onclick="showPTRSection('oldPayment')">🧾 Record Old Payment</button>
+      <button id="ptrUnremittedTab" type="button" onclick="showPTRSection('unremitted')">💵 Unremitted Collections</button>
       <button id="ptrPassbookTab" type="button" onclick="showPTRSection('passbook')">🏦 Bank / Passbook Records</button>
     </div>
 
@@ -2817,6 +2818,40 @@ button.danger{
           <button type="button" onclick="savePTRHistoricalPayment()">💾 RECORD OLD PAYMENT</button>
           <button type="button" class="alt" onclick="clearPTRPaymentForm(false)">CLEAR</button>
         </div>
+      </div>
+    </div>
+
+    <div id="ptrUnremittedSection" class="ptr-box hidden">
+      <div class="panel-note">
+        Validated old member payments received by the Previous Treasurer. These member accounts are already credited, but any amount not yet turned over remains under Previous Treasurer accountability and is not current Association Cash or Bank.
+      </div>
+
+      <div class="ptr-passbook-summary">
+        <div class="ptr-passbook-kpi"><b>Total Validated Old Payments</b><span id="ptrUnremittedValidated">₱0.00</span></div>
+        <div class="ptr-passbook-kpi"><b>Already Turned Over</b><span id="ptrUnremittedTurnedOver">₱0.00</span></div>
+        <div class="ptr-passbook-kpi"><b>Still Unremitted</b><span id="ptrUnremittedBalance">₱0.00</span></div>
+      </div>
+
+      <div id="ptrUnremittedMsg"></div>
+
+      <div class="table-wrap">
+        <table class="member-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Member</th>
+              <th>Payment Type</th>
+              <th>Amount</th>
+              <th>Turned Over</th>
+              <th>Unremitted</th>
+              <th>Status</th>
+              <th>Reference / Remarks</th>
+            </tr>
+          </thead>
+          <tbody id="ptrUnremittedBody">
+            <tr><td colspan="8">No validated old payments yet.</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -6344,12 +6379,16 @@ function ptrProfileBalance(p, keys){
 
 function resetPTRArea(){
   const oldTab=document.getElementById('ptrOldPaymentTab');
+  const unremittedTab=document.getElementById('ptrUnremittedTab');
   const passbookTab=document.getElementById('ptrPassbookTab');
   const oldSection=document.getElementById('ptrOldPaymentSection');
+  const unremittedSection=document.getElementById('ptrUnremittedSection');
   const passbookSection=document.getElementById('ptrPassbookSection');
   if(oldTab) oldTab.classList.add('active');
+  if(unremittedTab) unremittedTab.classList.remove('active');
   if(passbookTab) passbookTab.classList.remove('active');
   if(oldSection) oldSection.classList.remove('hidden');
+  if(unremittedSection) unremittedSection.classList.add('hidden');
   if(passbookSection) passbookSection.classList.add('hidden');
   ptrSelectedMember=null;
   ptrSelectedObligations=[];
@@ -6531,17 +6570,113 @@ async function savePTRHistoricalPayment(){
 ========================================================= */
 function showPTRSection(section){
   const oldSection=document.getElementById('ptrOldPaymentSection');
+  const unremittedSection=document.getElementById('ptrUnremittedSection');
   const passbookSection=document.getElementById('ptrPassbookSection');
   const oldTab=document.getElementById('ptrOldPaymentTab');
+  const unremittedTab=document.getElementById('ptrUnremittedTab');
   const passbookTab=document.getElementById('ptrPassbookTab');
 
+  const isOld=section==='oldPayment';
+  const isUnremitted=section==='unremitted';
   const isPassbook=section==='passbook';
-  if(oldSection) oldSection.classList.toggle('hidden',isPassbook);
+
+  if(oldSection) oldSection.classList.toggle('hidden',!isOld);
+  if(unremittedSection) unremittedSection.classList.toggle('hidden',!isUnremitted);
   if(passbookSection) passbookSection.classList.toggle('hidden',!isPassbook);
-  if(oldTab) oldTab.classList.toggle('active',!isPassbook);
+
+  if(oldTab) oldTab.classList.toggle('active',isOld);
+  if(unremittedTab) unremittedTab.classList.toggle('active',isUnremitted);
   if(passbookTab) passbookTab.classList.toggle('active',isPassbook);
 
+  if(isUnremitted) loadPTRUnremittedCollections();
   if(isPassbook) loadPTRPassbookRecords();
+}
+
+function ptrUnremittedDateDisplay(v){
+  if(!v) return '';
+  const d=new Date(v);
+  return isNaN(d.getTime()) ? String(v) :
+    d.toLocaleDateString('en-PH',{month:'short',day:'2-digit',year:'numeric',timeZone:'Asia/Manila'});
+}
+
+async function loadPTRUnremittedCollections(){
+  try{
+    const r=await api(
+      'getPreviousTreasurerUnremitted',
+      {token:token},
+      'Loading Unremitted Collections...',
+      'Reading validated old member payments'
+    );
+
+    const rows=(r&&(
+      r.payments ||
+      r.records ||
+      r.historicalPayments ||
+      r.paymentRecords ||
+      r.items
+    ))||[];
+
+    let totalValidated=0;
+    let totalTurnedOver=0;
+    let totalUnremitted=0;
+
+    rows.forEach(x=>{
+      const validationStatus=String(x.validationStatus||x.status||'VALIDATED').toUpperCase();
+      if(validationStatus && validationStatus!=='VALIDATED') return;
+      const amount=Number(x.amount||0);
+      const turned=Number(x.turnedOverAmount||x.remittedAmount||0);
+      const unremitted=(x.unremittedBalance!==undefined && x.unremittedBalance!==null && x.unremittedBalance!=='')
+        ? Number(x.unremittedBalance||0)
+        : Math.max(0,amount-turned);
+      totalValidated+=amount;
+      totalTurnedOver+=turned;
+      totalUnremitted+=unremitted;
+    });
+
+    if(r){
+      if(r.totalValidated!==undefined) totalValidated=Number(r.totalValidated||0);
+      else if(r.validatedTotal!==undefined) totalValidated=Number(r.validatedTotal||0);
+      else if(r.totalValidatedPayments!==undefined) totalValidated=Number(r.totalValidatedPayments||0);
+
+      if(r.totalTurnedOver!==undefined) totalTurnedOver=Number(r.totalTurnedOver||0);
+      else if(r.turnedOverTotal!==undefined) totalTurnedOver=Number(r.turnedOverTotal||0);
+
+      if(r.totalUnremitted!==undefined) totalUnremitted=Number(r.totalUnremitted||0);
+      else if(r.unremittedTotal!==undefined) totalUnremitted=Number(r.unremittedTotal||0);
+      else if(r.stillUnremitted!==undefined) totalUnremitted=Number(r.stillUnremitted||0);
+    }
+
+    set('ptrUnremittedValidated',ptrMoney(totalValidated));
+    set('ptrUnremittedTurnedOver',ptrMoney(totalTurnedOver));
+    set('ptrUnremittedBalance',ptrMoney(totalUnremitted));
+
+    const body=document.getElementById('ptrUnremittedBody');
+    if(body){
+      body.innerHTML=rows.length ? rows.map(x=>{
+        const amount=Number(x.amount||0);
+        const turned=Number(x.turnedOverAmount||x.remittedAmount||0);
+        const unremitted=(x.unremittedBalance!==undefined && x.unremittedBalance!==null && x.unremittedBalance!=='')
+          ? Number(x.unremittedBalance||0)
+          : Math.max(0,amount-turned);
+        const status=String(x.turnoverStatus||x.status||(unremitted<=0?'TURNED OVER':(turned>0?'PARTIAL':'UNREMITTED')));
+        const refRemarks=[x.receiptReference||x.reference||'',x.remarks||''].filter(Boolean).join(' | ');
+        return '<tr>'+
+          '<td>'+esc(ptrUnremittedDateDisplay(x.paymentDate||x.date||''))+'</td>'+
+          '<td>'+esc(x.memberName||x.name||x.memberId||'')+'</td>'+
+          '<td>'+esc(x.paymentType||x.transactionType||x.type||'')+'</td>'+
+          '<td>'+money(amount)+'</td>'+
+          '<td>'+money(turned)+'</td>'+
+          '<td><b>'+money(unremitted)+'</b></td>'+
+          '<td>'+esc(status)+'</td>'+
+          '<td>'+esc(refRemarks)+'</td>'+
+          '</tr>';
+      }).join('') : '<tr><td colspan="8">No validated old payments yet.</td></tr>';
+    }
+
+    msg('ptrUnremittedMsg','','');
+  }catch(e){
+    fail(e,'ptrUnremittedMsg');
+  }
 }
 
 function clearPTRPassbookForm(){
