@@ -7123,11 +7123,11 @@ async function loadPTRTurnover(){
             : esc(status);
 
         const actionHtml=status==='CONFIRMED'
-          ? '<button type="button" class="ptr-history-action" onclick="openPTRReverseModal('+
-              JSON.stringify(turnoverId)+','+
-              JSON.stringify(turnoverType)+','+
-              String(Number.isFinite(amount)?amount:0)+
-            ')">↩ REVERSE</button>'
+          ? '<button type="button" class="ptr-history-action ptr-reverse-action"'+
+              ' data-turnover-id="'+esc(turnoverId)+'"'+
+              ' data-turnover-type="'+esc(turnoverType)+'"'+
+              ' data-turnover-amount="'+String(Number.isFinite(amount)?amount:0)+'">'+
+              '↩ REVERSE</button>'
           : '';
 
         return '<tr>'+
@@ -7141,6 +7141,16 @@ async function loadPTRTurnover(){
           '<td>'+actionHtml+'</td>'+
           '</tr>';
       }).join(''):'<tr><td colspan="8">No turnover records yet.</td></tr>';
+
+      body.querySelectorAll('.ptr-reverse-action').forEach(btn=>{
+        btn.addEventListener('click',()=>{
+          openPTRReverseModal(
+            btn.dataset.turnoverId || '',
+            btn.dataset.turnoverType || '',
+            Number(btn.dataset.turnoverAmount || 0)
+          );
+        });
+      });
     }
     msg('ptrTurnoverMsg','','');
   }catch(e){fail(e,'ptrTurnoverMsg');}
