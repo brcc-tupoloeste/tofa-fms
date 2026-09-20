@@ -1521,6 +1521,32 @@ button.danger{
 .attendance-print-org{font-size:16px;font-weight:900;color:#14532d}
 .attendance-print-title{font-size:18px;font-weight:900;margin-top:7px}
 .attendance-print-meta{font-size:11px;color:#64748b;margin-top:3px}
+
+.attendance-select-box{border:1px solid #d7e8da;border-radius:11px;background:#fff;margin-top:10px;overflow:hidden}
+.attendance-select-box summary{cursor:pointer;padding:11px 12px;font-weight:900;color:#14532d;background:#f7fcf8;list-style:none}
+.attendance-select-box summary::-webkit-details-marker{display:none}
+.attendance-select-box summary:after{content:"▼";float:right;font-size:10px;color:#64748b}
+.attendance-select-box[open] summary:after{content:"▲"}
+.attendance-checklist{max-height:320px;overflow:auto;padding:6px 10px 10px}
+.attendance-check-row{display:flex;align-items:center;gap:9px;padding:8px 4px;border-bottom:1px solid #edf5ee;font-size:12px}
+.attendance-check-row:last-child{border-bottom:0}
+.attendance-check-row input{width:auto!important;margin:0!important}
+.attendance-check-row span{flex:1}
+.attendance-selection-note{font-size:11px;color:#64748b;margin:7px 2px}
+.attendance-annual-controls{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end;margin:12px 0}
+.attendance-annual-controls button{width:auto!important;margin:0!important;min-width:150px}
+@media(max-width:619px){.attendance-annual-controls{grid-template-columns:1fr}.attendance-annual-controls button{width:100%!important}}
+@media print{
+ body.print-annual-attendance *{visibility:hidden!important}
+ body.print-annual-attendance #annualAttendancePrintArea,body.print-annual-attendance #annualAttendancePrintArea *{visibility:visible!important}
+ body.print-annual-attendance #annualAttendancePrintArea{position:absolute!important;left:0!important;top:0!important;width:100%!important;background:#fff!important;margin:0!important;padding:0!important}
+ body.print-annual-attendance .table-wrap{overflow:visible!important;border:0!important}
+ body.print-annual-attendance table{min-width:0!important;width:100%!important}
+ body.print-annual-attendance th,body.print-annual-attendance td{font-size:8.5pt!important;padding:4px!important;color:#000!important}
+ body.print-annual-attendance .attendance-print-org{font-size:13pt!important;color:#000!important}
+ body.print-annual-attendance .attendance-print-title{font-size:14pt!important}
+ body.print-annual-attendance .attendance-print-meta{font-size:9pt!important;color:#000!important}
+}
 @media(max-width:619px){.attendance-controls{grid-template-columns:1fr}.attendance-summary-grid{grid-template-columns:repeat(2,1fr)}}
 @media print{
   body.print-attendance-summary *{visibility:hidden!important}
@@ -1872,7 +1898,7 @@ button.danger{
 <div id="attendancePanel" class="card hidden">
   <div class="panel-nav"><button type="button" class="back-dashboard" onclick="backToDashboard()">← Back to Dashboard</button></div>
   <h3 class="panel-title">📋 Attendance</h3>
-  <div class="panel-note">Record attendance by meeting/activity. Reopening the same date and activity loads saved records for editing.</div>
+  <div class="panel-note">Select the members who are present. Members not selected as Present or Excused will automatically be recorded as Absent.</div>
   <div class="attendance-controls">
     <div><label for="attendanceDate">Meeting Date</label><input id="attendanceDate" type="date"></div>
     <div><label for="attendanceActivity">Activity / Meeting</label><input id="attendanceActivity" type="text" placeholder="e.g. Monthly Meeting"></div>
@@ -1887,28 +1913,51 @@ button.danger{
       <div class="attendance-kpi"><b>Excused</b><span id="attendanceExcused">0</span></div>
     </div>
     <div class="attendance-toolbar">
-      <button type="button" onclick="markAllAttendance('PRESENT')">✓ Mark All Present</button>
-      <button type="button" class="alt" onclick="markAllAttendance('ABSENT')">Mark All Absent</button>
+      <button type="button" onclick="setAllAttendancePresent(true)">✓ Select All Present</button>
+      <button type="button" class="alt" onclick="setAllAttendancePresent(false)">Clear Present</button>
     </div>
-    <div id="attendanceMemberList"></div>
+    <details class="attendance-select-box" open>
+      <summary id="presentMembersSummary">Present Members — 0 selected</summary>
+      <div id="attendancePresentList" class="attendance-checklist"></div>
+    </details>
+    <div class="attendance-selection-note">Only check the members who attended. Everyone else will be marked Absent unless selected as Excused below.</div>
+    <details class="attendance-select-box">
+      <summary id="excusedMembersSummary">Excused Members — 0 selected</summary>
+      <div id="attendanceExcusedList" class="attendance-checklist"></div>
+    </details>
     <button type="button" onclick="saveAttendance()">💾 SAVE ATTENDANCE</button>
   </div>
   <hr style="border:0;border-top:1px solid #d7e8da;margin:18px 0">
   <div class="form-actions-row">
     <button type="button" class="alt" onclick="loadAttendanceHistory()">📚 Attendance History</button>
-    <button type="button" class="print-btn" onclick="loadAttendanceSummary()">📊 Attendance Summary</button>
+    <button type="button" class="print-btn" onclick="loadAttendanceSummary()">📊 Overall Summary</button>
   </div>
   <div id="attendanceHistoryWrap" class="hidden"><h4>Attendance History</h4><div id="attendanceHistory" class="table-wrap"></div></div>
   <div id="attendanceSummaryWrap" class="hidden">
     <div id="attendanceSummaryPrintArea">
-      <div class="attendance-print-header">
-        <div class="attendance-print-org">TUPOL OESTE FARMERS ASSOCIATION</div>
-        <div class="attendance-print-title">ATTENDANCE SUMMARY</div>
-        <div id="attendanceSummaryMeta" class="attendance-print-meta"></div>
-      </div>
+      <div class="attendance-print-header"><div class="attendance-print-org">TUPOL OESTE FARMERS ASSOCIATION</div><div class="attendance-print-title">ATTENDANCE SUMMARY</div><div id="attendanceSummaryMeta" class="attendance-print-meta"></div></div>
       <div id="attendanceSummaryTable" class="table-wrap"></div>
     </div>
     <button type="button" class="print-btn attendance-no-print" onclick="printAttendanceSummary()">🖨 PRINT ATTENDANCE SUMMARY</button>
+  </div>
+  <hr style="border:0;border-top:1px solid #d7e8da;margin:18px 0">
+  <h4>📅 Annual Attendance Summary</h4>
+  <div class="attendance-annual-controls">
+    <div><label for="attendanceAnnualYear">Year</label><select id="attendanceAnnualYear"></select></div>
+    <button type="button" onclick="loadAnnualAttendanceSummary()">VIEW ANNUAL SUMMARY</button>
+  </div>
+  <div id="annualAttendanceWrap" class="hidden">
+    <div id="annualAttendancePrintArea">
+      <div class="attendance-print-header"><div class="attendance-print-org">TUPOL OESTE FARMERS ASSOCIATION</div><div class="attendance-print-title" id="annualAttendanceTitle">ANNUAL ATTENDANCE SUMMARY</div><div id="annualAttendanceMeta" class="attendance-print-meta"></div></div>
+      <div class="attendance-summary-grid">
+        <div class="attendance-kpi"><b>Total Meetings</b><span id="annualTotalMeetings">0</span></div>
+        <div class="attendance-kpi"><b>Total Present</b><span id="annualTotalPresent">0</span></div>
+        <div class="attendance-kpi"><b>Total Absent</b><span id="annualTotalAbsent">0</span></div>
+        <div class="attendance-kpi"><b>Total Excused</b><span id="annualTotalExcused">0</span></div>
+      </div>
+      <div id="annualAttendanceTable" class="table-wrap"></div>
+    </div>
+    <button type="button" class="print-btn attendance-no-print" onclick="printAnnualAttendanceSummary()">🖨 PRINT ANNUAL ATTENDANCE SUMMARY</button>
   </div>
 </div>
 
@@ -8866,8 +8915,18 @@ function openAttendance(){
     const d=new Date();
     document.getElementById('attendanceDate').value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
   }
+  populateAttendanceYears();
   msg('attendanceMsg','');
   window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function populateAttendanceYears(){
+  const sel=document.getElementById('attendanceAnnualYear');
+  if(!sel||sel.options.length)return;
+  const now=new Date().getFullYear();
+  let h='';
+  for(let y=now;y>=2019;y--)h+='<option value="'+y+'">'+y+'</option>';
+  sel.innerHTML=h;
 }
 
 async function loadAttendanceMembers(){
@@ -8880,40 +8939,69 @@ async function loadAttendanceMembers(){
     attendanceMembers=Array.isArray(r)?r:((r&&r.records)||[]);
     renderAttendanceMembers();
     document.getElementById('attendanceWorkArea').classList.remove('hidden');
-    msg('attendanceMsg',attendanceMembers.length+' members loaded.','ok');
+    msg('attendanceMsg',attendanceMembers.length+' members loaded. Select Present members; unselected members will be Absent.','ok');
   }catch(e){fail(e,'attendanceMsg');}
 }
 
 function renderAttendanceMembers(){
-  const box=document.getElementById('attendanceMemberList');
-  if(!attendanceMembers.length){box.innerHTML='<div class="panel-note">No members found.</div>';updateAttendanceCounts();return;}
-  box.innerHTML=attendanceMembers.map(function(m,i){
+  const presentBox=document.getElementById('attendancePresentList');
+  const excusedBox=document.getElementById('attendanceExcusedList');
+  if(!attendanceMembers.length){
+    presentBox.innerHTML='<div class="panel-note">No members found.</div>';
+    excusedBox.innerHTML='';
+    updateAttendanceCounts();return;
+  }
+  presentBox.innerHTML=attendanceMembers.map(function(m,i){
     const st=String(m.status||'').toUpperCase();
-    return '<div class="attendance-member">'+
-      '<div class="attendance-member-head">'+(i+1)+'. '+esc(m.memberName||'')+'</div>'+
-      '<div class="attendance-status-row">'+
-      ['PRESENT','ABSENT','EXCUSED'].map(function(x){return '<label><input type="radio" name="att_'+i+'" value="'+x+'" '+(st===x?'checked':'')+' onchange="updateAttendanceCounts()"> '+(x.charAt(0)+x.slice(1).toLowerCase())+'</label>';}).join('')+
-      '</div><input class="attendance-remarks" id="attRemarks_'+i+'" type="text" placeholder="Remarks (optional)" value="'+esc(m.remarks||'')+'"></div>';
+    return '<label class="attendance-check-row"><input type="checkbox" id="attPresent_'+i+'" '+(st==='PRESENT'?'checked':'')+' onchange="attendanceStatusChanged('+i+',\'PRESENT\')"><span>'+(i+1)+'. '+esc(m.memberName||'')+'</span></label>';
+  }).join('');
+  excusedBox.innerHTML=attendanceMembers.map(function(m,i){
+    const st=String(m.status||'').toUpperCase();
+    return '<label class="attendance-check-row"><input type="checkbox" id="attExcused_'+i+'" '+(st==='EXCUSED'?'checked':'')+' onchange="attendanceStatusChanged('+i+',\'EXCUSED\')"><span>'+(i+1)+'. '+esc(m.memberName||'')+'</span></label>';
   }).join('');
   updateAttendanceCounts();
 }
 
-function markAllAttendance(status){
-  attendanceMembers.forEach(function(_,i){const el=document.querySelector('input[name="att_'+i+'"][value="'+status+'"]');if(el)el.checked=true;});
+function attendanceStatusChanged(i,type){
+  const p=document.getElementById('attPresent_'+i);
+  const e=document.getElementById('attExcused_'+i);
+  if(type==='PRESENT'&&p&&p.checked&&e)e.checked=false;
+  if(type==='EXCUSED'&&e&&e.checked&&p)p.checked=false;
+  updateAttendanceCounts();
+}
+
+function setAllAttendancePresent(checked){
+  attendanceMembers.forEach(function(_,i){
+    const p=document.getElementById('attPresent_'+i);
+    const e=document.getElementById('attExcused_'+i);
+    if(p)p.checked=!!checked;
+    if(checked&&e)e.checked=false;
+  });
   updateAttendanceCounts();
 }
 
 function updateAttendanceCounts(){
-  let present=0,absent=0,excused=0;
-  attendanceMembers.forEach(function(_,i){const el=document.querySelector('input[name="att_'+i+'"]:checked');const st=el?el.value:'';if(st==='PRESENT')present++;else if(st==='ABSENT')absent++;else if(st==='EXCUSED')excused++;});
+  let present=0,excused=0;
+  attendanceMembers.forEach(function(_,i){
+    const p=document.getElementById('attPresent_'+i);
+    const e=document.getElementById('attExcused_'+i);
+    if(p&&p.checked)present++;else if(e&&e.checked)excused++;
+  });
+  const absent=Math.max(0,attendanceMembers.length-present-excused);
   set('attendanceTotal',attendanceMembers.length);set('attendancePresent',present);set('attendanceAbsent',absent);set('attendanceExcused',excused);
+  const ps=document.getElementById('presentMembersSummary');if(ps)ps.textContent='Present Members — '+present+' selected';
+  const es=document.getElementById('excusedMembersSummary');if(es)es.textContent='Excused Members — '+excused+' selected';
 }
 
 async function saveAttendance(){
   const meetingDate=document.getElementById('attendanceDate').value;
   const activity=document.getElementById('attendanceActivity').value.trim();
   if(!attendanceMembers.length){msg('attendanceMsg','Load members first.','error');return;}
-  const records=attendanceMembers.map(function(m,i){const el=document.querySelector('input[name="att_'+i+'"]:checked');return {memberId:m.memberId,status:el?el.value:'ABSENT',remarks:(document.getElementById('attRemarks_'+i)||{}).value||''};});
+  const records=attendanceMembers.map(function(m,i){
+    const p=document.getElementById('attPresent_'+i);
+    const e=document.getElementById('attExcused_'+i);
+    return {memberId:m.memberId,status:(p&&p.checked)?'PRESENT':((e&&e.checked)?'EXCUSED':'ABSENT'),remarks:''};
+  });
   try{
     const r=await api('saveAttendance',{token:token,attendanceData:{meetingDate:meetingDate,activity:activity,records:records}},'Saving Attendance...','Updating attendance records');
     msg('attendanceMsg',(r&&r.message)||'Attendance saved successfully.','ok');
@@ -8952,9 +9040,31 @@ async function loadAttendanceSummary(){
 function printAttendanceSummary(){
   document.body.classList.add('print-attendance-summary');
   const cleanup=function(){document.body.classList.remove('print-attendance-summary');window.removeEventListener('afterprint',cleanup);};
-  window.addEventListener('afterprint',cleanup);
-  window.print();
-  setTimeout(cleanup,1500);
+  window.addEventListener('afterprint',cleanup);window.print();setTimeout(cleanup,1500);
+}
+
+async function loadAnnualAttendanceSummary(){
+  const year=Number(document.getElementById('attendanceAnnualYear').value||new Date().getFullYear());
+  try{
+    const r=await api('getAnnualAttendanceSummary',{token:token,year:year},'Loading Annual Summary...','Calculating annual attendance');
+    const rows=(r&&r.records)||[];
+    document.getElementById('annualAttendanceWrap').classList.remove('hidden');
+    document.getElementById('annualAttendanceTitle').textContent='ANNUAL ATTENDANCE SUMMARY — '+year;
+    document.getElementById('annualAttendanceMeta').textContent='Calendar Year '+year+' • Total Meetings: '+Number((r&&r.totalMeetings)||0);
+    set('annualTotalMeetings',Number((r&&r.totalMeetings)||0));set('annualTotalPresent',Number((r&&r.totalPresent)||0));set('annualTotalAbsent',Number((r&&r.totalAbsent)||0));set('annualTotalExcused',Number((r&&r.totalExcused)||0));
+    const box=document.getElementById('annualAttendanceTable');
+    if(!rows.length){box.innerHTML='<div class="panel-note">No attendance records found for '+year+'.</div>';return;}
+    let h='<table class="report-table"><thead><tr><th>No.</th><th>Member Name</th><th>Total Meetings</th><th>Present</th><th>Absent</th><th>Excused</th><th>Attendance %</th></tr></thead><tbody>';
+    rows.forEach(function(x,i){h+='<tr><td>'+(i+1)+'</td><td>'+esc(x.memberName||'')+'</td><td>'+Number(x.total||0)+'</td><td>'+Number(x.present||0)+'</td><td>'+Number(x.absent||0)+'</td><td>'+Number(x.excused||0)+'</td><td>'+Number(x.attendancePercent||0).toFixed(1)+'%</td></tr>';});
+    box.innerHTML=h+'</tbody></table>';
+    window.scrollTo({top:document.getElementById('annualAttendanceWrap').offsetTop-20,behavior:'smooth'});
+  }catch(e){fail(e,'attendanceMsg');}
+}
+
+function printAnnualAttendanceSummary(){
+  document.body.classList.add('print-annual-attendance');
+  const cleanup=function(){document.body.classList.remove('print-annual-attendance');window.removeEventListener('afterprint',cleanup);};
+  window.addEventListener('afterprint',cleanup);window.print();setTimeout(cleanup,1500);
 }
 
 </script>
