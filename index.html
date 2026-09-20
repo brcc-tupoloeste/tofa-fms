@@ -1929,10 +1929,16 @@ button.danger{
   </div>
   <hr style="border:0;border-top:1px solid #d7e8da;margin:18px 0">
   <div class="form-actions-row">
-    <button type="button" class="alt" onclick="loadAttendanceHistory()">📚 Attendance History</button>
-    <button type="button" class="print-btn" onclick="loadAttendanceSummary()">📊 Overall Summary</button>
+    <button type="button" class="alt" onclick="toggleAttendanceHistory()">📚 Attendance History</button>
+    <button type="button" class="print-btn" onclick="toggleAttendanceSummary()">📊 Overall Summary</button>
+    <button type="button" onclick="toggleAnnualAttendance()">📅 Annual Summary</button>
   </div>
-  <div id="attendanceHistoryWrap" class="hidden"><h4>Attendance History</h4><div id="attendanceHistory" class="table-wrap"></div></div>
+
+  <div id="attendanceHistoryWrap" class="hidden">
+    <h4>📚 Attendance History</h4>
+    <div id="attendanceHistory" class="table-wrap"></div>
+  </div>
+
   <div id="attendanceSummaryWrap" class="hidden">
     <div id="attendanceSummaryPrintArea">
       <div class="attendance-print-header"><div class="attendance-print-org">TUPOL OESTE FARMERS ASSOCIATION</div><div class="attendance-print-title">ATTENDANCE SUMMARY</div><div id="attendanceSummaryMeta" class="attendance-print-meta"></div></div>
@@ -1940,24 +1946,27 @@ button.danger{
     </div>
     <button type="button" class="print-btn attendance-no-print" onclick="printAttendanceSummary()">🖨 PRINT ATTENDANCE SUMMARY</button>
   </div>
-  <hr style="border:0;border-top:1px solid #d7e8da;margin:18px 0">
-  <h4>📅 Annual Attendance Summary</h4>
-  <div class="attendance-annual-controls">
-    <div><label for="attendanceAnnualYear">Year</label><select id="attendanceAnnualYear"></select></div>
-    <button type="button" onclick="loadAnnualAttendanceSummary()">VIEW ANNUAL SUMMARY</button>
-  </div>
-  <div id="annualAttendanceWrap" class="hidden">
-    <div id="annualAttendancePrintArea">
-      <div class="attendance-print-header"><div class="attendance-print-org">TUPOL OESTE FARMERS ASSOCIATION</div><div class="attendance-print-title" id="annualAttendanceTitle">ANNUAL ATTENDANCE SUMMARY</div><div id="annualAttendanceMeta" class="attendance-print-meta"></div></div>
-      <div class="attendance-summary-grid">
-        <div class="attendance-kpi"><b>Total Meetings</b><span id="annualTotalMeetings">0</span></div>
-        <div class="attendance-kpi"><b>Total Present</b><span id="annualTotalPresent">0</span></div>
-        <div class="attendance-kpi"><b>Total Absent</b><span id="annualTotalAbsent">0</span></div>
-        <div class="attendance-kpi"><b>Total Excused</b><span id="annualTotalExcused">0</span></div>
-      </div>
-      <div id="annualAttendanceTable" class="table-wrap"></div>
+
+  <div id="annualAttendanceSection" class="hidden">
+    <hr style="border:0;border-top:1px solid #d7e8da;margin:18px 0">
+    <h4>📅 Annual Attendance Summary</h4>
+    <div class="attendance-annual-controls">
+      <div><label for="attendanceAnnualYear">Year</label><select id="attendanceAnnualYear"></select></div>
+      <button type="button" onclick="loadAnnualAttendanceSummary()">VIEW ANNUAL SUMMARY</button>
     </div>
-    <button type="button" class="print-btn attendance-no-print" onclick="printAnnualAttendanceSummary()">🖨 PRINT ANNUAL ATTENDANCE SUMMARY</button>
+    <div id="annualAttendanceWrap" class="hidden">
+      <div id="annualAttendancePrintArea">
+        <div class="attendance-print-header"><div class="attendance-print-org">TUPOL OESTE FARMERS ASSOCIATION</div><div class="attendance-print-title" id="annualAttendanceTitle">ANNUAL ATTENDANCE SUMMARY</div><div id="annualAttendanceMeta" class="attendance-print-meta"></div></div>
+        <div class="attendance-summary-grid">
+          <div class="attendance-kpi"><b>Total Meetings</b><span id="annualTotalMeetings">0</span></div>
+          <div class="attendance-kpi"><b>Total Present</b><span id="annualTotalPresent">0</span></div>
+          <div class="attendance-kpi"><b>Total Absent</b><span id="annualTotalAbsent">0</span></div>
+          <div class="attendance-kpi"><b>Total Excused</b><span id="annualTotalExcused">0</span></div>
+        </div>
+        <div id="annualAttendanceTable" class="table-wrap"></div>
+      </div>
+      <button type="button" class="print-btn attendance-no-print" onclick="printAnnualAttendanceSummary()">🖨 PRINT ANNUAL ATTENDANCE SUMMARY</button>
+    </div>
   </div>
 </div>
 
@@ -9007,6 +9016,40 @@ async function saveAttendance(){
     msg('attendanceMsg',(r&&r.message)||'Attendance saved successfully.','ok');
     await loadAttendanceMembers();
   }catch(e){fail(e,'attendanceMsg');}
+}
+
+function hideAttendanceLowerSections(exceptId){
+  ['attendanceHistoryWrap','attendanceSummaryWrap','annualAttendanceSection'].forEach(function(id){
+    if(id!==exceptId){const el=document.getElementById(id);if(el)el.classList.add('hidden');}
+  });
+  if(exceptId!=='annualAttendanceSection'){
+    const aw=document.getElementById('annualAttendanceWrap');if(aw)aw.classList.add('hidden');
+  }
+}
+
+function toggleAttendanceHistory(){
+  const el=document.getElementById('attendanceHistoryWrap');
+  if(!el)return;
+  if(!el.classList.contains('hidden')){el.classList.add('hidden');return;}
+  hideAttendanceLowerSections('attendanceHistoryWrap');
+  loadAttendanceHistory();
+}
+
+function toggleAttendanceSummary(){
+  const el=document.getElementById('attendanceSummaryWrap');
+  if(!el)return;
+  if(!el.classList.contains('hidden')){el.classList.add('hidden');return;}
+  hideAttendanceLowerSections('attendanceSummaryWrap');
+  loadAttendanceSummary();
+}
+
+function toggleAnnualAttendance(){
+  const el=document.getElementById('annualAttendanceSection');
+  if(!el)return;
+  if(!el.classList.contains('hidden')){el.classList.add('hidden');const w=document.getElementById('annualAttendanceWrap');if(w)w.classList.add('hidden');return;}
+  hideAttendanceLowerSections('annualAttendanceSection');
+  el.classList.remove('hidden');
+  el.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 async function loadAttendanceHistory(){
