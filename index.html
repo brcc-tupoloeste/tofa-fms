@@ -6339,10 +6339,10 @@ function printMemberList(){
       #androidMemberListPrintArea{display:none}
       @media print{
         @page{size:A4 portrait;margin:12mm}
-        body *{visibility:hidden !important}
-        #androidMemberListPrintArea,
-        #androidMemberListPrintArea *{visibility:visible !important}
-        #androidMemberListPrintArea{
+        body.print-member-list-android *{visibility:hidden !important}
+        body.print-member-list-android #androidMemberListPrintArea,
+        body.print-member-list-android #androidMemberListPrintArea *{visibility:visible !important}
+        body.print-member-list-android #androidMemberListPrintArea{
           display:block !important;
           position:absolute;
           left:0;
@@ -6370,9 +6370,23 @@ function printMemberList(){
       }`;
     document.head.appendChild(printStyle);
 
+    document.body.classList.add('print-member-list-android');
+
     setTimeout(function(){
       window.AndroidPrint.print();
+
+      /*
+       * IMPORTANT:
+       * Remove Member List print mode after the Android print job
+       * has been created. This prevents later reports such as
+       * Monthly Report, Annual Summary and Uncollected Amount
+       * from being forced to print the Member List.
+       */
+      setTimeout(function(){
+        document.body.classList.remove('print-member-list-android');
+      },1500);
     },150);
+
     return;
   }
 
