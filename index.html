@@ -6305,6 +6305,78 @@ function printMemberList(){
     year:'numeric', month:'long', day:'numeric'
   });
 
+  const printBody = `
+    <div class="head">
+      <h1>TUPOL OESTE FARMERS ASSOCIATION</h1>
+      <h2>MEMBER LIST</h2>
+      <p>Barangay Tupol Oeste, Cabatuan, Iloilo</p>
+      <p>As of ${dateText}</p>
+    </div>
+    <table>
+      <thead>
+        <tr><th>No.</th><th>Full Name</th><th>Address / Sitio</th><th>Contact</th><th>Status</th></tr>
+      </thead>
+      <tbody>${printedRows}</tbody>
+    </table>
+    <div class="summary">TOTAL MEMBERS: ${rows.length}</div>`;
+
+  /* Android APK: print inside the current WebView so it never opens Chrome. */
+  if(window.AndroidPrint && typeof window.AndroidPrint.print === 'function'){
+    let printArea = document.getElementById('androidMemberListPrintArea');
+    if(printArea) printArea.remove();
+
+    printArea = document.createElement('div');
+    printArea.id = 'androidMemberListPrintArea';
+    printArea.innerHTML = printBody;
+    document.body.appendChild(printArea);
+
+    let printStyle = document.getElementById('androidMemberListPrintStyle');
+    if(printStyle) printStyle.remove();
+
+    printStyle = document.createElement('style');
+    printStyle.id = 'androidMemberListPrintStyle';
+    printStyle.textContent = `
+      #androidMemberListPrintArea{display:none}
+      @media print{
+        @page{size:A4 portrait;margin:12mm}
+        body *{visibility:hidden !important}
+        #androidMemberListPrintArea,
+        #androidMemberListPrintArea *{visibility:visible !important}
+        #androidMemberListPrintArea{
+          display:block !important;
+          position:absolute;
+          left:0;
+          top:0;
+          width:100%;
+          color:#111;
+          background:#fff;
+          font-family:Arial,sans-serif;
+          font-size:11px;
+        }
+        #androidMemberListPrintArea .head{text-align:center;margin-bottom:12px}
+        #androidMemberListPrintArea .head h1{font-size:18px;margin:0 0 3px}
+        #androidMemberListPrintArea .head h2{font-size:15px;margin:0 0 3px}
+        #androidMemberListPrintArea .head p{margin:2px 0}
+        #androidMemberListPrintArea table{width:100%;border-collapse:collapse}
+        #androidMemberListPrintArea th,
+        #androidMemberListPrintArea td{border:1px solid #222;padding:6px 5px;vertical-align:top}
+        #androidMemberListPrintArea th{font-weight:700;text-align:center;background:#eee}
+        #androidMemberListPrintArea td:first-child{text-align:center;width:7%}
+        #androidMemberListPrintArea td:nth-child(2){width:28%}
+        #androidMemberListPrintArea td:nth-child(3){width:29%}
+        #androidMemberListPrintArea td:nth-child(4){width:20%}
+        #androidMemberListPrintArea td:nth-child(5){text-align:center;width:16%}
+        #androidMemberListPrintArea .summary{margin-top:8px;font-weight:700}
+      }`;
+    document.head.appendChild(printStyle);
+
+    setTimeout(function(){
+      window.AndroidPrint.print();
+    },150);
+    return;
+  }
+
+  /* Normal browser: retain the existing popup print behavior. */
   const w = window.open('', '_blank', 'width=1000,height=750');
   if(!w){
     alert('Please allow pop-ups to print the Member List.');
@@ -6334,23 +6406,10 @@ function printMemberList(){
   td:nth-child(4){width:20%}
   td:nth-child(5){text-align:center;width:16%}
   .summary{margin-top:8px;font-weight:700}
-  @media print{.no-print{display:none}}
 </style>
 </head>
 <body>
-  <div class="head">
-    <h1>TUPOL OESTE FARMERS ASSOCIATION</h1>
-    <h2>MEMBER LIST</h2>
-    <p>Barangay Tupol Oeste, Cabatuan, Iloilo</p>
-    <p>As of ${dateText}</p>
-  </div>
-  <table>
-    <thead>
-      <tr><th>No.</th><th>Full Name</th><th>Address / Sitio</th><th>Contact</th><th>Status</th></tr>
-    </thead>
-    <tbody>${printedRows}</tbody>
-  </table>
-  <div class="summary">TOTAL MEMBERS: ${rows.length}</div>
+${printBody}
 <script>
 window.onload=function(){ window.print(); };
 <\/script>
