@@ -1122,7 +1122,7 @@ button.danger{
 }
 
 
-/* =========================================================
+/* =========================================================\n   ATTENDANCE MANAGEMENT\n========================================================= */\n\nlet attendanceMembers = [];\n\nfunction attendanceToday_(){\n  const d = new Date();\n  const y = d.getFullYear();\n  const m = String(d.getMonth()+1).padStart(2,'0');\n  const day = String(d.getDate()).padStart(2,'0');\n  return y + '-' + m + '-' + day;\n}\n\nasync function openAttendance(){\n  hideAppPanels();\n  document.getElementById('attendancePanel').classList.remove('hidden');\n  document.getElementById('searchTopBar').classList.remove('hidden');\n  if(!document.getElementById('attendanceDate').value){\n    document.getElementById('attendanceDate').value = attendanceToday_();\n  }\n  attendanceMembers = [];\n  document.getElementById('attendanceEntrySection').classList.add('hidden');\n  document.getElementById('attendanceMemberList').innerHTML = '';\n  document.getElementById('attendanceSearch').value = '';\n  msg('attendanceMsg','','');\n  window.scrollTo({top:0,behavior:'smooth'});\n}\n\nfunction normalizeAttendanceMember_(r){\n  r = r || {};\n  const status = String(r.attendanceStatus || r.attendance || r.statusAttendance || r.recordStatus || '').trim().toUpperCase();\n  return {\n    memberId:String(r.memberId || r.id || '').trim(),\n    name:String(r.name || r.memberName || r.fullName || '').trim(),\n    address:String(r.address || r.sitio || '').trim(),\n    memberStatus:String(r.memberStatus || r.membershipStatus || '').trim(),\n    attendanceStatus:['PRESENT','ABSENT','EXCUSED'].includes(status) ? status : 'PRESENT',\n    remarks:String(r.remarks || r.attendanceRemarks || '').trim()\n  };\n}\n\nasync function loadAttendanceMembers(){\n  const meetingDate = String(document.getElementById('attendanceDate').value || '').trim();\n  const activity = String(document.getElementById('attendanceActivity').value || '').trim();\n  if(!meetingDate){ msg('attendanceMsg','Please select the attendance date.','error'); return; }\n  if(!activity){ msg('attendanceMsg','Please enter the activity or meeting.','error'); return; }\n  try{\n    const r = await api('getAttendanceMembers',{token:token,meetingDate:meetingDate,activity:activity},'Loading Attendance...','Reading member records');\n    const rows = Array.isArray(r) ? r : ((r && (r.members || r.records || r.data)) || []);\n    attendanceMembers = rows.map(normalizeAttendanceMember_).filter(function(x){ return x.memberId || x.name; });\n    document.getElementById('attendanceEntrySection').classList.remove('hidden');\n    document.getElementById('attendanceSearch').value = '';\n    renderAttendanceMembers();\n    msg('attendanceMsg',attendanceMembers.length ? attendanceMembers.length + ' member(s) loaded.' : 'No members found.','ok');\n  }catch(e){\n    attendanceMembers=[];\n    document.getElementById('attendanceEntrySection').classList.add('hidden');\n    fail(e,'attendanceMsg');\n  }\n}\n\nfunction renderAttendanceMembers(){\n  const box = document.getElementById('attendanceMemberList');\n  const q = String(document.getElementById('attendanceSearch').value || '').trim().toLowerCase();\n  const visible = attendanceMembers.map(function(r,index){return {r:r,index:index};}).filter(function(x){\n    return !q || (x.r.name + ' ' + x.r.memberId + ' ' + x.r.address).toLowerCase().includes(q);\n  });\n  if(!visible.length){ box.innerHTML='<div class="panel-note" style="padding:12px">No matching members.</div>'; updateAttendanceSummary(); return; }\n  box.innerHTML = visible.map(function(x){\n    const r=x.r, i=x.index;\n    const meta=[r.memberId,r.address].filter(Boolean).join(' • ');\n    return '<div class="attendance-item">' +\n      '<div class="attendance-member-name">' + esc(r.name || r.memberId) + '</div>' +\n      '<div class="attendance-member-meta">' + esc(meta) + '</div>' +\n      '<div class="attendance-status-row">' +\n        attendanceRadio_(i,'PRESENT','Present',r.attendanceStatus) +\n        attendanceRadio_(i,'ABSENT','Absent',r.attendanceStatus) +\n        attendanceRadio_(i,'EXCUSED','Excused',r.attendanceStatus) +\n      '</div>' +\n      '<input class="attendance-remarks" type="text" maxlength="200" placeholder="Remarks (optional)" value="' + esc(r.remarks || '') + '" oninput="setAttendanceRemarks(' + i + ',this.value)">' +\n    '</div>';\n  }).join('');\n  updateAttendanceSummary();\n}\n\nfunction attendanceRadio_(index,value,label,current){\n  return '<label class="attendance-status-option"><input type="radio" name="attendanceStatus_' + index + '" value="' + value + '" ' + (current===value?'checked':'') + ' onchange="setAttendanceStatus(' + index + ',\'' + value + '\')">' + label + '</label>';\n}\n\nfunction setAttendanceStatus(index,status){\n  if(attendanceMembers[index]) attendanceMembers[index].attendanceStatus=status;\n  updateAttendanceSummary();\n}\n\nfunction setAttendanceRemarks(index,value){\n  if(attendanceMembers[index]) attendanceMembers[index].remarks=String(value || '');\n}\n\nfunction markAllAttendance(status){\n  attendanceMembers.forEach(function(r){r.attendanceStatus=status;});\n  renderAttendanceMembers();\n}\n\nfunction updateAttendanceSummary(){\n  const counts={PRESENT:0,ABSENT:0,EXCUSED:0};\n  attendanceMembers.forEach(function(r){ if(counts[r.attendanceStatus] !== undefined) counts[r.attendanceStatus]++; });\n  document.getElementById('attendanceTotal').textContent=attendanceMembers.length;\n  document.getElementById('attendancePresent').textContent=counts.PRESENT;\n  document.getElementById('attendanceAbsent').textContent=counts.ABSENT;\n  document.getElementById('attendanceExcused').textContent=counts.EXCUSED;\n}\n\nasync function saveAttendanceRecords(){\n  const meetingDate=String(document.getElementById('attendanceDate').value || '').trim();\n  const activity=String(document.getElementById('attendanceActivity').value || '').trim();\n  if(!meetingDate || !activity){ msg('attendanceMsg','Date and Activity / Meeting are required.','error'); return; }\n  if(!attendanceMembers.length){ msg('attendanceMsg','Load the member list first.','error'); return; }\n  const records=attendanceMembers.map(function(r){\n    return {memberId:r.memberId,memberName:r.name,name:r.name,status:r.attendanceStatus,attendanceStatus:r.attendanceStatus,remarks:r.remarks || ''};\n  });\n  const confirmed=window.confirm('Save attendance for ' + activity + ' on ' + meetingDate + '?');\n  if(!confirmed) return;\n  try{\n    const result=await api('saveAttendance',{token:token,attendanceData:{meetingDate:meetingDate,date:meetingDate,activity:activity,records:records,attendance:records}},'Saving Attendance...','Updating attendance records');\n    msg('attendanceMsg',(result && result.message) ? result.message : 'Attendance saved successfully.','ok');\n    await loadAttendanceMembers();\n  }catch(e){ fail(e,'attendanceMsg'); }\n}\n\nasync function toggleAttendanceHistory(){\n  const section=document.getElementById('attendanceHistorySection');\n  const btn=document.getElementById('attendanceHistoryBtn');\n  if(!section.classList.contains('hidden')){ section.classList.add('hidden'); btn.textContent='🕘 View Attendance History'; return; }\n  section.classList.remove('hidden');\n  btn.textContent='🕘 Hide Attendance History';\n  await loadAttendanceHistory();\n}\n\nasync function loadAttendanceHistory(){\n  const box=document.getElementById('attendanceHistoryContent');\n  box.innerHTML='<div class="panel-note" style="padding:12px">Loading attendance history...</div>';\n  try{\n    const r=await api('getAttendanceHistory',{token:token},'Loading Attendance History...','Reading saved attendance records');\n    const rows=Array.isArray(r) ? r : ((r && (r.records || r.history || r.data)) || []);\n    if(!rows.length){ box.innerHTML='<div class="panel-note" style="padding:12px">No attendance history found.</div>'; return; }\n    let html='<table class="attendance-history-table"><thead><tr><th>Date</th><th>Activity / Meeting</th><th>Present</th><th>Absent</th><th>Excused</th><th>Total</th></tr></thead><tbody>';\n    rows.forEach(function(x){\n      const present=Number(x.present || x.presentCount || 0);\n      const absent=Number(x.absent || x.absentCount || 0);\n      const excused=Number(x.excused || x.excusedCount || 0);\n      const total=Number(x.total || x.totalMembers || (present+absent+excused));\n      html+='<tr><td>'+esc(x.date || x.meetingDate || '')+'</td><td>'+esc(x.activity || x.meeting || x.event || '')+'</td><td>'+present+'</td><td>'+absent+'</td><td>'+excused+'</td><td>'+total+'</td></tr>';\n    });\n    html+='</tbody></table>'; box.innerHTML=html;\n  }catch(e){ box.innerHTML='<div class="msg error">'+esc(e && e.message ? e.message : String(e))+'</div>'; }\n}\n\n\n/* =========================================================
    TEXT ANNOUNCEMENT
 ========================================================= */
 .announcement-box{
@@ -1500,6 +1500,31 @@ button.danger{
   body.print-ptr-report .ptr-report-status{font-size:9pt!important;padding:6pt!important}
 }
 
+
+/* =========================================================
+   ATTENDANCE MANAGEMENT
+========================================================= */
+.attendance-box{border:1px solid #d7e8da;border-radius:12px;padding:12px;background:#f7fcf8;margin-top:10px}
+.attendance-controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.attendance-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}
+.attendance-toolbar input[type="search"]{flex:1;min-width:180px}
+.attendance-toolbar button{width:auto!important;margin:0!important;padding:9px 11px!important;font-size:11px!important}
+.attendance-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:10px 0}
+.attendance-kpi{border:1px solid #d7e8da;border-radius:9px;padding:8px;background:#fff;text-align:center}
+.attendance-kpi b{display:block;font-size:9px;color:#4b7256}
+.attendance-kpi span{display:block;font-size:14px;font-weight:900;color:#14532d;margin-top:3px}
+.attendance-list{border:1px solid #d7e8da;border-radius:10px;background:#fff;overflow:hidden}
+.attendance-item{padding:10px;border-bottom:1px solid #e5eee7}
+.attendance-item:last-child{border-bottom:0}
+.attendance-member-name{font-size:13px;font-weight:900;color:#14532d}
+.attendance-member-meta{font-size:10px;color:#64748b;margin-top:2px}
+.attendance-status-row{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:8px}
+.attendance-status-option{display:flex;align-items:center;justify-content:center;gap:5px;margin:0;padding:7px 4px;border:1px solid #d7e8da;border-radius:8px;background:#f8fafc;font-size:10px;cursor:pointer}
+.attendance-status-option input{width:auto;margin:0}
+.attendance-remarks{margin-top:7px!important;padding:8px!important;font-size:11px!important}
+.attendance-history-table{min-width:620px}
+@media(max-width:619px){.attendance-controls{grid-template-columns:1fr}.attendance-summary{grid-template-columns:repeat(2,1fr)}.attendance-toolbar{display:grid;grid-template-columns:1fr}.attendance-toolbar button{width:100%!important}}
+
 </style>
 
 </head>
@@ -1815,6 +1840,12 @@ button.danger{
       📢 Text Announcement
     </button>
 
+    <button
+      class="quick-btn"
+      onclick="openAttendance()">
+      📋 Attendance
+    </button>
+
 
 
   </div>
@@ -1919,6 +1950,61 @@ button.danger{
 
   <div id="announcementMsg"></div>
 
+</div>
+
+<!-- =======================================================
+     ATTENDANCE MANAGEMENT
+======================================================= -->
+<div id="attendancePanel" class="card hidden">
+  <div class="panel-nav">
+    <button type="button" class="back-dashboard" onclick="backToDashboard()">← Back to Dashboard</button>
+  </div>
+
+  <h3 class="panel-title">📋 Attendance</h3>
+  <div class="panel-note">Select the date and activity, load the members, mark attendance, then save.</div>
+
+  <div class="attendance-box">
+    <div class="attendance-controls">
+      <div>
+        <label for="attendanceDate">Date *</label>
+        <input id="attendanceDate" type="date">
+      </div>
+      <div>
+        <label for="attendanceActivity">Activity / Meeting *</label>
+        <input id="attendanceActivity" type="text" maxlength="120" placeholder="e.g. Monthly Meeting">
+      </div>
+    </div>
+
+    <button type="button" onclick="loadAttendanceMembers()">👥 LOAD MEMBERS</button>
+    <div id="attendanceMsg"></div>
+  </div>
+
+  <div id="attendanceEntrySection" class="hidden">
+    <div class="attendance-summary">
+      <div class="attendance-kpi"><b>TOTAL</b><span id="attendanceTotal">0</span></div>
+      <div class="attendance-kpi"><b>PRESENT</b><span id="attendancePresent">0</span></div>
+      <div class="attendance-kpi"><b>ABSENT</b><span id="attendanceAbsent">0</span></div>
+      <div class="attendance-kpi"><b>EXCUSED</b><span id="attendanceExcused">0</span></div>
+    </div>
+
+    <div class="attendance-toolbar">
+      <input id="attendanceSearch" type="search" placeholder="Search member" oninput="renderAttendanceMembers()">
+      <button type="button" class="alt" onclick="markAllAttendance('PRESENT')">Mark All Present</button>
+      <button type="button" class="alt" onclick="markAllAttendance('ABSENT')">Mark All Absent</button>
+    </div>
+
+    <div id="attendanceMemberList" class="attendance-list"></div>
+
+    <button type="button" onclick="saveAttendanceRecords()">💾 SAVE ATTENDANCE</button>
+  </div>
+
+  <div class="attendance-box">
+    <button id="attendanceHistoryBtn" type="button" class="alt" onclick="toggleAttendanceHistory()">🕘 View Attendance History</button>
+    <div id="attendanceHistorySection" class="hidden">
+      <div class="panel-note" style="margin-top:10px">Saved attendance sessions</div>
+      <div id="attendanceHistoryContent" class="table-wrap"></div>
+    </div>
+  </div>
 </div>
 
 <!-- =======================================================
@@ -5731,7 +5817,8 @@ function hideAppPanels(){
     'memberManagementMenu',
     'reportsMenu',
     'cashBankMenu',
-    'textAnnouncementPanel'
+    'textAnnouncementPanel',
+    'attendancePanel'
   ].forEach(function(id){
     const el = document.getElementById(id);
     if(el) el.classList.add('hidden');
