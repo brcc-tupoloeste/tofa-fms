@@ -1122,7 +1122,7 @@ button.danger{
 }
 
 
-/* =========================================================\n   ATTENDANCE MANAGEMENT\n========================================================= */\n\nlet attendanceMembers = [];\n\nfunction attendanceToday_(){\n  const d = new Date();\n  const y = d.getFullYear();\n  const m = String(d.getMonth()+1).padStart(2,'0');\n  const day = String(d.getDate()).padStart(2,'0');\n  return y + '-' + m + '-' + day;\n}\n\nasync function openAttendance(){\n  hideAppPanels();\n  document.getElementById('attendancePanel').classList.remove('hidden');\n  document.getElementById('searchTopBar').classList.remove('hidden');\n  if(!document.getElementById('attendanceDate').value){\n    document.getElementById('attendanceDate').value = attendanceToday_();\n  }\n  attendanceMembers = [];\n  document.getElementById('attendanceEntrySection').classList.add('hidden');\n  document.getElementById('attendanceMemberList').innerHTML = '';\n  document.getElementById('attendanceSearch').value = '';\n  msg('attendanceMsg','','');\n  window.scrollTo({top:0,behavior:'smooth'});\n}\n\nfunction normalizeAttendanceMember_(r){\n  r = r || {};\n  const status = String(r.attendanceStatus || r.attendance || r.statusAttendance || r.recordStatus || '').trim().toUpperCase();\n  return {\n    memberId:String(r.memberId || r.id || '').trim(),\n    name:String(r.name || r.memberName || r.fullName || '').trim(),\n    address:String(r.address || r.sitio || '').trim(),\n    memberStatus:String(r.memberStatus || r.membershipStatus || '').trim(),\n    attendanceStatus:['PRESENT','ABSENT','EXCUSED'].includes(status) ? status : 'PRESENT',\n    remarks:String(r.remarks || r.attendanceRemarks || '').trim()\n  };\n}\n\nasync function loadAttendanceMembers(){\n  const meetingDate = String(document.getElementById('attendanceDate').value || '').trim();\n  const activity = String(document.getElementById('attendanceActivity').value || '').trim();\n  if(!meetingDate){ msg('attendanceMsg','Please select the attendance date.','error'); return; }\n  if(!activity){ msg('attendanceMsg','Please enter the activity or meeting.','error'); return; }\n  try{\n    const r = await api('getAttendanceMembers',{token:token,meetingDate:meetingDate,activity:activity},'Loading Attendance...','Reading member records');\n    const rows = Array.isArray(r) ? r : ((r && (r.members || r.records || r.data)) || []);\n    attendanceMembers = rows.map(normalizeAttendanceMember_).filter(function(x){ return x.memberId || x.name; });\n    document.getElementById('attendanceEntrySection').classList.remove('hidden');\n    document.getElementById('attendanceSearch').value = '';\n    renderAttendanceMembers();\n    msg('attendanceMsg',attendanceMembers.length ? attendanceMembers.length + ' member(s) loaded.' : 'No members found.','ok');\n  }catch(e){\n    attendanceMembers=[];\n    document.getElementById('attendanceEntrySection').classList.add('hidden');\n    fail(e,'attendanceMsg');\n  }\n}\n\nfunction renderAttendanceMembers(){\n  const box = document.getElementById('attendanceMemberList');\n  const q = String(document.getElementById('attendanceSearch').value || '').trim().toLowerCase();\n  const visible = attendanceMembers.map(function(r,index){return {r:r,index:index};}).filter(function(x){\n    return !q || (x.r.name + ' ' + x.r.memberId + ' ' + x.r.address).toLowerCase().includes(q);\n  });\n  if(!visible.length){ box.innerHTML='<div class="panel-note" style="padding:12px">No matching members.</div>'; updateAttendanceSummary(); return; }\n  box.innerHTML = visible.map(function(x){\n    const r=x.r, i=x.index;\n    const meta=[r.memberId,r.address].filter(Boolean).join(' • ');\n    return '<div class="attendance-item">' +\n      '<div class="attendance-member-name">' + esc(r.name || r.memberId) + '</div>' +\n      '<div class="attendance-member-meta">' + esc(meta) + '</div>' +\n      '<div class="attendance-status-row">' +\n        attendanceRadio_(i,'PRESENT','Present',r.attendanceStatus) +\n        attendanceRadio_(i,'ABSENT','Absent',r.attendanceStatus) +\n        attendanceRadio_(i,'EXCUSED','Excused',r.attendanceStatus) +\n      '</div>' +\n      '<input class="attendance-remarks" type="text" maxlength="200" placeholder="Remarks (optional)" value="' + esc(r.remarks || '') + '" oninput="setAttendanceRemarks(' + i + ',this.value)">' +\n    '</div>';\n  }).join('');\n  updateAttendanceSummary();\n}\n\nfunction attendanceRadio_(index,value,label,current){\n  return '<label class="attendance-status-option"><input type="radio" name="attendanceStatus_' + index + '" value="' + value + '" ' + (current===value?'checked':'') + ' onchange="setAttendanceStatus(' + index + ',\'' + value + '\')">' + label + '</label>';\n}\n\nfunction setAttendanceStatus(index,status){\n  if(attendanceMembers[index]) attendanceMembers[index].attendanceStatus=status;\n  updateAttendanceSummary();\n}\n\nfunction setAttendanceRemarks(index,value){\n  if(attendanceMembers[index]) attendanceMembers[index].remarks=String(value || '');\n}\n\nfunction markAllAttendance(status){\n  attendanceMembers.forEach(function(r){r.attendanceStatus=status;});\n  renderAttendanceMembers();\n}\n\nfunction updateAttendanceSummary(){\n  const counts={PRESENT:0,ABSENT:0,EXCUSED:0};\n  attendanceMembers.forEach(function(r){ if(counts[r.attendanceStatus] !== undefined) counts[r.attendanceStatus]++; });\n  document.getElementById('attendanceTotal').textContent=attendanceMembers.length;\n  document.getElementById('attendancePresent').textContent=counts.PRESENT;\n  document.getElementById('attendanceAbsent').textContent=counts.ABSENT;\n  document.getElementById('attendanceExcused').textContent=counts.EXCUSED;\n}\n\nasync function saveAttendanceRecords(){\n  const meetingDate=String(document.getElementById('attendanceDate').value || '').trim();\n  const activity=String(document.getElementById('attendanceActivity').value || '').trim();\n  if(!meetingDate || !activity){ msg('attendanceMsg','Date and Activity / Meeting are required.','error'); return; }\n  if(!attendanceMembers.length){ msg('attendanceMsg','Load the member list first.','error'); return; }\n  const records=attendanceMembers.map(function(r){\n    return {memberId:r.memberId,memberName:r.name,name:r.name,status:r.attendanceStatus,attendanceStatus:r.attendanceStatus,remarks:r.remarks || ''};\n  });\n  const confirmed=window.confirm('Save attendance for ' + activity + ' on ' + meetingDate + '?');\n  if(!confirmed) return;\n  try{\n    const result=await api('saveAttendance',{token:token,attendanceData:{meetingDate:meetingDate,date:meetingDate,activity:activity,records:records,attendance:records}},'Saving Attendance...','Updating attendance records');\n    msg('attendanceMsg',(result && result.message) ? result.message : 'Attendance saved successfully.','ok');\n    await loadAttendanceMembers();\n  }catch(e){ fail(e,'attendanceMsg'); }\n}\n\nasync function toggleAttendanceHistory(){\n  const section=document.getElementById('attendanceHistorySection');\n  const btn=document.getElementById('attendanceHistoryBtn');\n  if(!section.classList.contains('hidden')){ section.classList.add('hidden'); btn.textContent='🕘 View Attendance History'; return; }\n  section.classList.remove('hidden');\n  btn.textContent='🕘 Hide Attendance History';\n  await loadAttendanceHistory();\n}\n\nasync function loadAttendanceHistory(){\n  const box=document.getElementById('attendanceHistoryContent');\n  box.innerHTML='<div class="panel-note" style="padding:12px">Loading attendance history...</div>';\n  try{\n    const r=await api('getAttendanceHistory',{token:token},'Loading Attendance History...','Reading saved attendance records');\n    const rows=Array.isArray(r) ? r : ((r && (r.records || r.history || r.data)) || []);\n    if(!rows.length){ box.innerHTML='<div class="panel-note" style="padding:12px">No attendance history found.</div>'; return; }\n    let html='<table class="attendance-history-table"><thead><tr><th>Date</th><th>Activity / Meeting</th><th>Present</th><th>Absent</th><th>Excused</th><th>Total</th></tr></thead><tbody>';\n    rows.forEach(function(x){\n      const present=Number(x.present || x.presentCount || 0);\n      const absent=Number(x.absent || x.absentCount || 0);\n      const excused=Number(x.excused || x.excusedCount || 0);\n      const total=Number(x.total || x.totalMembers || (present+absent+excused));\n      html+='<tr><td>'+esc(x.date || x.meetingDate || '')+'</td><td>'+esc(x.activity || x.meeting || x.event || '')+'</td><td>'+present+'</td><td>'+absent+'</td><td>'+excused+'</td><td>'+total+'</td></tr>';\n    });\n    html+='</tbody></table>'; box.innerHTML=html;\n  }catch(e){ box.innerHTML='<div class="msg error">'+esc(e && e.message ? e.message : String(e))+'</div>'; }\n}\n\n\n/* =========================================================
+/* =========================================================
    TEXT ANNOUNCEMENT
 ========================================================= */
 .announcement-box{
@@ -1502,28 +1502,39 @@ button.danger{
 
 
 /* =========================================================
-   ATTENDANCE MANAGEMENT
+   ATTENDANCE MODULE
 ========================================================= */
-.attendance-box{border:1px solid #d7e8da;border-radius:12px;padding:12px;background:#f7fcf8;margin-top:10px}
 .attendance-controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.attendance-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}
-.attendance-toolbar input[type="search"]{flex:1;min-width:180px}
-.attendance-toolbar button{width:auto!important;margin:0!important;padding:9px 11px!important;font-size:11px!important}
-.attendance-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:10px 0}
-.attendance-kpi{border:1px solid #d7e8da;border-radius:9px;padding:8px;background:#fff;text-align:center}
-.attendance-kpi b{display:block;font-size:9px;color:#4b7256}
-.attendance-kpi span{display:block;font-size:14px;font-weight:900;color:#14532d;margin-top:3px}
-.attendance-list{border:1px solid #d7e8da;border-radius:10px;background:#fff;overflow:hidden}
-.attendance-item{padding:10px;border-bottom:1px solid #e5eee7}
-.attendance-item:last-child{border-bottom:0}
-.attendance-member-name{font-size:13px;font-weight:900;color:#14532d}
-.attendance-member-meta{font-size:10px;color:#64748b;margin-top:2px}
-.attendance-status-row{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:8px}
-.attendance-status-option{display:flex;align-items:center;justify-content:center;gap:5px;margin:0;padding:7px 4px;border:1px solid #d7e8da;border-radius:8px;background:#f8fafc;font-size:10px;cursor:pointer}
-.attendance-status-option input{width:auto;margin:0}
+.attendance-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.attendance-toolbar button{width:auto!important;margin:0!important}
+.attendance-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:10px 0}
+.attendance-kpi{border:1px solid #d7e8da;border-radius:10px;padding:9px;background:#f7fcf8;text-align:center}
+.attendance-kpi b{display:block;font-size:10px;color:#4b7256}
+.attendance-kpi span{display:block;font-size:16px;font-weight:900;color:#14532d;margin-top:3px}
+.attendance-member{border:1px solid #d7e8da;border-radius:11px;padding:10px;margin-top:8px;background:#fff}
+.attendance-member-head{font-size:13px;font-weight:900;color:#14532d;margin-bottom:7px}
+.attendance-status-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.attendance-status-row label{margin:0;padding:7px;border:1px solid #d7e8da;border-radius:8px;font-size:11px;text-align:center;cursor:pointer}
+.attendance-status-row input{width:auto;margin-right:4px}
 .attendance-remarks{margin-top:7px!important;padding:8px!important;font-size:11px!important}
-.attendance-history-table{min-width:620px}
-@media(max-width:619px){.attendance-controls{grid-template-columns:1fr}.attendance-summary{grid-template-columns:repeat(2,1fr)}.attendance-toolbar{display:grid;grid-template-columns:1fr}.attendance-toolbar button{width:100%!important}}
+.attendance-print-header{text-align:center;margin-bottom:12px}
+.attendance-print-org{font-size:16px;font-weight:900;color:#14532d}
+.attendance-print-title{font-size:18px;font-weight:900;margin-top:7px}
+.attendance-print-meta{font-size:11px;color:#64748b;margin-top:3px}
+@media(max-width:619px){.attendance-controls{grid-template-columns:1fr}.attendance-summary-grid{grid-template-columns:repeat(2,1fr)}}
+@media print{
+  body.print-attendance-summary *{visibility:hidden!important}
+  body.print-attendance-summary #attendanceSummaryPrintArea,
+  body.print-attendance-summary #attendanceSummaryPrintArea *{visibility:visible!important}
+  body.print-attendance-summary #attendanceSummaryPrintArea{position:absolute!important;left:0!important;top:0!important;width:100%!important;background:#fff!important;margin:0!important;padding:0!important}
+  body.print-attendance-summary .attendance-no-print{display:none!important}
+  body.print-attendance-summary .table-wrap{overflow:visible!important;border:0!important}
+  body.print-attendance-summary table{min-width:0!important;width:100%!important}
+  body.print-attendance-summary th,body.print-attendance-summary td{font-size:9pt!important;padding:5px!important;color:#000!important}
+  body.print-attendance-summary .attendance-print-org{font-size:13pt!important;color:#000!important}
+  body.print-attendance-summary .attendance-print-title{font-size:14pt!important}
+  body.print-attendance-summary .attendance-print-meta{font-size:9pt!important;color:#000!important}
+}
 
 </style>
 
@@ -1854,6 +1865,53 @@ button.danger{
 </div>
 
 
+
+<!-- =======================================================
+     ATTENDANCE
+======================================================= -->
+<div id="attendancePanel" class="card hidden">
+  <div class="panel-nav"><button type="button" class="back-dashboard" onclick="backToDashboard()">← Back to Dashboard</button></div>
+  <h3 class="panel-title">📋 Attendance</h3>
+  <div class="panel-note">Record attendance by meeting/activity. Reopening the same date and activity loads saved records for editing.</div>
+  <div class="attendance-controls">
+    <div><label for="attendanceDate">Meeting Date</label><input id="attendanceDate" type="date"></div>
+    <div><label for="attendanceActivity">Activity / Meeting</label><input id="attendanceActivity" type="text" placeholder="e.g. Monthly Meeting"></div>
+  </div>
+  <button type="button" onclick="loadAttendanceMembers()">LOAD MEMBERS</button>
+  <div id="attendanceMsg"></div>
+  <div id="attendanceWorkArea" class="hidden">
+    <div class="attendance-summary-grid">
+      <div class="attendance-kpi"><b>Total Members</b><span id="attendanceTotal">0</span></div>
+      <div class="attendance-kpi"><b>Present</b><span id="attendancePresent">0</span></div>
+      <div class="attendance-kpi"><b>Absent</b><span id="attendanceAbsent">0</span></div>
+      <div class="attendance-kpi"><b>Excused</b><span id="attendanceExcused">0</span></div>
+    </div>
+    <div class="attendance-toolbar">
+      <button type="button" onclick="markAllAttendance('PRESENT')">✓ Mark All Present</button>
+      <button type="button" class="alt" onclick="markAllAttendance('ABSENT')">Mark All Absent</button>
+    </div>
+    <div id="attendanceMemberList"></div>
+    <button type="button" onclick="saveAttendance()">💾 SAVE ATTENDANCE</button>
+  </div>
+  <hr style="border:0;border-top:1px solid #d7e8da;margin:18px 0">
+  <div class="form-actions-row">
+    <button type="button" class="alt" onclick="loadAttendanceHistory()">📚 Attendance History</button>
+    <button type="button" class="print-btn" onclick="loadAttendanceSummary()">📊 Attendance Summary</button>
+  </div>
+  <div id="attendanceHistoryWrap" class="hidden"><h4>Attendance History</h4><div id="attendanceHistory" class="table-wrap"></div></div>
+  <div id="attendanceSummaryWrap" class="hidden">
+    <div id="attendanceSummaryPrintArea">
+      <div class="attendance-print-header">
+        <div class="attendance-print-org">TUPOL OESTE FARMERS ASSOCIATION</div>
+        <div class="attendance-print-title">ATTENDANCE SUMMARY</div>
+        <div id="attendanceSummaryMeta" class="attendance-print-meta"></div>
+      </div>
+      <div id="attendanceSummaryTable" class="table-wrap"></div>
+    </div>
+    <button type="button" class="print-btn attendance-no-print" onclick="printAttendanceSummary()">🖨 PRINT ATTENDANCE SUMMARY</button>
+  </div>
+</div>
+
 <!-- =======================================================
      TEXT ANNOUNCEMENT
 ======================================================= -->
@@ -1950,61 +2008,6 @@ button.danger{
 
   <div id="announcementMsg"></div>
 
-</div>
-
-<!-- =======================================================
-     ATTENDANCE MANAGEMENT
-======================================================= -->
-<div id="attendancePanel" class="card hidden">
-  <div class="panel-nav">
-    <button type="button" class="back-dashboard" onclick="backToDashboard()">← Back to Dashboard</button>
-  </div>
-
-  <h3 class="panel-title">📋 Attendance</h3>
-  <div class="panel-note">Select the date and activity, load the members, mark attendance, then save.</div>
-
-  <div class="attendance-box">
-    <div class="attendance-controls">
-      <div>
-        <label for="attendanceDate">Date *</label>
-        <input id="attendanceDate" type="date">
-      </div>
-      <div>
-        <label for="attendanceActivity">Activity / Meeting *</label>
-        <input id="attendanceActivity" type="text" maxlength="120" placeholder="e.g. Monthly Meeting">
-      </div>
-    </div>
-
-    <button type="button" onclick="loadAttendanceMembers()">👥 LOAD MEMBERS</button>
-    <div id="attendanceMsg"></div>
-  </div>
-
-  <div id="attendanceEntrySection" class="hidden">
-    <div class="attendance-summary">
-      <div class="attendance-kpi"><b>TOTAL</b><span id="attendanceTotal">0</span></div>
-      <div class="attendance-kpi"><b>PRESENT</b><span id="attendancePresent">0</span></div>
-      <div class="attendance-kpi"><b>ABSENT</b><span id="attendanceAbsent">0</span></div>
-      <div class="attendance-kpi"><b>EXCUSED</b><span id="attendanceExcused">0</span></div>
-    </div>
-
-    <div class="attendance-toolbar">
-      <input id="attendanceSearch" type="search" placeholder="Search member" oninput="renderAttendanceMembers()">
-      <button type="button" class="alt" onclick="markAllAttendance('PRESENT')">Mark All Present</button>
-      <button type="button" class="alt" onclick="markAllAttendance('ABSENT')">Mark All Absent</button>
-    </div>
-
-    <div id="attendanceMemberList" class="attendance-list"></div>
-
-    <button type="button" onclick="saveAttendanceRecords()">💾 SAVE ATTENDANCE</button>
-  </div>
-
-  <div class="attendance-box">
-    <button id="attendanceHistoryBtn" type="button" class="alt" onclick="toggleAttendanceHistory()">🕘 View Attendance History</button>
-    <div id="attendanceHistorySection" class="hidden">
-      <div class="panel-note" style="margin-top:10px">Saved attendance sessions</div>
-      <div id="attendanceHistoryContent" class="table-wrap"></div>
-    </div>
-  </div>
 </div>
 
 <!-- =======================================================
@@ -8848,6 +8851,111 @@ async function sendTextAnnouncement(){
   }
 }
 
+
+
+/* =========================================================
+   ATTENDANCE MODULE
+========================================================= */
+let attendanceMembers = [];
+
+function openAttendance(){
+  hideAppPanels();
+  document.getElementById('attendancePanel').classList.remove('hidden');
+  document.getElementById('searchTopBar').classList.remove('hidden');
+  if(!document.getElementById('attendanceDate').value){
+    const d=new Date();
+    document.getElementById('attendanceDate').value=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+  msg('attendanceMsg','');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+async function loadAttendanceMembers(){
+  const meetingDate=document.getElementById('attendanceDate').value;
+  const activity=document.getElementById('attendanceActivity').value.trim();
+  if(!meetingDate){msg('attendanceMsg','Please select the Meeting Date.','error');return;}
+  if(!activity){msg('attendanceMsg','Please enter the Activity / Meeting.','error');return;}
+  try{
+    const r=await api('getAttendanceMembers',{token:token,meetingDate:meetingDate,activity:activity},'Loading Attendance...','Retrieving member list');
+    attendanceMembers=Array.isArray(r)?r:((r&&r.records)||[]);
+    renderAttendanceMembers();
+    document.getElementById('attendanceWorkArea').classList.remove('hidden');
+    msg('attendanceMsg',attendanceMembers.length+' members loaded.','ok');
+  }catch(e){fail(e,'attendanceMsg');}
+}
+
+function renderAttendanceMembers(){
+  const box=document.getElementById('attendanceMemberList');
+  if(!attendanceMembers.length){box.innerHTML='<div class="panel-note">No members found.</div>';updateAttendanceCounts();return;}
+  box.innerHTML=attendanceMembers.map(function(m,i){
+    const st=String(m.status||'').toUpperCase();
+    return '<div class="attendance-member">'+
+      '<div class="attendance-member-head">'+(i+1)+'. '+esc(m.memberName||'')+'</div>'+
+      '<div class="attendance-status-row">'+
+      ['PRESENT','ABSENT','EXCUSED'].map(function(x){return '<label><input type="radio" name="att_'+i+'" value="'+x+'" '+(st===x?'checked':'')+' onchange="updateAttendanceCounts()"> '+(x.charAt(0)+x.slice(1).toLowerCase())+'</label>';}).join('')+
+      '</div><input class="attendance-remarks" id="attRemarks_'+i+'" type="text" placeholder="Remarks (optional)" value="'+esc(m.remarks||'')+'"></div>';
+  }).join('');
+  updateAttendanceCounts();
+}
+
+function markAllAttendance(status){
+  attendanceMembers.forEach(function(_,i){const el=document.querySelector('input[name="att_'+i+'"][value="'+status+'"]');if(el)el.checked=true;});
+  updateAttendanceCounts();
+}
+
+function updateAttendanceCounts(){
+  let present=0,absent=0,excused=0;
+  attendanceMembers.forEach(function(_,i){const el=document.querySelector('input[name="att_'+i+'"]:checked');const st=el?el.value:'';if(st==='PRESENT')present++;else if(st==='ABSENT')absent++;else if(st==='EXCUSED')excused++;});
+  set('attendanceTotal',attendanceMembers.length);set('attendancePresent',present);set('attendanceAbsent',absent);set('attendanceExcused',excused);
+}
+
+async function saveAttendance(){
+  const meetingDate=document.getElementById('attendanceDate').value;
+  const activity=document.getElementById('attendanceActivity').value.trim();
+  if(!attendanceMembers.length){msg('attendanceMsg','Load members first.','error');return;}
+  const records=attendanceMembers.map(function(m,i){const el=document.querySelector('input[name="att_'+i+'"]:checked');return {memberId:m.memberId,status:el?el.value:'ABSENT',remarks:(document.getElementById('attRemarks_'+i)||{}).value||''};});
+  try{
+    const r=await api('saveAttendance',{token:token,attendanceData:{meetingDate:meetingDate,activity:activity,records:records}},'Saving Attendance...','Updating attendance records');
+    msg('attendanceMsg',(r&&r.message)||'Attendance saved successfully.','ok');
+    await loadAttendanceMembers();
+  }catch(e){fail(e,'attendanceMsg');}
+}
+
+async function loadAttendanceHistory(){
+  try{
+    const r=await api('getAttendanceHistory',{token:token},'Loading History...','Retrieving attendance history');
+    const rows=Array.isArray(r)?r:[];
+    const box=document.getElementById('attendanceHistory');
+    document.getElementById('attendanceHistoryWrap').classList.remove('hidden');
+    if(!rows.length){box.innerHTML='<div class="panel-note">No attendance history found.</div>';return;}
+    let h='<table class="report-table"><thead><tr><th>Date</th><th>Activity / Meeting</th><th>Present</th><th>Absent</th><th>Excused</th><th>Total</th></tr></thead><tbody>';
+    rows.forEach(function(x){h+='<tr><td>'+esc(x.meetingDate||'')+'</td><td>'+esc(x.activity||'')+'</td><td>'+Number(x.present||0)+'</td><td>'+Number(x.absent||0)+'</td><td>'+Number(x.excused||0)+'</td><td>'+Number(x.total||0)+'</td></tr>';});
+    box.innerHTML=h+'</tbody></table>';
+  }catch(e){fail(e,'attendanceMsg');}
+}
+
+async function loadAttendanceSummary(){
+  try{
+    const r=await api('getAttendanceSummary',{token:token},'Loading Summary...','Calculating member attendance');
+    const rows=(r&&r.records)||[];
+    document.getElementById('attendanceSummaryWrap').classList.remove('hidden');
+    document.getElementById('attendanceSummaryMeta').textContent='As of '+new Date().toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
+    const box=document.getElementById('attendanceSummaryTable');
+    if(!rows.length){box.innerHTML='<div class="panel-note">No attendance records found.</div>';return;}
+    let h='<table class="report-table"><thead><tr><th>No.</th><th>Member Name</th><th>Present</th><th>Absent</th><th>Excused</th><th>Total Meetings</th></tr></thead><tbody>';
+    rows.forEach(function(x,i){h+='<tr><td>'+(i+1)+'</td><td>'+esc(x.memberName||'')+'</td><td>'+Number(x.present||0)+'</td><td>'+Number(x.absent||0)+'</td><td>'+Number(x.excused||0)+'</td><td>'+Number(x.total||0)+'</td></tr>';});
+    box.innerHTML=h+'</tbody></table>';
+    window.scrollTo({top:document.getElementById('attendanceSummaryWrap').offsetTop-20,behavior:'smooth'});
+  }catch(e){fail(e,'attendanceMsg');}
+}
+
+function printAttendanceSummary(){
+  document.body.classList.add('print-attendance-summary');
+  const cleanup=function(){document.body.classList.remove('print-attendance-summary');window.removeEventListener('afterprint',cleanup);};
+  window.addEventListener('afterprint',cleanup);
+  window.print();
+  setTimeout(cleanup,1500);
+}
 
 </script>
 
