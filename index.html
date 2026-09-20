@@ -2170,6 +2170,21 @@ button.danger{
   </div>
 
   <div id="expenseMsg"></div>
+
+  <button
+    id="expenseHistoryToggleBtn"
+    type="button"
+    class="alt"
+    onclick="toggleExpenseHistory()">
+    📋 View Expense History
+  </button>
+
+  <div id="expenseHistorySection" class="hidden" style="margin-top:12px">
+    <h3 style="margin:0 0 10px">📋 Expense History</h3>
+    <div id="expenseHistoryContent" class="scroll">
+      <div class="panel-note">Click View Expense History to load records.</div>
+    </div>
+  </div>
 </div>
 
 <!-- =======================================================
@@ -2225,6 +2240,21 @@ button.danger{
   </div>
 
   <div id="bankMsg"></div>
+
+  <button
+    id="bankHistoryToggleBtn"
+    type="button"
+    class="alt"
+    onclick="toggleBankHistory()">
+    🏦 View Bank History
+  </button>
+
+  <div id="bankHistorySection" class="hidden" style="margin-top:12px">
+    <h3 style="margin:0 0 10px">🏦 Bank History</h3>
+    <div id="bankHistoryContent" class="scroll">
+      <div class="panel-note">Click View Bank History to load records.</div>
+    </div>
+  </div>
 </div>
 
 <div
@@ -2742,6 +2772,14 @@ button.danger{
   </button>
 
   <div id="paymentMsg"></div>
+
+  <button
+    id="paymentHistoryToggleBtn"
+    type="button"
+    class="alt"
+    onclick="togglePaymentHistory()">
+    📋 View Payment History
+  </button>
 
 
   <!-- SUCCESS -->
@@ -5364,7 +5402,9 @@ function openReceivePayment(){
   hideAppPanels();
   document.getElementById('profileCard').classList.remove('hidden');
   document.getElementById('paymentCard').classList.remove('hidden');
-  document.getElementById('historyCard').classList.remove('hidden');
+  document.getElementById('historyCard').classList.add('hidden');
+  const paymentHistoryToggleBtn = document.getElementById('paymentHistoryToggleBtn');
+  if(paymentHistoryToggleBtn) paymentHistoryToggleBtn.textContent = '📋 View Payment History';
   document.getElementById('searchTopBar').classList.remove('hidden');
 
   const type = document.getElementById('paymentType');
@@ -5389,6 +5429,10 @@ function openExpensePanel(){
   if(date && !date.value) date.value = todayInputValue();
 
   msg('expenseMsg','','');
+  const expenseHistorySection = document.getElementById('expenseHistorySection');
+  const expenseHistoryToggleBtn = document.getElementById('expenseHistoryToggleBtn');
+  if(expenseHistorySection) expenseHistorySection.classList.add('hidden');
+  if(expenseHistoryToggleBtn) expenseHistoryToggleBtn.textContent = '📋 View Expense History';
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -5401,6 +5445,10 @@ function openBankPanel(){
   if(date && !date.value) date.value = todayInputValue();
 
   msg('bankMsg','','');
+  const bankHistorySection = document.getElementById('bankHistorySection');
+  const bankHistoryToggleBtn = document.getElementById('bankHistoryToggleBtn');
+  if(bankHistorySection) bankHistorySection.classList.add('hidden');
+  if(bankHistoryToggleBtn) bankHistoryToggleBtn.textContent = '🏦 View Bank History';
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -5445,6 +5493,11 @@ async function saveOnlineExpense(){
     document.getElementById('expenseRemarks').value = '';
 
     loadDashboard();
+
+    const expenseHistorySection = document.getElementById('expenseHistorySection');
+    if(expenseHistorySection && !expenseHistorySection.classList.contains('hidden')){
+      await loadExpenseHistory();
+    }
 
   }catch(e){
     fail(e,'expenseMsg');
@@ -5500,8 +5553,147 @@ async function saveOnlineBankTransaction(){
 
     loadDashboard();
 
+    const bankHistorySection = document.getElementById('bankHistorySection');
+    if(bankHistorySection && !bankHistorySection.classList.contains('hidden')){
+      await loadBankHistory();
+    }
+
   }catch(e){
     fail(e,'bankMsg');
+  }
+}
+
+/* =========================================================
+   COLLAPSIBLE TRANSACTION HISTORIES
+========================================================= */
+
+function togglePaymentHistory(){
+  const card = document.getElementById('historyCard');
+  const btn = document.getElementById('paymentHistoryToggleBtn');
+  if(!card || !btn) return;
+
+  const willShow = card.classList.contains('hidden');
+  card.classList.toggle('hidden', !willShow);
+  btn.textContent = willShow
+    ? '📋 Hide Payment History'
+    : '📋 View Payment History';
+}
+
+async function toggleExpenseHistory(){
+  const section = document.getElementById('expenseHistorySection');
+  const btn = document.getElementById('expenseHistoryToggleBtn');
+  if(!section || !btn) return;
+
+  if(!section.classList.contains('hidden')){
+    section.classList.add('hidden');
+    btn.textContent = '📋 View Expense History';
+    return;
+  }
+
+  section.classList.remove('hidden');
+  btn.textContent = '📋 Hide Expense History';
+  await loadExpenseHistory();
+}
+
+async function loadExpenseHistory(){
+  const box = document.getElementById('expenseHistoryContent');
+  if(!box) return;
+
+  box.innerHTML = '<div class="panel-note">Loading expense history...</div>';
+
+  try{
+    const r = await api(
+      'getExpenseHistory',
+      {token: token},
+      'Loading Expense History...',
+      'Retrieving expense records'
+    );
+
+    const rows = (r && r.records) || [];
+    if(!rows.length){
+      box.innerHTML = '<div class="panel-note">No expense history found.</div>';
+      return;
+    }
+
+    let html = '<table><thead><tr>' +
+      '<th>Date</th><th>Category</th><th>Particulars</th>' +
+      '<th>Reference No.</th><th>Remarks</th><th style="text-align:right">Amount</th>' +
+      '</tr></thead><tbody>';
+
+    rows.forEach(function(x){
+      html += '<tr>' +
+        '<td>' + esc(x.date || '') + '</td>' +
+        '<td>' + esc(x.category || '') + '</td>' +
+        '<td>' + esc(x.particulars || '') + '</td>' +
+        '<td>' + esc(x.referenceNo || '—') + '</td>' +
+        '<td>' + esc(x.remarks || '') + '</td>' +
+        '<td style="text-align:right">' + money(x.amount) + '</td>' +
+        '</tr>';
+    });
+
+    html += '</tbody></table>';
+    box.innerHTML = html;
+  }catch(e){
+    box.innerHTML = '<div class="msg error">' + esc(e && e.message ? e.message : String(e)) + '</div>';
+  }
+}
+
+async function toggleBankHistory(){
+  const section = document.getElementById('bankHistorySection');
+  const btn = document.getElementById('bankHistoryToggleBtn');
+  if(!section || !btn) return;
+
+  if(!section.classList.contains('hidden')){
+    section.classList.add('hidden');
+    btn.textContent = '🏦 View Bank History';
+    return;
+  }
+
+  section.classList.remove('hidden');
+  btn.textContent = '🏦 Hide Bank History';
+  await loadBankHistory();
+}
+
+async function loadBankHistory(){
+  const box = document.getElementById('bankHistoryContent');
+  if(!box) return;
+
+  box.innerHTML = '<div class="panel-note">Loading bank history...</div>';
+
+  try{
+    const r = await api(
+      'getBankHistory',
+      {token: token},
+      'Loading Bank History...',
+      'Retrieving bank transaction records'
+    );
+
+    const rows = (r && r.records) || [];
+    if(!rows.length){
+      box.innerHTML = '<div class="panel-note">No bank history found.</div>';
+      return;
+    }
+
+    let html = '<table><thead><tr>' +
+      '<th>Date</th><th>Type</th><th>Particulars</th>' +
+      '<th>Reference No.</th><th>Remarks</th><th style="text-align:right">Amount</th>' +
+      '</tr></thead><tbody>';
+
+    rows.forEach(function(x){
+      html += '<tr>' +
+        '<td>' + esc(x.date || '') + '</td>' +
+        '<td>' + esc(x.type || '') + '</td>' +
+        '<td>' + esc(x.particulars || '') + '</td>' +
+        '<td>' + esc(x.referenceNo || '—') + '</td>' +
+        '<td>' + esc(x.remarks || '') + '</td>' +
+        '<td style="text-align:right">' + money(x.amount) + '</td>' +
+        '</tr>';
+    });
+
+    html += '</tbody></table>';
+    box.innerHTML = html;
+  }catch(e){
+    box.innerHTML = '<div class="msg error">' + esc(e && e.message ? e.message : String(e)) + '</div>';
   }
 }
 
