@@ -4172,8 +4172,7 @@ function renderProfile(
 
   [
     'profileCard',
-    'paymentCard',
-    'historyCard'
+    'paymentCard'
   ].forEach(
     id =>
       document
@@ -4181,6 +4180,19 @@ function renderProfile(
         .classList
         .remove('hidden')
   );
+
+  /* Payment History must be hidden when a member profile first opens. */
+  const historyCard = document.getElementById('historyCard');
+  if(historyCard){
+    historyCard.classList.add('hidden');
+  }
+
+  const paymentHistoryToggleBtn =
+    document.getElementById('paymentHistoryToggleBtn');
+
+  if(paymentHistoryToggleBtn){
+    paymentHistoryToggleBtn.textContent = '📋 View Payment History';
+  }
 
 
   /* Search hidden while viewing member */
