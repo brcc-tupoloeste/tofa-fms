@@ -1564,125 +1564,129 @@ button.danger{
 
 
 /* =========================================================
-   TOFA-FMS — COMPACT MOBILE DASHBOARD
+   TOFA-FMS — BALANCED FULL-SCREEN MOBILE DASHBOARD
    Dashboard presentation only. No functions/API changed.
 ========================================================= */
 @media (max-width:619px){
 
-  /* Use more of the phone width */
   .wrap{
-    padding:5px!important;
+    padding:6px!important;
   }
 
-  /* Compact branding/header */
+  /* Header: readable but still compact */
   .brand{
-    padding:5px 4px 5px!important;
+    padding:7px 4px 7px!important;
   }
 
   .brand-logo-wrap{
-    width:54px!important;
-    height:54px!important;
-    margin-bottom:3px!important;
+    width:62px!important;
+    height:62px!important;
+    margin-bottom:4px!important;
   }
 
   .brand h1{
-    font-size:14px!important;
-    line-height:1.12!important;
+    font-size:16px!important;
+    line-height:1.15!important;
   }
 
   .brand-system{
-    margin-top:2px!important;
-    font-size:8px!important;
-    line-height:1.1!important;
-    letter-spacing:1.1px!important;
+    margin-top:3px!important;
+    font-size:9px!important;
+    line-height:1.15!important;
+    letter-spacing:1.2px!important;
   }
 
   .brand-tagline{
     margin-top:2px!important;
-    font-size:8px!important;
-    line-height:1.1!important;
+    font-size:9px!important;
+    line-height:1.15!important;
   }
 
-  /* Compact green top bar */
+  /* Green top bar */
   .top{
-    padding:6px 8px!important;
-    margin-bottom:5px!important;
-    gap:6px!important;
-    border-radius:9px!important;
+    padding:8px 9px!important;
+    margin-bottom:7px!important;
+    gap:7px!important;
+    border-radius:10px!important;
   }
 
   .top b{
-    font-size:11px!important;
+    font-size:12px!important;
   }
 
   button.danger{
-    padding:5px 8px!important;
-    font-size:9px!important;
+    padding:7px 10px!important;
+    font-size:10px!important;
   }
 
   /* Dashboard outer card */
   #dashboardView.dashboard{
-    padding:8px!important;
-    margin-bottom:5px!important;
-    border-radius:11px!important;
+    padding:10px!important;
+    margin-bottom:6px!important;
+    border-radius:12px!important;
   }
 
   .dashboard-head{
-    gap:5px!important;
-    margin-bottom:5px!important;
+    gap:6px!important;
+    margin-bottom:8px!important;
   }
 
   .dashboard-title{
-    font-size:13px!important;
+    font-size:14px!important;
   }
 
   .dashboard-period{
-    font-size:8px!important;
+    font-size:9px!important;
   }
 
-  /* 6 financial cards: 3 x 2 */
+  /* Financial Overview: 3 columns x 2 rows */
   .stats{
     grid-template-columns:repeat(3,minmax(0,1fr))!important;
-    gap:4px!important;
-    margin-bottom:6px!important;
+    gap:6px!important;
+    margin-bottom:12px!important;
   }
 
   .stat{
-    min-height:48px!important;
-    padding:5px 3px!important;
-    border-radius:8px!important;
+    min-height:68px!important;
+    padding:9px 5px!important;
+    border-radius:9px!important;
   }
 
   .stat-label{
-    min-height:20px!important;
-    font-size:7.5px!important;
-    line-height:1.08!important;
+    min-height:25px!important;
+    font-size:8.5px!important;
+    line-height:1.15!important;
   }
 
   .stat-value,
   .stat-value.small{
-    margin-top:2px!important;
-    font-size:10px!important;
-    line-height:1.1!important;
+    margin-top:4px!important;
+    font-size:11.5px!important;
+    line-height:1.15!important;
   }
 
-  /* Quick Actions: 2 x 3 */
+  /* Quick Actions: intentionally larger to use lower screen space */
   .quick-title{
-    margin:1px 0 4px!important;
-    font-size:11px!important;
+    margin:4px 0 8px!important;
+    font-size:13px!important;
   }
 
   .quick-grid{
     grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:4px!important;
+    gap:8px!important;
   }
 
   .quick-btn{
-    min-height:29px!important;
-    padding:5px 4px!important;
-    font-size:8.5px!important;
-    line-height:1.1!important;
-    border-radius:8px!important;
+    min-height:58px!important;
+    padding:12px 8px!important;
+    font-size:11px!important;
+    line-height:1.2!important;
+    border-radius:10px!important;
+    white-space:normal!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    text-align:center!important;
   }
 }
 
