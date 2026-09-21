@@ -3222,6 +3222,8 @@ button.danger{
 
     <div class="ptr-submenu">
       <button id="ptrOldPaymentTab" type="button" class="active" onclick="showPTRSection('oldPayment')">🧾 Record Old Payment</button>
+      <button id="ptrExpenseTab" type="button" onclick="showPTRSection('expense')">🧾 Historical Expenses</button>
+      <button id="ptrExpenseAllocationTab" type="button" onclick="showPTRSection('expenseAllocation')">🔗 Expense Allocation</button>
       <button id="ptrUnremittedTab" type="button" onclick="showPTRSection('unremitted')">💵 Unremitted Collections</button>
       <button id="ptrPassbookTab" type="button" onclick="showPTRSection('passbook')">🏦 Bank / Passbook Records</button>
       <button id="ptrTurnoverTab" type="button" onclick="showPTRSection('turnover')">🔄 Record Turnover</button>
@@ -3301,6 +3303,65 @@ button.danger{
           <button type="button" onclick="savePTRHistoricalPayment()">💾 RECORD OLD PAYMENT</button>
           <button type="button" class="alt" onclick="clearPTRPaymentForm(false)">CLEAR</button>
         </div>
+      </div>
+    </div>
+
+    <div id="ptrExpenseSection" class="ptr-box hidden">
+      <div class="panel-note">
+        Record legitimate historical expenses paid from collections handled by the Previous Treasurer. Recording an expense does not change the member's PAID/ACTIVE credit and is not actual turnover.
+      </div>
+      <div class="ptr-passbook-summary">
+        <div class="ptr-passbook-kpi"><b>Historical Collections</b><span id="ptrExpenseCollections">₱0.00</span></div>
+        <div class="ptr-passbook-kpi"><b>Expenses Applied</b><span id="ptrExpenseApplied">₱0.00</span></div>
+        <div class="ptr-passbook-kpi"><b>Unallocated Expenses</b><span id="ptrExpenseUnallocated">₱0.00</span></div>
+        <div class="ptr-passbook-kpi"><b>Remaining Accountability</b><span id="ptrExpenseRemaining">₱0.00</span></div>
+      </div>
+      <div class="form-grid">
+        <div><label>Expense Date</label><input id="ptrExpenseDate" type="date"></div>
+        <div><label>Category</label><input id="ptrExpenseCategory" autocomplete="off" placeholder="Example: Office Supplies"></div>
+        <div class="full"><label>Particulars / Description</label><input id="ptrExpenseParticulars" autocomplete="off" placeholder="Describe the historical expense"></div>
+        <div><label>Amount</label><input id="ptrExpenseAmount" type="number" min="0.01" step="0.01" inputmode="decimal"></div>
+        <div><label>Receipt / Reference</label><input id="ptrExpenseReference" autocomplete="off" placeholder="Optional"></div>
+        <div class="full"><label>Remarks</label><textarea id="ptrExpenseRemarks" placeholder="Optional notes"></textarea></div>
+      </div>
+      <div class="ptr-warning"><b>Historical Expense is not Turnover.</b> Only funds actually surrendered by the Previous Treasurer are recorded as turnover.</div>
+      <div class="form-actions-row">
+        <button type="button" onclick="savePTRHistoricalExpense()">💾 RECORD HISTORICAL EXPENSE</button>
+        <button type="button" class="alt" onclick="clearPTRExpenseForm()">CLEAR</button>
+      </div>
+      <div id="ptrExpenseMsg"></div>
+      <div class="table-wrap" style="margin-top:14px">
+        <table class="member-table"><thead><tr><th>Expense ID</th><th>Date</th><th>Particulars</th><th>Amount</th><th>Allocated</th><th>Remaining</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody id="ptrExpenseBody"><tr><td colspan="8">No historical expenses yet.</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <div id="ptrExpenseAllocationSection" class="ptr-box hidden">
+      <div class="panel-note">
+        Allocate a validated historical expense to the historical member collections from which it was paid. This changes Previous Treasurer accountability only; member payment credit remains intact.
+      </div>
+      <div class="ptr-passbook-summary">
+        <div class="ptr-passbook-kpi"><b>Historical Collections</b><span id="ptrAllocCollections">₱0.00</span></div>
+        <div class="ptr-passbook-kpi"><b>Expenses Applied</b><span id="ptrAllocApplied">₱0.00</span></div>
+        <div class="ptr-passbook-kpi"><b>Actual Cash Turnover</b><span id="ptrAllocTurnover">₱0.00</span></div>
+        <div class="ptr-passbook-kpi"><b>Remaining Accountability</b><span id="ptrAllocRemaining">₱0.00</span></div>
+      </div>
+      <div id="ptrExpenseAllocationMsg"></div>
+      <div class="form-grid">
+        <div class="full"><label>Historical Expense</label><select id="ptrAllocationExpense" onchange="renderPTRExpenseAllocationPayments()"><option value="">Select historical expense</option></select></div>
+      </div>
+      <div id="ptrAllocationExpenseInfo" class="panel-note">Select a historical expense.</div>
+      <div class="table-wrap" style="margin-top:14px">
+        <table class="member-table"><thead><tr><th>Select</th><th>Payment ID</th><th>Member</th><th>Payment Type</th><th>Amount</th><th>Turned Over</th><th>Expense Applied</th><th>Available</th></tr></thead>
+        <tbody id="ptrAllocationPaymentBody"><tr><td colspan="8">Select a historical expense first.</td></tr></tbody></table>
+      </div>
+      <div class="form-actions-row">
+        <button type="button" onclick="savePTRExpenseAllocation()">🔗 APPLY EXPENSE</button>
+        <button type="button" class="alt" onclick="loadPTRExpenseAllocation()">↻ REFRESH</button>
+      </div>
+      <div class="table-wrap" style="margin-top:14px">
+        <table class="member-table"><thead><tr><th>Allocation ID</th><th>Expense ID</th><th>Payment ID</th><th>Member</th><th>Amount</th><th>Type</th><th>Action</th></tr></thead>
+        <tbody id="ptrAllocationLedgerBody"><tr><td colspan="7">No expense allocations yet.</td></tr></tbody></table>
       </div>
     </div>
 
@@ -7422,40 +7483,171 @@ async function savePTRHistoricalPayment(){
 /* =========================================================
    PREVIOUS TREASURER — PASSBOOK UI
 ========================================================= */
+
+/* =========================================================
+   PREVIOUS TREASURER — HISTORICAL EXPENSES / ALLOCATION
+========================================================= */
+let ptrExpenseState=null;
+let ptrExpenseAllocationState=null;
+
+function ptrPick(obj,names,fallback){
+  obj=obj||{};
+  for(const n of names){ if(obj[n]!==undefined && obj[n]!==null && obj[n]!=='') return obj[n]; }
+  return fallback;
+}
+function ptrArray(obj,names){
+  obj=obj||{};
+  for(const n of names){ if(Array.isArray(obj[n])) return obj[n]; }
+  return [];
+}
+function ptrExpenseId(x){ return String(ptrPick(x,['historicalExpenseId','expenseId','id','Historical Expense ID'],'')||'').trim(); }
+function ptrPaymentId(x){ return String(ptrPick(x,['historicalPaymentId','paymentId','id','Historical Payment ID'],'')||'').trim(); }
+function ptrAllocationId(x){ return String(ptrPick(x,['expenseAllocationId','allocationId','id','Expense Allocation ID'],'')||'').trim(); }
+function ptrNum(v){ const n=Number(v||0); return Number.isFinite(n)?n:0; }
+function ptrHtml(v){ return esc(String(v===undefined||v===null?'':v)); }
+
+function clearPTRExpenseForm(){
+  ['ptrExpenseDate','ptrExpenseCategory','ptrExpenseParticulars','ptrExpenseAmount','ptrExpenseReference','ptrExpenseRemarks'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  msg('ptrExpenseMsg','','');
+}
+
+function ptrExpenseRows(state){ return ptrArray(state,['expenses','historicalExpenses','expenseRecords','validatedExpenses']); }
+function ptrPaymentRows(state){ return ptrArray(state,['payments','historicalPayments','paymentRecords','availablePayments']); }
+function ptrAllocationRows(state){ return ptrArray(state,['allocations','allocationRecords','expenseAllocations','ledger']); }
+
+async function loadPTRExpenseState(){
+  try{
+    const r=await api('getPreviousTreasurerExpenseState',{token:token},'Loading Historical Expenses...','Reading Previous Treasurer expenses');
+    ptrExpenseState=r||{};
+    set('ptrExpenseCollections',ptrMoney(ptrPick(r,['historicalCollections','totalHistoricalCollections'],0)));
+    set('ptrExpenseApplied',ptrMoney(ptrPick(r,['expenseApplied','allocatedHistoricalExpenses','activeExpenseAllocations'],0)));
+    set('ptrExpenseUnallocated',ptrMoney(ptrPick(r,['unallocatedHistoricalExpenses','unallocatedExpenses'],0)));
+    set('ptrExpenseRemaining',ptrMoney(ptrPick(r,['remainingUnaccounted','remainingAccountability'],0)));
+    renderPTRExpenseTable(r);
+  }catch(e){fail(e,'ptrExpenseMsg');}
+}
+
+function renderPTRExpenseTable(state){
+  const body=document.getElementById('ptrExpenseBody'); if(!body)return;
+  const rows=ptrExpenseRows(state);
+  if(!rows.length){body.innerHTML='<tr><td colspan="8">No historical expenses yet.</td></tr>';return;}
+  body.innerHTML=rows.map(x=>{
+    const id=ptrExpenseId(x), amount=ptrNum(ptrPick(x,['amount','expenseAmount'],0));
+    const allocated=ptrNum(ptrPick(x,['allocated','allocatedAmount','expenseApplied'],0));
+    const remaining=ptrNum(ptrPick(x,['remaining','remainingAmount'],Math.max(0,amount-allocated)));
+    const status=String(ptrPick(x,['validationStatus','status'],'VALIDATED')||'').toUpperCase();
+    const canVoid=status!=='VOID' && allocated<=0.001;
+    return '<tr><td>'+ptrHtml(id)+'</td><td>'+ptrHtml(ptrPick(x,['expenseDate','date'],''))+'</td><td>'+ptrHtml(ptrPick(x,['particulars','description','category'],''))+'</td><td>'+ptrMoney(amount)+'</td><td>'+ptrMoney(allocated)+'</td><td>'+ptrMoney(remaining)+'</td><td>'+ptrHtml(status)+'</td><td>'+(canVoid?'<button type="button" class="alt" onclick="voidPTRHistoricalExpense(\''+ptrHtml(id)+'\')">VOID</button>':'—')+'</td></tr>';
+  }).join('');
+}
+
+async function savePTRHistoricalExpense(){
+  const expenseDate=(document.getElementById('ptrExpenseDate').value||'').trim();
+  const category=(document.getElementById('ptrExpenseCategory').value||'').trim();
+  const particulars=(document.getElementById('ptrExpenseParticulars').value||'').trim();
+  const amount=ptrNum(document.getElementById('ptrExpenseAmount').value);
+  const reference=(document.getElementById('ptrExpenseReference').value||'').trim();
+  const remarks=(document.getElementById('ptrExpenseRemarks').value||'').trim();
+  if(!expenseDate){msg('ptrExpenseMsg','Expense Date is required.','error');return;}
+  if(!category){msg('ptrExpenseMsg','Expense Category is required.','error');return;}
+  if(!particulars){msg('ptrExpenseMsg','Particulars / Description is required.','error');return;}
+  if(!(amount>0)){msg('ptrExpenseMsg','Expense Amount must be greater than zero.','error');return;}
+  if(!confirm('Record this HISTORICAL EXPENSE?\n\n'+particulars+'\nAmount: '+ptrMoney(amount)+'\n\nThis is NOT actual turnover and does not change member payment credit.'))return;
+  try{
+    const r=await api('recordPreviousTreasurerExpense',{token:token,expenseData:{expenseDate,category,particulars,amount,reference,receiptReference:reference,remarks}},'Recording Historical Expense...','Saving Previous Treasurer historical expense');
+    clearPTRExpenseForm(); msg('ptrExpenseMsg',(r&&r.message)||'Historical expense recorded successfully.','ok');
+    await loadPTRExpenseState();
+  }catch(e){fail(e,'ptrExpenseMsg');}
+}
+
+async function voidPTRHistoricalExpense(expenseId){
+  if(!expenseId)return;
+  let reason=prompt('Reason for voiding Historical Expense '+expenseId+':',''); if(reason===null)return; reason=reason.trim();
+  if(!reason){msg('ptrExpenseMsg','Void reason is required.','error');return;}
+  try{
+    const preview=await api('previewPreviousTreasurerExpenseVoid',{token:token,historicalExpenseId:expenseId},'Checking Historical Expense...','Preparing expense void');
+    const active=ptrNum(ptrPick(preview,['activeAllocation','activeAllocatedAmount','allocatedAmount'],0));
+    if(active>0.001){msg('ptrExpenseMsg','Cannot void this expense while it still has active allocation. Reverse the allocation first.','error');return;}
+    if(!confirm('VOID Historical Expense '+expenseId+'?\n\nReason: '+reason+'\n\nThe original audit record will remain.'))return;
+    const r=await api('voidPreviousTreasurerExpense',{token:token,historicalExpenseId:expenseId,reason:reason},'Voiding Historical Expense...','Writing audit-safe void');
+    msg('ptrExpenseMsg',(r&&r.message)||'Historical expense voided.','ok'); await loadPTRExpenseState();
+  }catch(e){fail(e,'ptrExpenseMsg');}
+}
+
+async function loadPTRExpenseAllocation(){
+  try{
+    const r=await api('getPreviousTreasurerExpenseState',{token:token},'Loading Expense Allocation...','Reading historical expenses and collections');
+    ptrExpenseAllocationState=r||{};
+    set('ptrAllocCollections',ptrMoney(ptrPick(r,['historicalCollections','totalHistoricalCollections'],0)));
+    set('ptrAllocApplied',ptrMoney(ptrPick(r,['expenseApplied','allocatedHistoricalExpenses','activeExpenseAllocations'],0)));
+    set('ptrAllocTurnover',ptrMoney(ptrPick(r,['actualCashTurnedOver','cashTurnedOver'],0)));
+    set('ptrAllocRemaining',ptrMoney(ptrPick(r,['remainingUnaccounted','remainingAccountability'],0)));
+    renderPTRExpenseOptions(); renderPTRExpenseAllocationPayments(); renderPTRAllocationLedger(r);
+  }catch(e){fail(e,'ptrExpenseAllocationMsg');}
+}
+
+function renderPTRExpenseOptions(){
+  const sel=document.getElementById('ptrAllocationExpense'); if(!sel)return;
+  const old=sel.value; const rows=ptrExpenseRows(ptrExpenseAllocationState);
+  const active=rows.filter(x=>{const status=String(ptrPick(x,['validationStatus','status'],'VALIDATED')).toUpperCase();const a=ptrNum(ptrPick(x,['amount','expenseAmount'],0));const used=ptrNum(ptrPick(x,['allocated','allocatedAmount','expenseApplied'],0));const rem=ptrNum(ptrPick(x,['remaining','remainingAmount'],Math.max(0,a-used)));return status!=='VOID'&&rem>0.001;});
+  sel.innerHTML='<option value="">Select historical expense</option>'+active.map(x=>{const id=ptrExpenseId(x),a=ptrNum(ptrPick(x,['amount','expenseAmount'],0)),used=ptrNum(ptrPick(x,['allocated','allocatedAmount','expenseApplied'],0)),rem=ptrNum(ptrPick(x,['remaining','remainingAmount'],Math.max(0,a-used)));return '<option value="'+ptrHtml(id)+'">'+ptrHtml(id)+' — '+ptrHtml(ptrPick(x,['particulars','description','category'],''))+' — '+ptrMoney(rem)+'</option>';}).join('');
+  if(old&&active.some(x=>ptrExpenseId(x)===old))sel.value=old;
+}
+
+function renderPTRExpenseAllocationPayments(){
+  const sel=document.getElementById('ptrAllocationExpense'), body=document.getElementById('ptrAllocationPaymentBody'), info=document.getElementById('ptrAllocationExpenseInfo'); if(!sel||!body)return;
+  const expenseId=(sel.value||'').trim(); if(!expenseId){if(info)info.textContent='Select a historical expense.';body.innerHTML='<tr><td colspan="8">Select a historical expense first.</td></tr>';return;}
+  const exp=ptrExpenseRows(ptrExpenseAllocationState).find(x=>ptrExpenseId(x)===expenseId);
+  if(!exp){body.innerHTML='<tr><td colspan="8">Historical expense not found.</td></tr>';return;}
+  const ea=ptrNum(ptrPick(exp,['amount','expenseAmount'],0)), used=ptrNum(ptrPick(exp,['allocated','allocatedAmount','expenseApplied'],0)), rem=ptrNum(ptrPick(exp,['remaining','remainingAmount'],Math.max(0,ea-used)));
+  if(info)info.innerHTML='<b>Expense:</b> '+ptrHtml(expenseId)+' — '+ptrHtml(ptrPick(exp,['particulars','description','category'],''))+'<br><b>Amount:</b> '+ptrMoney(ea)+' &nbsp; <b>Allocated:</b> '+ptrMoney(used)+' &nbsp; <b>Remaining:</b> '+ptrMoney(rem);
+  const payments=ptrPaymentRows(ptrExpenseAllocationState).filter(x=>{const amount=ptrNum(ptrPick(x,['amount'],0)),turned=ptrNum(ptrPick(x,['turnedOver','turnedOverAmount'],0)),applied=ptrNum(ptrPick(x,['expenseApplied','allocatedExpense'],0)),avail=ptrNum(ptrPick(x,['available','availableAmount'],Math.max(0,amount-turned-applied)));return avail>0.001;});
+  if(!payments.length){body.innerHTML='<tr><td colspan="8">No historical collection is available for allocation.</td></tr>';return;}
+  body.innerHTML=payments.map(x=>{const id=ptrPaymentId(x),amount=ptrNum(ptrPick(x,['amount'],0)),turned=ptrNum(ptrPick(x,['turnedOver','turnedOverAmount'],0)),applied=ptrNum(ptrPick(x,['expenseApplied','allocatedExpense'],0)),avail=ptrNum(ptrPick(x,['available','availableAmount'],Math.max(0,amount-turned-applied)));return '<tr><td><input type="checkbox" class="ptr-expense-payment-check" value="'+ptrHtml(id)+'"></td><td>'+ptrHtml(id)+'</td><td>'+ptrHtml(ptrPick(x,['memberName','memberId'],''))+'</td><td>'+ptrHtml(ptrPick(x,['paymentType'],''))+'</td><td>'+ptrMoney(amount)+'</td><td>'+ptrMoney(turned)+'</td><td>'+ptrMoney(applied)+'</td><td><b>'+ptrMoney(avail)+'</b></td></tr>';}).join('');
+}
+
+function renderPTRAllocationLedger(state){
+  const body=document.getElementById('ptrAllocationLedgerBody'); if(!body)return;
+  const rows=ptrAllocationRows(state); if(!rows.length){body.innerHTML='<tr><td colspan="7">No expense allocations yet.</td></tr>';return;}
+  body.innerHTML=rows.map(x=>{const id=ptrAllocationId(x),type=String(ptrPick(x,['recordType','type'],'ALLOCATION')||'ALLOCATION').toUpperCase(),isActive=type!=='REVERSAL'&&ptrNum(ptrPick(x,['activeAmount','netActiveAmount','amount','allocatedAmount'],0))>0.001;return '<tr><td>'+ptrHtml(id)+'</td><td>'+ptrHtml(ptrPick(x,['historicalExpenseId','expenseId'],''))+'</td><td>'+ptrHtml(ptrPick(x,['historicalPaymentId','paymentId'],''))+'</td><td>'+ptrHtml(ptrPick(x,['memberName'],''))+'</td><td>'+ptrMoney(ptrPick(x,['allocatedAmount','amount'],0))+'</td><td>'+ptrHtml(type)+'</td><td>'+(isActive?'<button type="button" class="alt" onclick="reversePTRExpenseAllocation(\''+ptrHtml(id)+'\')">REVERSE</button>':'—')+'</td></tr>';}).join('');
+}
+
+async function savePTRExpenseAllocation(){
+  const expenseId=(document.getElementById('ptrAllocationExpense').value||'').trim();
+  const paymentIds=Array.from(document.querySelectorAll('.ptr-expense-payment-check:checked')).map(e=>String(e.value||'').trim()).filter(Boolean);
+  if(!expenseId){msg('ptrExpenseAllocationMsg','Select a Historical Expense.','error');return;}
+  if(!paymentIds.length){msg('ptrExpenseAllocationMsg','Select at least one Historical Collection.','error');return;}
+  if(!confirm('Apply Historical Expense '+expenseId+' to '+paymentIds.length+' selected collection(s)?\n\nMember payment credit will remain unchanged.'))return;
+  try{
+    const r=await api('allocatePreviousTreasurerExpense',{token:token,historicalExpenseId:expenseId,paymentIds:paymentIds},'Applying Historical Expense...','Reconciling expense against historical collections');
+    msg('ptrExpenseAllocationMsg',(r&&r.message)||'Historical expense allocated successfully.','ok'); await loadPTRExpenseAllocation();
+  }catch(e){fail(e,'ptrExpenseAllocationMsg');}
+}
+
+async function reversePTRExpenseAllocation(allocationId){
+  if(!allocationId)return;
+  let reason=prompt('Reason for reversing Expense Allocation '+allocationId+':',''); if(reason===null)return; reason=reason.trim();
+  if(!reason){msg('ptrExpenseAllocationMsg','Reversal reason is required.','error');return;}
+  try{
+    const preview=await api('previewPreviousTreasurerExpenseAllocationReversal',{token:token,expenseAllocationId:allocationId},'Checking Expense Allocation...','Preparing allocation reversal');
+    const amount=ptrNum(ptrPick(preview,['activeAmount','amount','allocatedAmount'],0));
+    if(!confirm('REVERSE Expense Allocation '+allocationId+'?\n\nActive amount: '+ptrMoney(amount)+'\nReason: '+reason+'\n\nThe original allocation will remain in the audit trail.'))return;
+    const r=await api('reversePreviousTreasurerExpenseAllocation',{token:token,expenseAllocationId:allocationId,reason:reason},'Reversing Expense Allocation...','Writing audit-safe reversal');
+    msg('ptrExpenseAllocationMsg',(r&&r.message)||'Expense allocation reversed.','ok'); await loadPTRExpenseAllocation();
+  }catch(e){fail(e,'ptrExpenseAllocationMsg');}
+}
+
 function showPTRSection(section){
-  const oldSection=document.getElementById('ptrOldPaymentSection');
-  const unremittedSection=document.getElementById('ptrUnremittedSection');
-  const passbookSection=document.getElementById('ptrPassbookSection');
-  const turnoverSection=document.getElementById('ptrTurnoverSection');
-  const reportSection=document.getElementById('ptrReportSection');
-  const oldTab=document.getElementById('ptrOldPaymentTab');
-  const unremittedTab=document.getElementById('ptrUnremittedTab');
-  const passbookTab=document.getElementById('ptrPassbookTab');
-  const turnoverTab=document.getElementById('ptrTurnoverTab');
-  const reportTab=document.getElementById('ptrReportTab');
-
-  const isOld=section==='oldPayment';
-  const isUnremitted=section==='unremitted';
-  const isPassbook=section==='passbook';
-  const isTurnover=section==='turnover';
-  const isReport=section==='report';
-
-  if(oldSection) oldSection.classList.toggle('hidden',!isOld);
-  if(unremittedSection) unremittedSection.classList.toggle('hidden',!isUnremitted);
-  if(passbookSection) passbookSection.classList.toggle('hidden',!isPassbook);
-  if(turnoverSection) turnoverSection.classList.toggle('hidden',!isTurnover);
-  if(reportSection) reportSection.classList.toggle('hidden',!isReport);
-
-  if(oldTab) oldTab.classList.toggle('active',isOld);
-  if(unremittedTab) unremittedTab.classList.toggle('active',isUnremitted);
-  if(passbookTab) passbookTab.classList.toggle('active',isPassbook);
-  if(turnoverTab) turnoverTab.classList.toggle('active',isTurnover);
-  if(reportTab) reportTab.classList.toggle('active',isReport);
-
-  if(isUnremitted) loadPTRUnremittedCollections();
-  if(isPassbook) loadPTRPassbookRecords();
-  if(isTurnover) loadPTRTurnover();
-  if(isReport) loadPTRReconciliationReport();
+  const sections={oldPayment:'ptrOldPaymentSection',expense:'ptrExpenseSection',expenseAllocation:'ptrExpenseAllocationSection',unremitted:'ptrUnremittedSection',passbook:'ptrPassbookSection',turnover:'ptrTurnoverSection',report:'ptrReportSection'};
+  const tabs={oldPayment:'ptrOldPaymentTab',expense:'ptrExpenseTab',expenseAllocation:'ptrExpenseAllocationTab',unremitted:'ptrUnremittedTab',passbook:'ptrPassbookTab',turnover:'ptrTurnoverTab',report:'ptrReportTab'};
+  Object.keys(sections).forEach(k=>{const e=document.getElementById(sections[k]);if(e)e.classList.toggle('hidden',k!==section);});
+  Object.keys(tabs).forEach(k=>{const e=document.getElementById(tabs[k]);if(e)e.classList.toggle('active',k===section);});
+  if(section==='expense')loadPTRExpenseState();
+  if(section==='expenseAllocation')loadPTRExpenseAllocation();
+  if(section==='unremitted')loadPTRUnremittedCollections();
+  if(section==='passbook')loadPTRPassbookRecords();
+  if(section==='turnover')loadPTRTurnover();
+  if(section==='report')loadPTRReconciliationReport();
 }
 
 function ptrReportVal(obj,names,fallback){
