@@ -1562,6 +1562,130 @@ button.danger{
   body.print-attendance-summary .attendance-print-meta{font-size:9pt!important;color:#000!important}
 }
 
+
+/* =========================================================
+   TOFA-FMS — COMPACT MOBILE DASHBOARD
+   Dashboard presentation only. No functions/API changed.
+========================================================= */
+@media (max-width:619px){
+
+  /* Use more of the phone width */
+  .wrap{
+    padding:5px!important;
+  }
+
+  /* Compact branding/header */
+  .brand{
+    padding:5px 4px 5px!important;
+  }
+
+  .brand-logo-wrap{
+    width:54px!important;
+    height:54px!important;
+    margin-bottom:3px!important;
+  }
+
+  .brand h1{
+    font-size:14px!important;
+    line-height:1.12!important;
+  }
+
+  .brand-system{
+    margin-top:2px!important;
+    font-size:8px!important;
+    line-height:1.1!important;
+    letter-spacing:1.1px!important;
+  }
+
+  .brand-tagline{
+    margin-top:2px!important;
+    font-size:8px!important;
+    line-height:1.1!important;
+  }
+
+  /* Compact green top bar */
+  .top{
+    padding:6px 8px!important;
+    margin-bottom:5px!important;
+    gap:6px!important;
+    border-radius:9px!important;
+  }
+
+  .top b{
+    font-size:11px!important;
+  }
+
+  button.danger{
+    padding:5px 8px!important;
+    font-size:9px!important;
+  }
+
+  /* Dashboard outer card */
+  #dashboardView.dashboard{
+    padding:8px!important;
+    margin-bottom:5px!important;
+    border-radius:11px!important;
+  }
+
+  .dashboard-head{
+    gap:5px!important;
+    margin-bottom:5px!important;
+  }
+
+  .dashboard-title{
+    font-size:13px!important;
+  }
+
+  .dashboard-period{
+    font-size:8px!important;
+  }
+
+  /* 6 financial cards: 3 x 2 */
+  .stats{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:4px!important;
+    margin-bottom:6px!important;
+  }
+
+  .stat{
+    min-height:48px!important;
+    padding:5px 3px!important;
+    border-radius:8px!important;
+  }
+
+  .stat-label{
+    min-height:20px!important;
+    font-size:7.5px!important;
+    line-height:1.08!important;
+  }
+
+  .stat-value,
+  .stat-value.small{
+    margin-top:2px!important;
+    font-size:10px!important;
+    line-height:1.1!important;
+  }
+
+  /* Quick Actions: 2 x 3 */
+  .quick-title{
+    margin:1px 0 4px!important;
+    font-size:11px!important;
+  }
+
+  .quick-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:4px!important;
+  }
+
+  .quick-btn{
+    min-height:29px!important;
+    padding:5px 4px!important;
+    font-size:8.5px!important;
+    line-height:1.1!important;
+    border-radius:8px!important;
+  }
+}
+
 </style>
 
 </head>
