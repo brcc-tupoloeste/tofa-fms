@@ -7668,7 +7668,16 @@ async function loadPTRReconciliationReport(){
     );
     const sum=(r&&r.summary)||{};
     set('ptrReportGenerated',r&&r.generatedAt ? 'Generated: '+r.generatedAt : '');
-    set('ptrReportAccountability',ptrMoney(sum.totalAccountability));
+  set(
+  'ptrReportAccountability',
+  ptrMoney(
+    ptrReportVal(
+      sum,
+      ['netTotalAccountability','grossTotalAccountability','totalAccountability'],
+      0
+    )
+  )
+);
     set('ptrReportConfirmed',ptrMoney(sum.totalConfirmedTurnover));
     set('ptrReportPending',ptrMoney(sum.totalPendingTurnover));
     set('ptrReportUnremitted',ptrMoney(sum.unremittedMemberCollections));
