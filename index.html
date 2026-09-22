@@ -2391,8 +2391,46 @@ button.danger{
   <h3 class="panel-title">💰 Cash &amp; Bank Management</h3>
   <div class="panel-note">Select the financial transaction function you want to use.</div>
   <div class="quick-grid">
+    <button class="quick-btn" type="button" onclick="openAddFundsPanel()">➕ Add Funds</button>
     <button class="quick-btn" type="button" onclick="openExpensePanel()">💸 Expenses</button>
     <button class="quick-btn" type="button" onclick="openBankPanel()">🏦 Bank</button>
+  </div>
+</div>
+
+<!-- =======================================================
+     ADD FUNDS — CURRENT / NEW TREASURER
+======================================================= -->
+<div id="addFundsPanel" class="card hidden">
+  <div class="panel-nav">
+    <button type="button" class="back-dashboard" onclick="openCashBankMenu()">← Back to Cash &amp; Bank</button>
+  </div>
+  <h3 class="panel-title">➕ Add Funds</h3>
+  <div class="panel-note">Record actual cash received by the Current Treasurer that is not a member payment. This adds to Cash on Hand and Association Balance, not Bank Balance.</div>
+  <div class="form-grid">
+    <div><label>Date</label><input id="fundReceiptDate" type="date"></div>
+    <div><label>Fund Source</label><select id="fundReceiptSource">
+      <option value="">Select fund source</option>
+      <option value="SALE OF PRODUCE">Sale of Produce</option>
+      <option value="RETURNED/EXCESS EXPENSE FUNDS">Returned/Excess Expense Funds</option>
+      <option value="DONATION">Donation</option>
+      <option value="OTHER INCOME / FUND SOURCE">Other Income / Fund Source</option>
+    </select></div>
+    <div><label>Received From</label><input id="fundReceiptFrom" placeholder="Person / source (optional)"></div>
+    <div><label>Amount</label><input id="fundReceiptAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00"></div>
+    <div class="full"><label>Description</label><input id="fundReceiptDescription" placeholder="Example: Excess from transportation expense fund"></div>
+    <div><label>Received By</label><input id="fundReceiptReceivedBy" placeholder="Current Treasurer"></div>
+    <div><label>Reference</label><input id="fundReceiptReference" placeholder="Optional"></div>
+    <div class="full"><label>Remarks</label><textarea id="fundReceiptRemarks" placeholder="Optional remarks"></textarea></div>
+  </div>
+  <div class="form-actions-row">
+    <button type="button" onclick="saveOtherFundReceipt()">ADD FUNDS</button>
+    <button type="button" class="alt" onclick="openCashBankMenu()">CANCEL</button>
+  </div>
+  <div id="fundReceiptMsg"></div>
+  <button id="fundReceiptHistoryBtn" type="button" class="alt" onclick="toggleOtherFundHistory()">📋 View Add Funds History</button>
+  <div id="fundReceiptHistorySection" class="hidden" style="margin-top:12px">
+    <h3 style="margin:0 0 10px">📋 Add Funds History</h3>
+    <div id="fundReceiptHistoryContent" class="scroll"><div class="panel-note">Click View Add Funds History to load records.</div></div>
   </div>
 </div>
 
@@ -3495,7 +3533,6 @@ button.danger{
       <div class="ptr-passbook-summary">
         <div class="ptr-passbook-kpi"><b>Total Cash on Hand Recorded</b><span id="ptrBeginningCashTotal">₱0.00</span></div>
         <div class="ptr-passbook-kpi"><b>From Encoded Historical Collections</b><span id="ptrBeginningHistoricalCustody">₱0.00</span></div>
-        <div class="ptr-passbook-kpi"><b>Separate Beginning Funds</b><span id="ptrBeginningSeparateFunds">₱0.00</span></div>
         <div class="ptr-passbook-kpi"><b>Additional Accountability</b><span id="ptrBeginningRemaining">₱0.00</span></div>
       </div>
 
@@ -3740,7 +3777,9 @@ button.danger{
 ========================================================= */
 
 const API_URL =
-  'https://script.google.com/macros/s/AKfycbynk1P7SnfHWOBnJYC2vhwdH7ONxEUj8FWMp--40YUpkcecjwWoigQG29pnc4YlU6l0zA/exec';
+  'https://script.google.com/macros/s/AKfycbxzAWl0Oge3Sa6hf0SjMK5aSzkzh9hTnpuB9zEj1zxrBd3pYCEhyjCcO5WCr5yKDAE2YQ/exec';
+
+ console.log('[TOFA BUILD] Add Funds / Apps Script Version 151');
 
 
 let token = '';
@@ -3981,151 +4020,637 @@ function fail(
         ↓
    route/action
 ========================================================= */
-
 /* =========================================================
    APPS SCRIPT IFRAME BRIDGE
-   Avoids browser CORS problems from direct fetch().
+   PROBE / HANDSHAKE VERSION
 ========================================================= */
+
 let tofaBridgeFrame = null;
 let tofaBridgeWindow = null;
 let tofaBridgeReady = false;
 let tofaBridgeWaiters = {};
 let tofaBridgeReadyPromise = null;
 
-function ensureTofaBridge(){
-  if(tofaBridgeReady && tofaBridgeWindow) return Promise.resolve();
 
-  if(tofaBridgeReadyPromise) return tofaBridgeReadyPromise;
+/* =========================================================
+   RECEIVE MESSAGES FROM APPS SCRIPT BRIDGE
+========================================================= */
 
-  tofaBridgeReadyPromise = new Promise(function(resolve,reject){
-    let settled = false;
+window.addEventListener('message', function(ev){
 
-    function finishReady(){
-      if(settled) return;
-      settled = true;
-      clearTimeout(timer);
-      tofaBridgeReady = true;
-      resolve();
-    }
-
-    const timer = setTimeout(function(){
-      if(settled) return;
-      settled = true;
-      tofaBridgeReadyPromise = null;
-      reject(new Error('TOFA server bridge did not become ready. Please try again.'));
-    },25000);
-
-    if(!tofaBridgeFrame){
-      tofaBridgeFrame = document.createElement('iframe');
-      tofaBridgeFrame.id = 'tofaApiBridge';
-      tofaBridgeFrame.src = API_URL;
-      tofaBridgeFrame.setAttribute('aria-hidden','true');
-      tofaBridgeFrame.style.position = 'fixed';
-      tofaBridgeFrame.style.width = '1px';
-      tofaBridgeFrame.style.height = '1px';
-      tofaBridgeFrame.style.opacity = '0';
-      tofaBridgeFrame.style.pointerEvents = 'none';
-      tofaBridgeFrame.style.border = '0';
-      tofaBridgeFrame.style.left = '-9999px';
-      document.body.appendChild(tofaBridgeFrame);
-    }
-
-    if(tofaBridgeReady) finishReady();
-
-    window.addEventListener('tofa-bridge-ready-internal',finishReady,{once:true});
-  });
-
-  return tofaBridgeReadyPromise;
-}
-
-window.addEventListener('message',function(ev){
   const m = ev.data || {};
 
+  /* -------------------------------------------------------
+     BRIDGE READY
+  ------------------------------------------------------- */
+
   if(m.__onlineBridgeReady === true){
-    console.log('[TOFA BRIDGE CLIENT] READY',ev.origin);
-    // IMPORTANT: Apps Script may run inside a nested googleusercontent frame.
-    // Save the exact window that sent READY and send API requests back to it.
+
+    console.log(
+      '[TOFA BRIDGE CLIENT] READY',
+      ev.origin
+    );
+
+    /*
+     * Save the exact window that answered our probe.
+     */
     tofaBridgeWindow = ev.source;
     tofaBridgeReady = true;
-    window.dispatchEvent(new Event('tofa-bridge-ready-internal'));
+
+    window.dispatchEvent(
+      new Event(
+        'tofa-bridge-ready-internal'
+      )
+    );
+
     return;
   }
 
-  if(m.__onlineApi !== true || !m.id) return;
 
-  const pending = tofaBridgeWaiters[m.id];
-  if(!pending) return;
+  /* -------------------------------------------------------
+     API RESPONSE
+  ------------------------------------------------------- */
+
+  if(
+    m.__onlineApi !== true ||
+    !m.id
+  ){
+    return;
+  }
+
+
+  const pending =
+    tofaBridgeWaiters[m.id];
+
+  if(!pending){
+    return;
+  }
+
 
   delete tofaBridgeWaiters[m.id];
-  clearTimeout(pending.timer);
 
-  if(m.ok){
-    pending.resolve(m.data === undefined || m.data === null ? {} : m.data);
-  }else{
-    pending.reject(new Error(m.error || 'Request failed.'));
-  }
-});
-
-function callTofaBridge(action,payload){
-  return ensureTofaBridge().then(function(){
-    return new Promise(function(resolve,reject){
-      const id =
-        'TOFA-BRIDGE-' +
-        Date.now() + '-' +
-        Math.random().toString(36).substring(2,8).toUpperCase();
-
-      const timer = setTimeout(function(){
-        delete tofaBridgeWaiters[id];
-        reject(new Error('TOFA server request timed out. Please try again.'));
-      },30000);
-
-      tofaBridgeWaiters[id] = {
-        resolve:resolve,
-        reject:reject,
-        timer:timer
-      };
-
-      try{
-        const bridgeTarget = tofaBridgeWindow || (tofaBridgeFrame && tofaBridgeFrame.contentWindow);
-        if(!bridgeTarget) throw new Error('TOFA server bridge window is unavailable.');
-
-        bridgeTarget.postMessage(
-          {
-            __onlineApiRequest:true,
-            id:id,
-            action:action,
-            payload:payload || {}
-          },
-          '*'
-        );
-      }catch(err){
-        clearTimeout(timer);
-        delete tofaBridgeWaiters[id];
-        reject(err);
-      }
-    });
-  });
-}
-
-async function api(action,payload,title,sub){
-  showBusy(
-    title || 'Please wait...',
-    sub || 'Processing request'
+  clearTimeout(
+    pending.timer
   );
 
-  try{
-    console.log('[TOFA API BRIDGE] START',action);
-    const result = await callTofaBridge(action,payload || {});
-    console.log('[TOFA API BRIDGE] SUCCESS',action,result);
-    return result;
-  }catch(error){
-    console.error('[TOFA API BRIDGE] FAILED',action,error);
-    throw error;
-  }finally{
-    hideBusy();
+
+  if(m.ok){
+
+    pending.resolve(
+      m.data === undefined ||
+      m.data === null
+        ? {}
+        : m.data
+    );
+
+  }else{
+
+    pending.reject(
+      new Error(
+        m.error ||
+        'Request failed.'
+      )
+    );
+
   }
+
+});
+
+
+/* =========================================================
+   RESET BRIDGE
+========================================================= */
+
+function resetTofaBridge(){
+
+  console.warn(
+    '[TOFA BRIDGE CLIENT] RESET'
+  );
+
+  tofaBridgeReady = false;
+  tofaBridgeWindow = null;
+  tofaBridgeReadyPromise = null;
+
+
+  if(tofaBridgeFrame){
+
+    try{
+      tofaBridgeFrame.remove();
+    }
+    catch(e){}
+
+    tofaBridgeFrame = null;
+  }
+
 }
 
+
+/* =========================================================
+   SEND READY PROBE
+========================================================= */
+
+function probeTofaBridge(){
+
+  if(
+    !tofaBridgeFrame ||
+    !tofaBridgeFrame.contentWindow
+  ){
+    return;
+  }
+
+
+  try{
+
+    tofaBridgeFrame
+      .contentWindow
+      .postMessage(
+        {
+          __onlineBridgeProbe:
+            true
+        },
+        '*'
+      );
+
+    console.log(
+      '[TOFA BRIDGE CLIENT] PROBE SENT'
+    );
+
+  }
+  catch(err){
+
+    console.warn(
+      '[TOFA BRIDGE CLIENT] PROBE ERROR',
+      err
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   ENSURE BRIDGE
+========================================================= */
+
+function ensureTofaBridge(){
+
+  if(
+    tofaBridgeReady &&
+    tofaBridgeWindow
+  ){
+
+    return Promise.resolve();
+
+  }
+
+
+  if(tofaBridgeReadyPromise){
+
+    return tofaBridgeReadyPromise;
+
+  }
+
+
+  tofaBridgeReadyPromise =
+    new Promise(
+      function(resolve,reject){
+
+        let settled = false;
+
+        let probeTimer = null;
+
+        let timeoutTimer = null;
+
+
+        function cleanup(){
+
+          if(probeTimer){
+            clearInterval(
+              probeTimer
+            );
+          }
+
+          if(timeoutTimer){
+            clearTimeout(
+              timeoutTimer
+            );
+          }
+
+          window.removeEventListener(
+            'tofa-bridge-ready-internal',
+            finishReady
+          );
+
+        }
+
+
+        function finishReady(){
+
+          if(settled){
+            return;
+          }
+
+
+          if(
+            !tofaBridgeReady ||
+            !tofaBridgeWindow
+          ){
+            return;
+          }
+
+
+          settled = true;
+
+          cleanup();
+
+          tofaBridgeReadyPromise =
+            null;
+
+
+          console.log(
+            '[TOFA BRIDGE CLIENT] HANDSHAKE COMPLETE'
+          );
+
+
+          resolve();
+
+        }
+
+
+        function failReady(){
+
+          if(settled){
+            return;
+          }
+
+
+          settled = true;
+
+          cleanup();
+
+          tofaBridgeReadyPromise =
+            null;
+
+
+          reject(
+            new Error(
+              'TOFA server bridge did not become ready. Please try again.'
+            )
+          );
+
+        }
+
+
+        /*
+         * Install listener BEFORE iframe/probe.
+         */
+        window.addEventListener(
+          'tofa-bridge-ready-internal',
+          finishReady
+        );
+
+
+        /* ---------------------------------------------------
+           CREATE IFRAME
+        --------------------------------------------------- */
+
+        if(
+          !tofaBridgeFrame ||
+          !tofaBridgeFrame.isConnected
+        ){
+
+          tofaBridgeFrame =
+            document.createElement(
+              'iframe'
+            );
+
+
+          tofaBridgeFrame.id =
+            'tofaApiBridge';
+
+
+          tofaBridgeFrame.setAttribute(
+            'aria-hidden',
+            'true'
+          );
+
+
+          tofaBridgeFrame.style.position =
+            'fixed';
+
+          tofaBridgeFrame.style.width =
+            '1px';
+
+          tofaBridgeFrame.style.height =
+            '1px';
+
+          tofaBridgeFrame.style.opacity =
+            '0';
+
+          tofaBridgeFrame.style.pointerEvents =
+            'none';
+
+          tofaBridgeFrame.style.border =
+            '0';
+
+          tofaBridgeFrame.style.left =
+            '-9999px';
+
+
+          /*
+           * Once iframe loads,
+           * immediately start probing.
+           */
+          tofaBridgeFrame.addEventListener(
+            'load',
+            function(){
+
+              console.log(
+                '[TOFA BRIDGE CLIENT] IFRAME LOADED'
+              );
+
+              probeTofaBridge();
+
+            }
+          );
+
+
+          tofaBridgeFrame.src =
+            API_URL;
+
+
+          document.body.appendChild(
+            tofaBridgeFrame
+          );
+
+        }
+
+
+        /* ---------------------------------------------------
+           REPEATED PROBE
+
+           Important for mobile browsers:
+           if first READY/message is missed,
+           another probe will request it again.
+        --------------------------------------------------- */
+
+        probeTofaBridge();
+
+
+        probeTimer =
+          setInterval(
+            function(){
+
+              if(
+                tofaBridgeReady &&
+                tofaBridgeWindow
+              ){
+
+                finishReady();
+                return;
+
+              }
+
+              probeTofaBridge();
+
+            },
+            1000
+          );
+
+
+        /*
+         * Maximum bridge startup wait.
+         */
+        timeoutTimer =
+          setTimeout(
+            failReady,
+            30000
+          );
+
+
+        /*
+         * READY may already have arrived.
+         */
+        if(
+          tofaBridgeReady &&
+          tofaBridgeWindow
+        ){
+
+          finishReady();
+
+        }
+
+      }
+    );
+
+
+  return tofaBridgeReadyPromise;
+
+}
+
+
+/* =========================================================
+   CALL APPS SCRIPT THROUGH BRIDGE
+========================================================= */
+
+function callTofaBridge(
+  action,
+  payload
+){
+
+  return ensureTofaBridge()
+    .then(
+      function(){
+
+        return new Promise(
+          function(resolve,reject){
+
+            const id =
+              'TOFA-BRIDGE-' +
+              Date.now() +
+              '-' +
+              Math.random()
+                .toString(36)
+                .substring(2,8)
+                .toUpperCase();
+
+
+            const timer =
+              setTimeout(
+                function(){
+
+                  delete tofaBridgeWaiters[id];
+
+                  reject(
+                    new Error(
+                      'TOFA server request timed out. Please try again.'
+                    )
+                  );
+
+                },
+                30000
+              );
+
+
+            tofaBridgeWaiters[id] = {
+
+              resolve:
+                resolve,
+
+              reject:
+                reject,
+
+              timer:
+                timer
+
+            };
+
+
+            try{
+
+              const bridgeTarget =
+                tofaBridgeWindow;
+
+
+              if(!bridgeTarget){
+
+                throw new Error(
+                  'TOFA server bridge window is unavailable.'
+                );
+
+              }
+
+
+              bridgeTarget.postMessage(
+
+                {
+
+                  __onlineApiRequest:
+                    true,
+
+                  id:
+                    id,
+
+                  action:
+                    action,
+
+                  payload:
+                    payload || {}
+
+                },
+
+                '*'
+
+              );
+
+
+              console.log(
+                '[TOFA BRIDGE CLIENT] REQUEST SENT',
+                action,
+                id
+              );
+
+
+            }
+            catch(err){
+
+              clearTimeout(
+                timer
+              );
+
+              delete tofaBridgeWaiters[id];
+
+              reject(err);
+
+            }
+
+          }
+        );
+
+      }
+    );
+
+}
+
+
+/* =========================================================
+   MAIN API FUNCTION
+========================================================= */
+
+async function api(
+  action,
+  payload,
+  title,
+  sub
+){
+
+  showBusy(
+    title ||
+      'Please wait...',
+
+    sub ||
+      'Processing request'
+  );
+
+
+  try{
+
+    console.log(
+      '[TOFA API BRIDGE] START',
+      action
+    );
+
+
+    const result =
+      await callTofaBridge(
+        action,
+        payload || {}
+      );
+
+
+    console.log(
+      '[TOFA API BRIDGE] SUCCESS',
+      action,
+      result
+    );
+
+
+    return result;
+
+  }
+  catch(error){
+
+    console.error(
+      '[TOFA API BRIDGE] FAILED',
+      action,
+      error
+    );
+
+
+    if(
+      String(
+        error &&
+        error.message || ''
+      )
+      .toLowerCase()
+      .includes('bridge')
+    ){
+
+      resetTofaBridge();
+
+    }
+
+
+    throw error;
+
+  }
+  finally{
+
+    hideBusy();
+
+  }
+
+}
 
 /* =========================================================
    LOGIN
@@ -5880,6 +6405,68 @@ function openExpensePanel(){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
+function openAddFundsPanel(){
+  hideAppPanels();
+  document.getElementById('addFundsPanel').classList.remove('hidden');
+  document.getElementById('searchTopBar').classList.remove('hidden');
+  const date=document.getElementById('fundReceiptDate');
+  if(date && !date.value) date.value=todayInputValue();
+  msg('fundReceiptMsg','','');
+  const section=document.getElementById('fundReceiptHistorySection');
+  const btn=document.getElementById('fundReceiptHistoryBtn');
+  if(section) section.classList.add('hidden');
+  if(btn) btn.textContent='📋 View Add Funds History';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+async function saveOtherFundReceipt(){
+  const source=document.getElementById('fundReceiptSource').value;
+  const amount=Number(document.getElementById('fundReceiptAmount').value||0);
+  const description=document.getElementById('fundReceiptDescription').value.trim();
+  if(!source){msg('fundReceiptMsg','Please select a Fund Source.','error');return;}
+  if(!(amount>0)){msg('fundReceiptMsg','Please enter a valid amount.','error');return;}
+  if(!description){msg('fundReceiptMsg','Please enter a description.','error');return;}
+  try{
+    const r=await api('saveOtherFundReceipt',{token:token,fundData:{
+      date:document.getElementById('fundReceiptDate').value,
+      fundSource:source,
+      receivedFrom:document.getElementById('fundReceiptFrom').value.trim(),
+      description:description,
+      amount:amount,
+      receivedBy:document.getElementById('fundReceiptReceivedBy').value.trim(),
+      reference:document.getElementById('fundReceiptReference').value.trim(),
+      remarks:document.getElementById('fundReceiptRemarks').value.trim()
+    }},'Adding Funds...','Recording actual cash received');
+    msg('fundReceiptMsg',(r&&r.message)||'Funds successfully added.','ok');
+    ['fundReceiptAmount','fundReceiptFrom','fundReceiptDescription','fundReceiptReference','fundReceiptRemarks'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+    document.getElementById('fundReceiptSource').value='';
+    await loadDashboard({silent:true});
+    const section=document.getElementById('fundReceiptHistorySection');
+    if(section && !section.classList.contains('hidden')) await loadOtherFundHistory();
+  }catch(e){fail(e,'fundReceiptMsg');}
+}
+
+async function toggleOtherFundHistory(){
+  const section=document.getElementById('fundReceiptHistorySection');
+  const btn=document.getElementById('fundReceiptHistoryBtn');
+  if(!section||!btn)return;
+  const show=section.classList.contains('hidden');
+  section.classList.toggle('hidden',!show);
+  btn.textContent=show?'▲ Hide Add Funds History':'📋 View Add Funds History';
+  if(show) await loadOtherFundHistory();
+}
+
+async function loadOtherFundHistory(){
+  const box=document.getElementById('fundReceiptHistoryContent');
+  if(!box)return;
+  try{
+    const r=await api('getOtherFundReceipts',{token:token},'Loading Add Funds History...','Reading fund receipts');
+    const rows=(r&&r.records)||[];
+    if(!rows.length){box.innerHTML='<div class="panel-note">No Add Funds records yet.</div>';return;}
+    box.innerHTML='<div class="table-wrap"><table class="member-table"><thead><tr><th>Date</th><th>Source</th><th>Description</th><th>Received From</th><th>Amount</th><th>Reference</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+escapeHtml(formatDisplayDate(x.Date||''))+'</td><td>'+escapeHtml(x['Fund Source']||'')+'</td><td>'+escapeHtml(x.Description||'')+'</td><td>'+escapeHtml(x['Received From']||'')+'</td><td>'+money(Number(x.Amount||0))+'</td><td>'+escapeHtml(x.Reference||'')+'</td></tr>').join('')+'</tbody></table></div>';
+  }catch(e){box.innerHTML='<div class="error">'+escapeHtml(e.message||String(e))+'</div>';}
+}
+
 function openBankPanel(){
   hideAppPanels();
   document.getElementById('bankPanel').classList.remove('hidden');
@@ -6155,6 +6742,7 @@ function hideAppPanels(){
     'memberListPanel',
     'outstandingPanel',
     'reportPanel',
+    'addFundsPanel',
     'expensePanel',
     'bankPanel',
     'editMemberPanel',
@@ -6494,6 +7082,32 @@ async function loadDashboard(options){
 
 
     /* =====================================================
+       CURRENT TREASURER DASHBOARD BALANCES
+
+       Previous Treasurer verified/passbook funds are still
+       accountability until actually turned over. Therefore
+       they must NOT appear as Current Treasurer Bank Balance.
+
+       The existing dashboard bank figure can contain the old
+       verified opening/passbook balance. Remove that base; an
+       actual bank turnover is recorded as a new bank deposit,
+       so only the turned-over/current portion remains.
+    ===================================================== */
+
+    /*
+     * Current Treasurer Bank Balance now comes directly from
+     * Bank Transactions. The erroneous ₱22,000 turnover row
+     * was removed from the sheet, so no Previous Treasurer
+     * reconciliation API call is needed during Dashboard load.
+     * This keeps the Dashboard fast.
+     */
+    const currentTreasurerBank = Number(d.bankBalance || 0);
+
+    const currentTreasurerCash = Number(d.cashOnHand || 0);
+    const currentAssociationBalance =
+      currentTreasurerBank + currentTreasurerCash;
+
+    /* =====================================================
        UPDATE DASHBOARD
        EXACT EXISTING FIELD IDs
     ===================================================== */
@@ -6501,21 +7115,21 @@ async function loadDashboard(options){
     set(
       'statAssociation',
       money(
-        d.associationBalance
+        currentAssociationBalance
       )
     );
 
     set(
       'statBank',
       money(
-        d.bankBalance
+        currentTreasurerBank
       )
     );
 
     set(
       'statCash',
       money(
-        d.cashOnHand
+        currentTreasurerCash
       )
     );
 
@@ -7070,17 +7684,9 @@ function formatReportDate(v){
 function renderFinancialReport(r){
   const isAnnual=String(r.reportType||'').toLowerCase()==='annual';
   const cb=r.collectionBreakdown||[];
-  const fb=r.fundReceiptBreakdown||[];
   const eb=r.expenseBreakdown||[];
   const ms=r.monthlySummary||[];
   const ys=r.yearlySummary||[];
-  const fundReceipts=r.fundReceipts||[];
-
-  const totalFundReceipts=Number(r.totalFundReceipts||0);
-  const totalFundsReceived=(r.totalFundsReceived!==undefined && r.totalFundsReceived!==null)
-    ? Number(r.totalFundsReceived||0)
-    : Number(r.totalCollections||0)+totalFundReceipts;
-  const fundReceiptCount=Number(r.fundReceiptCount||fundReceipts.length||0);
 
   const signName=function(v){
     v=String(v||'').trim();
@@ -7093,20 +7699,12 @@ function renderFinancialReport(r){
           '<td>'+esc(x.year)+'</td>'+
           '<td>'+money(x.beginningBalance)+'</td>'+
           '<td>'+money(x.totalCollections)+'</td>'+
-          '<td>'+money(x.totalFundReceipts||0)+'</td>'+
-          '<td>'+money(x.totalFundsReceived!==undefined?x.totalFundsReceived:(Number(x.totalCollections||0)+Number(x.totalFundReceipts||0)))+'</td>'+
           '<td>'+money(x.totalExpenses)+'</td>'+
           '<td>'+money(x.netIncome)+'</td>'+
           '<td>'+money(x.endingBalance)+'</td>'+
         '</tr>'
       ).join('')
-    : '<tr><td colspan="8">No yearly summary available.</td></tr>';
-
-  const fundBreakdownRows=fb.length
-    ? fb.map(x=>'<tr><td>'+esc(x.fundSource||x.source||x.type||'Other Fund Receipt')+'</td><td>'+esc(x.transactions!==undefined?x.transactions:(x.count||0))+'</td><td>'+money(x.amount)+'</td></tr>').join('')
-    : (totalFundReceipts>0
-        ? '<tr><td>Other Fund Receipts / Add Funds</td><td>'+fundReceiptCount+'</td><td>'+money(totalFundReceipts)+'</td></tr>'
-        : '<tr><td colspan="3">No fund receipts for this period.</td></tr>');
+    : '<tr><td colspan="6">No yearly summary available.</td></tr>';
 
   const reportHtml=''
     +'<div class="fr-official-header">'
@@ -7125,25 +7723,18 @@ function renderFinancialReport(r){
     +'<div class="fr-section-heading">Financial Summary</div>'
     +'<div class="report-summary">'
       +'<div class="report-kpi"><b>Beginning Balance</b><span>'+money(r.beginningBalance)+'</span></div>'
-      +'<div class="report-kpi"><b>Member Collections</b><span>'+money(r.totalCollections)+'</span></div>'
-      +'<div class="report-kpi"><b>Fund Receipts / Add Funds</b><span>'+money(totalFundReceipts)+'</span></div>'
-      +'<div class="report-kpi"><b>Total Funds Received</b><span>'+money(totalFundsReceived)+'</span></div>'
+      +'<div class="report-kpi"><b>Total Collections</b><span>'+money(r.totalCollections)+'</span></div>'
       +'<div class="report-kpi"><b>Total Expenses</b><span>'+money(r.totalExpenses)+'</span></div>'
       +'<div class="report-kpi"><b>Net Income</b><span>'+money(r.netIncome)+'</span></div>'
       +'<div class="report-kpi"><b>Association Balance</b><span>'+money(r.associationBalance)+'</span></div>'
       +'<div class="report-kpi"><b>Bank Balance</b><span>'+money(r.bankBalance)+'</span></div>'
       +'<div class="report-kpi"><b>Cash Position</b><span>'+money(r.cashPosition)+'</span></div>'
-      +'<div class="report-kpi"><b>Transactions</b><span>'+((r.collectionCount||0)+fundReceiptCount+(r.expenseCount||0))+'</span></div>'
+      +'<div class="report-kpi"><b>Transactions</b><span>'+((r.collectionCount||0)+(r.expenseCount||0))+'</span></div>'
     +'</div>'
 
-    +'<div class="report-section"><h4>Member Collection Breakdown</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Type</th><th>Transactions</th><th>Amount</th></tr></thead><tbody>'
+    +'<div class="report-section"><h4>Collection Breakdown</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Type</th><th>Transactions</th><th>Amount</th></tr></thead><tbody>'
       +cb.map(x=>'<tr><td>'+esc(x.type)+'</td><td>'+esc(x.transactions)+'</td><td>'+money(x.amount)+'</td></tr>').join('')
       +'<tr><th>Total</th><th>'+cb.reduce((a,x)=>a+Number(x.transactions||0),0)+'</th><th>'+money(r.totalCollections)+'</th></tr>'
-    +'</tbody></table></div></div>'
-
-    +'<div class="report-section"><h4>Fund Receipts / Add Funds Breakdown</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Fund Source</th><th>Transactions</th><th>Amount</th></tr></thead><tbody>'
-      +fundBreakdownRows
-      +'<tr><th>Total</th><th>'+fundReceiptCount+'</th><th>'+money(totalFundReceipts)+'</th></tr>'
     +'</tbody></table></div></div>'
 
     +'<div class="report-section"><h4>Expense Breakdown</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Category</th><th>Transactions</th><th>Amount</th></tr></thead><tbody>'
@@ -7151,23 +7742,22 @@ function renderFinancialReport(r){
       +'<tr><th>Total</th><th>'+eb.reduce((a,x)=>a+Number(x.transactions||0),0)+'</th><th>'+money(r.totalExpenses)+'</th></tr>'
     +'</tbody></table></div></div>'
 
-    +'<div class="report-section"><h4>Monthly Summary</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Month</th><th>Member Collections</th><th>Fund Receipts</th><th>Total Funds Received</th><th>Expenses</th><th>Net</th></tr></thead><tbody>'
-      +ms.map(x=>'<tr><td>'+esc(x.monthName)+'</td><td>'+money(x.collections)+'</td><td>'+money(x.fundReceipts||0)+'</td><td>'+money(x.totalFundsReceived!==undefined?x.totalFundsReceived:(Number(x.collections||0)+Number(x.fundReceipts||0)))+'</td><td>'+money(x.expenses)+'</td><td>'+money(x.net)+'</td></tr>').join('')
+    +'<div class="report-section"><h4>Monthly Summary</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Month</th><th>Collections</th><th>Expenses</th><th>Net</th></tr></thead><tbody>'
+      +ms.map(x=>'<tr><td>'+esc(x.monthName)+'</td><td>'+money(x.collections)+'</td><td>'+money(x.expenses)+'</td><td>'+money(x.net)+'</td></tr>').join('')
     +'</tbody></table></div></div>'
 
-    +'<div class="report-section"><h4>Yearly Summary</h4><div class="table-wrap"><table class="report-table fr-yearly-table"><thead><tr><th>Year</th><th>Beginning Balance</th><th>Member Collections</th><th>Fund Receipts</th><th>Total Funds Received</th><th>Expenses</th><th>Net Income</th><th>Ending Balance</th></tr></thead><tbody>'
+    +'<div class="report-section"><h4>Yearly Summary</h4><div class="table-wrap"><table class="report-table fr-yearly-table"><thead><tr><th>Year</th><th>Beginning Balance</th><th>Collections</th><th>Expenses</th><th>Net Income</th><th>Ending Balance</th></tr></thead><tbody>'
       +yearlyRows+
     '</tbody></table></div></div>'
 
     +(isAnnual ? '' :
-      '<div class="report-section"><h4>Selected Member Collections</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Date</th><th>Member</th><th>Type</th><th>Amount</th></tr></thead><tbody>'
+      '<div class="report-section"><h4>Selected Collections</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Date</th><th>Member</th><th>Type</th><th>Amount</th></tr></thead><tbody>'
       +(r.collections||[]).map(x=>'<tr><td>'+formatReportDate(x.date)+'</td><td>'+esc(x.memberName||x.memberId)+'</td><td>'+esc(x.type)+'</td><td>'+money(x.amount)+'</td></tr>').join('')
       +'</tbody></table></div></div>'
-      +'<div class="report-section"><h4>Selected Fund Receipts / Add Funds</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Date</th><th>Fund Source</th><th>Received From</th><th>Description</th><th>Amount</th></tr></thead><tbody>'
-      +fundReceipts.map(x=>'<tr><td>'+formatReportDate(x.date)+'</td><td>'+esc(x.fundSource||'')+'</td><td>'+esc(x.receivedFrom||'')+'</td><td>'+esc(x.description||'')+'</td><td>'+money(x.amount)+'</td></tr>').join('')
-      +'</tbody></table></div></div>'
       +'<div class="report-section"><h4>Selected Expenses</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Date</th><th>Category</th><th>Particulars</th><th>Amount</th></tr></thead><tbody>'
-      +(r.expenses||[]).map(x=>'<tr><td>'+formatReportDate(x.date)+'</td><td>'+esc(x.category)+'</td><td>'+esc(x.particulars)+'</td><td>'+money(x.amount)+'</td></tr>').join('')
+      +((r.expenses||[]).length
+        ? (r.expenses||[]).map(x=>'<tr><td>'+formatReportDate(x.date)+'</td><td>'+esc(x.category)+'</td><td>'+esc(x.particulars)+'</td><td>'+money(x.amount)+'</td></tr>').join('')
+        : '<tr><td colspan="3" style="text-align:center;">No expenses recorded for this period.</td><td style="text-align:right;font-weight:700;">'+money(0)+'</td></tr>')
       +'</tbody></table></div></div>'
     )
 
@@ -8032,19 +8622,57 @@ async function loadPTRReconciliationReport(){
       0
     ));
 
+    /*
+     * FINAL ACCOUNTABILITY FORMULA (confirmed by user):
+     * Total Accountable Funds = Verified Bank + Previous Cash on Hand + Historical Member Collections.
+     * Pending Turnover = Total Accountable Funds - ALL VALIDATED Historical Expenses - Confirmed Turnover.
+     *
+     * Historical member collections are added because they were collected AFTER the
+     * recorded Previous Treasurer Cash on Hand and are therefore a separate fund source.
+     */
     const verifiedBankFunds=ptrNum(ptrReportVal(sum,['verifiedBankFunds'],0));
-    set('ptrReportBeginningCash',ptrMoney(beginningCashTotal));
 
-    set(
-      'ptrReportConfirmed',
-      ptrMoney(
+    const historicalCollectionsForAccountability=ptrNum(
+      ptrReportVal(
+        expenseState,
+        ['historicalCollections','totalHistoricalCollections'],
         ptrReportVal(
-          sum,
-          ['totalConfirmedTurnover'],
+          expenseSummary,
+          ['historicalCollections','totalHistoricalCollections'],
           0
         )
       )
     );
+
+    const totalValidatedHistoricalExpenses=ptrNum(
+      ptrReportVal(
+        expenseState,
+        ['validatedHistoricalExpenses','totalValidatedExpenses'],
+        ptrReportVal(
+          expenseSummary,
+          ['validatedHistoricalExpenses','totalValidatedExpenses'],
+          0
+        )
+      )
+    );
+
+    const totalConfirmedTurnover=ptrNum(
+      ptrReportVal(sum,['totalConfirmedTurnover'],0)
+    );
+
+    const totalAccountableFunds=
+      verifiedBankFunds + beginningCashTotal + historicalCollectionsForAccountability;
+
+    const physicalFundsPending=Math.max(
+      0,
+      totalAccountableFunds - totalValidatedHistoricalExpenses - totalConfirmedTurnover
+    );
+
+    set('ptrReportAccountability',ptrMoney(totalAccountableFunds));
+    set('ptrReportBeginningCash',ptrMoney(beginningCashTotal));
+    set('ptrReportSeparateBeginningFunds',ptrMoney(separateBeginningFunds));
+    set('ptrReportConfirmed',ptrMoney(totalConfirmedTurnover));
+    set('ptrReportPending',ptrMoney(physicalFundsPending));
 
     /*
      * Historical Collections and Historical Expenses Applied
@@ -8067,21 +8695,22 @@ async function loadPTRReconciliationReport(){
         )
       );
 
-    // Total VALIDATED historical expenses are deductions from Previous Treasurer
-    // accountability even when they are not currently allocated to member payments.
-    const historicalExpenses=
-      ptrExpenseRows(expenseState)
-        .filter(function(x){
-          const status=String(
-            ptrPick(x,['validationStatus','status'],'VALIDATED')||''
-          ).trim().toUpperCase();
-          return status==='VALIDATED';
-        })
-        .reduce(function(total,x){
-          return total + ptrNum(
-            ptrPick(x,['amount','expenseAmount'],0)
-          );
-        },0);
+    const historicalExpensesApplied=
+      ptrNum(
+        ptrReportVal(
+          expenseState,
+          ['expenseApplied','allocatedHistoricalExpenses','activeExpenseAllocations'],
+          ptrReportVal(
+            expenseSummary,
+            ['expenseApplied','allocatedHistoricalExpenses','activeExpenseAllocations'],
+            ptrReportVal(
+              sum,
+              ['historicalExpensesApplied'],
+              0
+            )
+          )
+        )
+      );
 
     set(
       'ptrReportHistoricalCollections',
@@ -8090,42 +8719,7 @@ async function loadPTRReconciliationReport(){
 
     set(
       'ptrReportHistoricalExpenses',
-      ptrMoney(historicalExpenses)
-    );
-
-    // Final accountability rule:
-    // Verified Bank Funds + Previous Cash on Hand + Historical Member Collections.
-    // Historical Collections are separate from the recorded Cash on Hand.
-    const totalAccountableFunds=
-      verifiedBankFunds +
-      beginningCashTotal +
-      historicalCollections;
-
-    const confirmedTurnover=
-      ptrNum(
-        ptrReportVal(
-          sum,
-          ['totalConfirmedTurnover'],
-          0
-        )
-      );
-
-    const pendingTurnover=
-      Math.max(
-        0,
-        totalAccountableFunds -
-        historicalExpenses -
-        confirmedTurnover
-      );
-
-    set(
-      'ptrReportAccountability',
-      ptrMoney(totalAccountableFunds)
-    );
-
-    set(
-      'ptrReportPending',
-      ptrMoney(pendingTurnover)
+      ptrMoney(totalValidatedHistoricalExpenses)
     );
 
     set(
