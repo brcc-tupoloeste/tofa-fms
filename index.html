@@ -3225,6 +3225,7 @@ button.danger{
       <button id="ptrExpenseTab" type="button" onclick="showPTRSection('expense')">🧾 Historical Expenses</button>
       <button id="ptrExpenseAllocationTab" type="button" onclick="showPTRSection('expenseAllocation')">🔗 Expense Allocation</button>
       <button id="ptrUnremittedTab" type="button" onclick="showPTRSection('unremitted')">💵 Unremitted Collections</button>
+      <button id="ptrBeginningFundsTab" type="button" onclick="showPTRSection('beginningFunds')">💰 Cash on Hand</button>
       <button id="ptrPassbookTab" type="button" onclick="showPTRSection('passbook')">🏦 Bank / Passbook Records</button>
       <button id="ptrTurnoverTab" type="button" onclick="showPTRSection('turnover')">🔄 Record Turnover</button>
       <button id="ptrReportTab" type="button" onclick="showPTRSection('report')">📄 Reconciliation Report</button>
@@ -3471,6 +3472,54 @@ button.danger{
       </div>
     </div>
 
+    <div id="ptrBeginningFundsSection" class="ptr-box hidden">
+      <div class="panel-note">
+        Encode cash already under the custody of the Previous Treasurer before actual turnover. This is a custody/accountability record only and does <b>not</b> create a Collection, current Cash, Bank transaction, or Association income.
+      </div>
+
+      <div class="ptr-passbook-summary">
+        <div class="ptr-passbook-kpi"><b>Total Cash on Hand Recorded</b><span id="ptrBeginningCashTotal">₱0.00</span></div>
+        <div class="ptr-passbook-kpi"><b>From Encoded Historical Collections</b><span id="ptrBeginningHistoricalCustody">₱0.00</span></div>
+        <div class="ptr-passbook-kpi"><b>Separate Beginning Funds</b><span id="ptrBeginningSeparateFunds">₱0.00</span></div>
+        <div class="ptr-passbook-kpi"><b>Additional Accountability</b><span id="ptrBeginningRemaining">₱0.00</span></div>
+      </div>
+
+      <div class="form-grid">
+        <div><label>As-of Date</label><input id="ptrBeginningDate" type="date"></div>
+        <div><label>Fund Type</label><select id="ptrBeginningFundType"><option value="CASH ON HAND">Cash on Hand</option></select></div>
+        <div class="full">
+          <label>Source Classification</label>
+          <select id="ptrBeginningSource" onchange="ptrBeginningSourceChanged()">
+            <option value="">Select source classification</option>
+            <option value="HISTORICAL COLLECTIONS">Balance from Encoded Historical Collections</option>
+            <option value="SEPARATE BEGINNING FUND">Separate Beginning Fund</option>
+          </select>
+        </div>
+        <div class="full"><div id="ptrBeginningSourceNote" class="panel-note">Select where this cash balance came from.</div></div>
+        <div><label>Amount</label><input id="ptrBeginningAmount" type="number" min="0.01" step="0.01" inputmode="decimal"></div>
+        <div><label>Reference</label><input id="ptrBeginningReference" autocomplete="off" placeholder="Optional"></div>
+        <div class="full"><label>Description</label><input id="ptrBeginningDescription" autocomplete="off" placeholder="Example: Cash on hand per previous treasurer records"></div>
+        <div class="full"><label>Remarks</label><textarea id="ptrBeginningRemarks" placeholder="Optional notes"></textarea></div>
+      </div>
+
+      <div class="ptr-warning">
+        <b>Anti-double-counting:</b> Choose <b>Balance from Encoded Historical Collections</b> when this cash is already represented by old payments/collections encoded in the system. Choose <b>Separate Beginning Fund</b> only when the amount is not represented by those historical collections.
+      </div>
+
+      <div class="form-actions-row">
+        <button type="button" onclick="savePTRBeginningFund()">💾 SAVE CASH ON HAND</button>
+        <button type="button" class="alt" onclick="clearPTRBeginningFundForm()">CLEAR</button>
+      </div>
+      <div id="ptrBeginningMsg"></div>
+
+      <div class="table-wrap" style="margin-top:14px">
+        <table class="member-table">
+          <thead><tr><th>Date</th><th>ID</th><th>Source Classification</th><th>Description</th><th>Amount</th><th>Additional Accountability</th><th>Status</th><th>Reference / Remarks</th></tr></thead>
+          <tbody id="ptrBeginningBody"><tr><td colspan="8">No Cash on Hand records yet.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
     <div id="ptrPassbookSection" class="ptr-box hidden">
       <div class="panel-note">
         Encode the Previous Treasurer's historical bank/passbook entries here. These records are for reconciliation only and do <b>not</b> change the current Bank Balance until an actual Bank Turnover is recorded.
@@ -3545,6 +3594,8 @@ button.danger{
           <div class="ptr-report-kpi"><b>Confirmed Turnover</b><span id="ptrReportConfirmed">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Pending Turnover</b><span id="ptrReportPending">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Historical Collections</b><span id="ptrReportHistoricalCollections">₱0.00</span></div>
+          <div class="ptr-report-kpi"><b>Cash on Hand Recorded</b><span id="ptrReportBeginningCash">₱0.00</span></div>
+          <div class="ptr-report-kpi"><b>Separate Beginning Funds</b><span id="ptrReportSeparateBeginningFunds">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Historical Expenses Applied</b><span id="ptrReportHistoricalExpenses">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Unremitted Member Collections</b><span id="ptrReportUnremitted">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Verified Bank Funds</b><span id="ptrReportBankFunds">₱0.00</span></div>
@@ -3558,6 +3609,14 @@ button.danger{
           <table class="member-table">
             <thead><tr><th>Date</th><th>Member / Source</th><th>Payment Type</th><th>Amount</th><th>Expense Applied</th><th>Turned Over</th><th>Unremitted</th><th>Status</th><th>Reference / Remarks</th></tr></thead>
             <tbody id="ptrReportPaymentsBody"><tr><td colspan="9">No historical collections.</td></tr></tbody>
+          </table>
+        </div>
+
+        <div class="ptr-report-section-title">CASH ON HAND / BEGINNING FUNDS — Previous Treasurer Custody</div>
+        <div class="table-wrap">
+          <table class="member-table">
+            <thead><tr><th>Date</th><th>Fund ID</th><th>Source Classification</th><th>Description</th><th>Amount</th><th>Additional Accountability</th><th>Status</th><th>Reference / Remarks</th></tr></thead>
+            <tbody id="ptrReportBeginningFundsBody"><tr><td colspan="8">No Cash on Hand records.</td></tr></tbody>
           </table>
         </div>
 
@@ -7806,13 +7865,14 @@ async function reversePTRExpenseAllocation(allocationId){
 }
 
 function showPTRSection(section){
-  const sections={oldPayment:'ptrOldPaymentSection',expense:'ptrExpenseSection',expenseAllocation:'ptrExpenseAllocationSection',unremitted:'ptrUnremittedSection',passbook:'ptrPassbookSection',turnover:'ptrTurnoverSection',report:'ptrReportSection'};
-  const tabs={oldPayment:'ptrOldPaymentTab',expense:'ptrExpenseTab',expenseAllocation:'ptrExpenseAllocationTab',unremitted:'ptrUnremittedTab',passbook:'ptrPassbookTab',turnover:'ptrTurnoverTab',report:'ptrReportTab'};
+  const sections={oldPayment:'ptrOldPaymentSection',expense:'ptrExpenseSection',expenseAllocation:'ptrExpenseAllocationSection',unremitted:'ptrUnremittedSection',beginningFunds:'ptrBeginningFundsSection',passbook:'ptrPassbookSection',turnover:'ptrTurnoverSection',report:'ptrReportSection'};
+  const tabs={oldPayment:'ptrOldPaymentTab',expense:'ptrExpenseTab',expenseAllocation:'ptrExpenseAllocationTab',unremitted:'ptrUnremittedTab',beginningFunds:'ptrBeginningFundsTab',passbook:'ptrPassbookTab',turnover:'ptrTurnoverTab',report:'ptrReportTab'};
   Object.keys(sections).forEach(k=>{const e=document.getElementById(sections[k]);if(e)e.classList.toggle('hidden',k!==section);});
   Object.keys(tabs).forEach(k=>{const e=document.getElementById(tabs[k]);if(e)e.classList.toggle('active',k===section);});
   if(section==='expense')loadPTRExpenseState();
   if(section==='expenseAllocation')loadPTRExpenseAllocation();
   if(section==='unremitted')loadPTRUnremittedCollections();
+  if(section==='beginningFunds')loadPTRBeginningFunds();
   if(section==='passbook')loadPTRPassbookRecords();
   if(section==='turnover')loadPTRTurnover();
   if(section==='report')loadPTRReconciliationReport();
@@ -7849,6 +7909,13 @@ async function loadPTRReconciliationReport(){
       'Reading historical expenses and use of funds'
     );
 
+    const beginningFunds=await api(
+      'getPreviousTreasurerBeginningFunds',
+      {token:token},
+      'Loading Reconciliation Report...',
+      'Reading Previous Treasurer Cash on Hand'
+    );
+
     const sum=(r&&r.summary)||{};
     const expenseSummary=(expenseState&&expenseState.summary)||{};
 
@@ -7859,16 +7926,19 @@ async function loadPTRReconciliationReport(){
         : ''
     );
 
-    set(
-      'ptrReportAccountability',
-      ptrMoney(
-        ptrReportVal(
-          sum,
-          ['netTotalAccountability','grossTotalAccountability','totalAccountability'],
-          0
-        )
-      )
-    );
+    const separateBeginningFunds=ptrNum(beginningFunds&&beginningFunds.separateBeginningFunds);
+    const beginningRemaining=ptrNum(beginningFunds&&beginningFunds.remainingAccountability);
+    const beginningCashTotal=ptrNum(beginningFunds&&beginningFunds.cashOnHand);
+
+    const baseAccountability=ptrNum(ptrReportVal(
+      sum,
+      ['netTotalAccountability','grossTotalAccountability','totalAccountability'],
+      0
+    ));
+
+    set('ptrReportAccountability',ptrMoney(baseAccountability+separateBeginningFunds));
+    set('ptrReportBeginningCash',ptrMoney(beginningCashTotal));
+    set('ptrReportSeparateBeginningFunds',ptrMoney(separateBeginningFunds));
 
     set(
       'ptrReportConfirmed',
@@ -7881,16 +7951,12 @@ async function loadPTRReconciliationReport(){
       )
     );
 
-    set(
-      'ptrReportPending',
-      ptrMoney(
-        ptrReportVal(
-          sum,
-          ['totalPendingTurnover','totalRemainingAccountability'],
-          0
-        )
-      )
-    );
+    const basePending=ptrNum(ptrReportVal(
+      sum,
+      ['totalPendingTurnover','totalRemainingAccountability'],
+      0
+    ));
+    set('ptrReportPending',ptrMoney(basePending+beginningRemaining));
 
     /*
      * Historical Collections and Historical Expenses Applied
@@ -8107,6 +8173,28 @@ async function loadPTRReconciliationReport(){
           : '<tr><td colspan="9">No historical collections.</td></tr>';
     }
 
+
+    /* =====================================================
+       CASH ON HAND / BEGINNING FUNDS
+       ===================================================== */
+    const beginningRows=Array.isArray(beginningFunds&&beginningFunds.records)?beginningFunds.records:[];
+    const bfb=document.getElementById('ptrReportBeginningFundsBody');
+    if(bfb){
+      bfb.innerHTML=beginningRows.length?beginningRows.map(function(x){
+        const additional=String(x.sourceClassification||'').toUpperCase()==='SEPARATE BEGINNING FUND'
+          ? ptrNum(x.remainingAccountability):0;
+        return '<tr>'+ 
+          '<td>'+esc(x.asOfDate||'')+'</td>'+ 
+          '<td>'+esc(x.beginningFundId||'')+'</td>'+ 
+          '<td>'+esc(x.sourceClassification||'')+'</td>'+ 
+          '<td>'+esc(x.description||'')+'</td>'+ 
+          '<td><b>'+ptrMoney(x.amount||0)+'</b></td>'+ 
+          '<td><b>'+ptrMoney(additional)+'</b></td>'+ 
+          '<td>'+esc(x.turnoverStatus||x.validationStatus||'')+'</td>'+ 
+          '<td>'+esc([x.reference,x.remarks].filter(Boolean).join(' | '))+'</td>'+ 
+          '</tr>';
+      }).join(''):'<tr><td colspan="8">No Cash on Hand records.</td></tr>';
+    }
 
     /* =====================================================
        EXPENSES / USE OF FUNDS
@@ -8518,6 +8606,102 @@ async function loadPTRUnremittedCollections(){
   }catch(e){
     fail(e,'ptrUnremittedMsg');
   }
+}
+
+/* =========================================================
+   PREVIOUS TREASURER — CASH ON HAND / BEGINNING FUNDS UI
+========================================================= */
+function ptrBeginningSourceChanged(){
+  const source=(document.getElementById('ptrBeginningSource').value||'').trim();
+  const note=document.getElementById('ptrBeginningSourceNote');
+  if(!note)return;
+  if(source==='HISTORICAL COLLECTIONS'){
+    note.innerHTML='<b>Custody only:</b> this amount is already represented by encoded Historical Collections, so it will not be added again to Total Accountability.';
+  }else if(source==='SEPARATE BEGINNING FUND'){
+    note.innerHTML='<b>Additional accountability:</b> use this only when the cash is not represented by encoded Historical Collections.';
+  }else{
+    note.textContent='Select where this cash balance came from.';
+  }
+}
+
+function clearPTRBeginningFundForm(){
+  ['ptrBeginningDate','ptrBeginningSource','ptrBeginningAmount','ptrBeginningReference','ptrBeginningDescription','ptrBeginningRemarks']
+    .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const ft=document.getElementById('ptrBeginningFundType'); if(ft)ft.value='CASH ON HAND';
+  ptrBeginningSourceChanged();
+  msg('ptrBeginningMsg','','');
+}
+
+async function loadPTRBeginningFunds(){
+  try{
+    const r=await api(
+      'getPreviousTreasurerBeginningFunds',
+      {token:token},
+      'Loading Cash on Hand...',
+      'Reading Previous Treasurer beginning funds'
+    );
+    const rows=Array.isArray(r&&r.records)?r.records:[];
+    set('ptrBeginningCashTotal',ptrMoney(r&&r.cashOnHand));
+    set('ptrBeginningHistoricalCustody',ptrMoney(r&&r.custodyFromHistoricalCollections));
+    set('ptrBeginningSeparateFunds',ptrMoney(r&&r.separateBeginningFunds));
+    set('ptrBeginningRemaining',ptrMoney(r&&r.remainingAccountability));
+    const body=document.getElementById('ptrBeginningBody');
+    if(body){
+      body.innerHTML=rows.length?rows.map(x=>{
+        const additional=String(x.sourceClassification||'').toUpperCase()==='SEPARATE BEGINNING FUND'
+          ? Number(x.remainingAccountability||0):0;
+        return '<tr>'+ 
+          '<td>'+esc(ptrPassbookDateDisplay(x.asOfDate||''))+'</td>'+ 
+          '<td>'+esc(x.beginningFundId||'')+'</td>'+ 
+          '<td>'+esc(x.sourceClassification||'')+'</td>'+ 
+          '<td>'+esc(x.description||'')+'</td>'+ 
+          '<td><b>'+ptrMoney(x.amount||0)+'</b></td>'+ 
+          '<td><b>'+ptrMoney(additional)+'</b></td>'+ 
+          '<td>'+esc(x.turnoverStatus||x.validationStatus||'')+'</td>'+ 
+          '<td>'+esc([x.reference,x.remarks].filter(Boolean).join(' | '))+'</td>'+ 
+          '</tr>';
+      }).join(''):'<tr><td colspan="8">No Cash on Hand records yet.</td></tr>';
+    }
+    msg('ptrBeginningMsg','','');
+  }catch(e){fail(e,'ptrBeginningMsg');}
+}
+
+async function savePTRBeginningFund(){
+  const asOfDate=(document.getElementById('ptrBeginningDate').value||'').trim();
+  const fundType=(document.getElementById('ptrBeginningFundType').value||'CASH ON HAND').trim();
+  const sourceClassification=(document.getElementById('ptrBeginningSource').value||'').trim();
+  const amount=Number(document.getElementById('ptrBeginningAmount').value||0);
+  const description=(document.getElementById('ptrBeginningDescription').value||'').trim();
+  const reference=(document.getElementById('ptrBeginningReference').value||'').trim();
+  const remarks=(document.getElementById('ptrBeginningRemarks').value||'').trim();
+  if(!asOfDate){msg('ptrBeginningMsg','Enter the As-of Date.','error');return;}
+  if(!sourceClassification){msg('ptrBeginningMsg','Select the Source Classification.','error');return;}
+  if(!(amount>0)){msg('ptrBeginningMsg','Enter a valid Cash on Hand amount.','error');return;}
+  if(!description){msg('ptrBeginningMsg','Enter the Description.','error');return;}
+  const effect=sourceClassification==='HISTORICAL COLLECTIONS'
+    ? 'This is custody only and will NOT be added again to Total Accountability.'
+    : 'This is a Separate Beginning Fund and WILL be added as additional Previous Treasurer accountability.';
+  if(!confirm(
+    'Save this Previous Treasurer CASH ON HAND record?\n\n'+
+    'As-of Date: '+asOfDate+'\n'+
+    'Source: '+sourceClassification+'\n'+
+    'Amount: '+ptrMoney(amount)+'\n\n'+effect+'\n\n'+
+    'This will NOT create current Cash, Bank, or Collections income.'
+  ))return;
+  try{
+    const r=await api(
+      'recordPreviousTreasurerBeginningFund',
+      {token:token,beginningFundData:{
+        asOfDate:asOfDate,fundType:fundType,sourceClassification:sourceClassification,
+        amount:amount,description:description,reference:reference,remarks:remarks
+      }},
+      'Saving Cash on Hand...',
+      'Recording Previous Treasurer custody/accountability'
+    );
+    clearPTRBeginningFundForm();
+    msg('ptrBeginningMsg',(r&&r.message)||'Cash on Hand record saved.','ok');
+    await loadPTRBeginningFunds();
+  }catch(e){fail(e,'ptrBeginningMsg');}
 }
 
 function clearPTRPassbookForm(){
