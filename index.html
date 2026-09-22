@@ -3667,9 +3667,7 @@ button.danger{
             <tbody id="ptrReportTurnoverBody"><tr><td colspan="7">No turnover records.</td></tr></tbody>
           </table>
         </div>
-        <div id="ptrReportAuditNote" class="ptr-report-audit-note"></div>
-
-        <div class="ptr-report-signatories">
+<div class="ptr-report-signatories">
           <div class="ptr-report-signatory"><div class="ptr-report-signatory-label">Prepared By:</div><div class="ptr-report-signatory-line"></div><div class="ptr-report-signatory-position">PREVIOUS TREASURER</div></div>
           <div class="ptr-report-signatory"><div class="ptr-report-signatory-label">Received By:</div><div class="ptr-report-signatory-line"></div><div class="ptr-report-signatory-position">TREASURER</div></div>
           <div class="ptr-report-signatory"><div class="ptr-report-signatory-label">Verified By:</div><div class="ptr-report-signatory-line"></div><div class="ptr-report-signatory-position">AUDITOR / PRESIDENT</div></div>
@@ -8556,43 +8554,6 @@ async function loadPTRReconciliationReport(){
           : '<tr><td colspan="7">No turnover records.</td></tr>';
     }
 
-
-    /* =====================================================
-       AUDIT NOTE / EQUATIONS
-       ===================================================== */
-
-    const audit=(r&&r.audit)||{};
-
-    const unremitted=
-      ptrNum(
-        ptrReportVal(
-          sum,
-          ['unremittedMemberCollections'],
-          0
-        )
-      );
-
-    const bankPending=
-      ptrNum(
-        ptrReportVal(
-          sum,
-          ['bankPendingTurnover'],
-          0
-        )
-      );
-
-    set(
-      'ptrReportAuditNote',
-      'Historical Collections '+ptrMoney(historicalCollections)+
-      ' − Historical Expenses Applied '+ptrMoney(historicalExpensesApplied)+
-      ' − Cash Turned Over '+ptrMoney(ptrReportVal(sum,['memberPaymentsTurnedOver','confirmedCashTurnover'],0))+
-      ' = Unremitted Collections '+ptrMoney(unremitted)+
-      '. Verified Bank Funds '+ptrMoney(ptrReportVal(sum,['verifiedBankFunds'],0))+
-      ' − Bank Turned Over '+ptrMoney(ptrReportVal(sum,['confirmedBankTurnover'],0))+
-      ' = Bank Pending Turnover '+ptrMoney(bankPending)+
-      '. Physical funds (Bank + Cash on Hand) are shown separately from member-payment accountability to avoid double counting. Reversed turnover audit total: '+ptrMoney(audit.reversedTotal||0)+
-      '.'
-    );
 
     msg(
       'ptrReportMsg',
