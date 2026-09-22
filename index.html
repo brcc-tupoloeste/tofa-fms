@@ -2391,8 +2391,46 @@ button.danger{
   <h3 class="panel-title">💰 Cash &amp; Bank Management</h3>
   <div class="panel-note">Select the financial transaction function you want to use.</div>
   <div class="quick-grid">
+    <button class="quick-btn" type="button" onclick="openAddFundsPanel()">➕ Add Funds</button>
     <button class="quick-btn" type="button" onclick="openExpensePanel()">💸 Expenses</button>
     <button class="quick-btn" type="button" onclick="openBankPanel()">🏦 Bank</button>
+  </div>
+</div>
+
+<!-- =======================================================
+     ADD FUNDS — CURRENT / NEW TREASURER
+======================================================= -->
+<div id="addFundsPanel" class="card hidden">
+  <div class="panel-nav">
+    <button type="button" class="back-dashboard" onclick="openCashBankMenu()">← Back to Cash &amp; Bank</button>
+  </div>
+  <h3 class="panel-title">➕ Add Funds</h3>
+  <div class="panel-note">Record actual cash received by the Current Treasurer that is not a member payment. This adds to Cash on Hand and Association Balance, not Bank Balance.</div>
+  <div class="form-grid">
+    <div><label>Date</label><input id="fundReceiptDate" type="date"></div>
+    <div><label>Fund Source</label><select id="fundReceiptSource">
+      <option value="">Select fund source</option>
+      <option value="SALE OF PRODUCE">Sale of Produce</option>
+      <option value="RETURNED/EXCESS EXPENSE FUNDS">Returned/Excess Expense Funds</option>
+      <option value="DONATION">Donation</option>
+      <option value="OTHER INCOME / FUND SOURCE">Other Income / Fund Source</option>
+    </select></div>
+    <div><label>Received From</label><input id="fundReceiptFrom" placeholder="Person / source (optional)"></div>
+    <div><label>Amount</label><input id="fundReceiptAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00"></div>
+    <div class="full"><label>Description</label><input id="fundReceiptDescription" placeholder="Example: Excess from transportation expense fund"></div>
+    <div><label>Received By</label><input id="fundReceiptReceivedBy" placeholder="Current Treasurer"></div>
+    <div><label>Reference</label><input id="fundReceiptReference" placeholder="Optional"></div>
+    <div class="full"><label>Remarks</label><textarea id="fundReceiptRemarks" placeholder="Optional remarks"></textarea></div>
+  </div>
+  <div class="form-actions-row">
+    <button type="button" onclick="saveOtherFundReceipt()">ADD FUNDS</button>
+    <button type="button" class="alt" onclick="openCashBankMenu()">CANCEL</button>
+  </div>
+  <div id="fundReceiptMsg"></div>
+  <button id="fundReceiptHistoryBtn" type="button" class="alt" onclick="toggleOtherFundHistory()">📋 View Add Funds History</button>
+  <div id="fundReceiptHistorySection" class="hidden" style="margin-top:12px">
+    <h3 style="margin:0 0 10px">📋 Add Funds History</h3>
+    <div id="fundReceiptHistoryContent" class="scroll"><div class="panel-note">Click View Add Funds History to load records.</div></div>
   </div>
 </div>
 
@@ -3739,7 +3777,9 @@ button.danger{
 ========================================================= */
 
 const API_URL =
-  'https://script.google.com/macros/s/AKfycbynk1P7SnfHWOBnJYC2vhwdH7ONxEUj8FWMp--40YUpkcecjwWoigQG29pnc4YlU6l0zA/exec';
+  'https://script.google.com/macros/s/AKfycbxzAWl0Oge3Sa6hf0SjMK5aSzkzh9hTnpuB9zEj1zxrBd3pYCEhyjCcO5WCr5yKDAE2YQ/exec';
+
+ console.log('[TOFA BUILD] Add Funds / Apps Script Version 151');
 
 
 let token = '';
@@ -4126,6 +4166,66 @@ async function api(action,payload,title,sub){
 }
 
 
+
+/* =========================================================
+   DASHBOARD INSTANT CACHE
+   Shows the last successful dashboard values immediately,
+   then refreshes them from the server in the background.
+========================================================= */
+const TOFA_DASHBOARD_CACHE_KEY = 'TOFA_FMS_DASHBOARD_CACHE_V1';
+
+function renderDashboardData(d){
+  d = d || {};
+
+  const currentTreasurerBank = Number(d.bankBalance || 0);
+  const currentTreasurerCash = Number(d.cashOnHand || 0);
+  const currentAssociationBalance =
+    currentTreasurerBank + currentTreasurerCash;
+
+  set('statAssociation', money(currentAssociationBalance));
+  set('statBank', money(currentTreasurerBank));
+  set('statCash', money(currentTreasurerCash));
+  set('statCurrent', money(d.currentMonthCollections));
+  set('statPrevious', money(d.previousMonthCollections));
+  set('statUncollected', money(d.uncollectedAmount));
+
+  set(
+    'dashboardPeriod',
+    (d.currentMonthName || 'Current Month') + ' ' + (d.year || '')
+  );
+}
+
+function saveDashboardCache(d){
+  try{
+    localStorage.setItem(
+      TOFA_DASHBOARD_CACHE_KEY,
+      JSON.stringify({
+        savedAt: Date.now(),
+        data: d || {}
+      })
+    );
+  }catch(e){
+    console.warn('[TOFA DASHBOARD] Cache save skipped.', e);
+  }
+}
+
+function showDashboardCache(){
+  try{
+    const raw = localStorage.getItem(TOFA_DASHBOARD_CACHE_KEY);
+    if(!raw) return false;
+
+    const cached = JSON.parse(raw);
+    if(!cached || !cached.data) return false;
+
+    renderDashboardData(cached.data);
+    console.log('[TOFA DASHBOARD] Cached values shown immediately.');
+    return true;
+  }catch(e){
+    console.warn('[TOFA DASHBOARD] Cache read skipped.', e);
+    return false;
+  }
+}
+
 /* =========================================================
    LOGIN
 ========================================================= */
@@ -4197,7 +4297,16 @@ async function login(){
     /* Always start on Dashboard */
 
     showDashboard();
-    loadDashboard();
+
+    /*
+     * Show the last successful dashboard immediately.
+     * Fresh server values replace it in the background.
+     */
+    const hasDashboardCache = showDashboardCache();
+
+    loadDashboard({
+      silent: hasDashboardCache
+    });
 
 
   }catch(e){
@@ -5879,6 +5988,68 @@ function openExpensePanel(){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
+function openAddFundsPanel(){
+  hideAppPanels();
+  document.getElementById('addFundsPanel').classList.remove('hidden');
+  document.getElementById('searchTopBar').classList.remove('hidden');
+  const date=document.getElementById('fundReceiptDate');
+  if(date && !date.value) date.value=todayInputValue();
+  msg('fundReceiptMsg','','');
+  const section=document.getElementById('fundReceiptHistorySection');
+  const btn=document.getElementById('fundReceiptHistoryBtn');
+  if(section) section.classList.add('hidden');
+  if(btn) btn.textContent='📋 View Add Funds History';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+async function saveOtherFundReceipt(){
+  const source=document.getElementById('fundReceiptSource').value;
+  const amount=Number(document.getElementById('fundReceiptAmount').value||0);
+  const description=document.getElementById('fundReceiptDescription').value.trim();
+  if(!source){msg('fundReceiptMsg','Please select a Fund Source.','error');return;}
+  if(!(amount>0)){msg('fundReceiptMsg','Please enter a valid amount.','error');return;}
+  if(!description){msg('fundReceiptMsg','Please enter a description.','error');return;}
+  try{
+    const r=await api('saveOtherFundReceipt',{token:token,fundData:{
+      date:document.getElementById('fundReceiptDate').value,
+      fundSource:source,
+      receivedFrom:document.getElementById('fundReceiptFrom').value.trim(),
+      description:description,
+      amount:amount,
+      receivedBy:document.getElementById('fundReceiptReceivedBy').value.trim(),
+      reference:document.getElementById('fundReceiptReference').value.trim(),
+      remarks:document.getElementById('fundReceiptRemarks').value.trim()
+    }},'Adding Funds...','Recording actual cash received');
+    msg('fundReceiptMsg',(r&&r.message)||'Funds successfully added.','ok');
+    ['fundReceiptAmount','fundReceiptFrom','fundReceiptDescription','fundReceiptReference','fundReceiptRemarks'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+    document.getElementById('fundReceiptSource').value='';
+    await loadDashboard({silent:true});
+    const section=document.getElementById('fundReceiptHistorySection');
+    if(section && !section.classList.contains('hidden')) await loadOtherFundHistory();
+  }catch(e){fail(e,'fundReceiptMsg');}
+}
+
+async function toggleOtherFundHistory(){
+  const section=document.getElementById('fundReceiptHistorySection');
+  const btn=document.getElementById('fundReceiptHistoryBtn');
+  if(!section||!btn)return;
+  const show=section.classList.contains('hidden');
+  section.classList.toggle('hidden',!show);
+  btn.textContent=show?'▲ Hide Add Funds History':'📋 View Add Funds History';
+  if(show) await loadOtherFundHistory();
+}
+
+async function loadOtherFundHistory(){
+  const box=document.getElementById('fundReceiptHistoryContent');
+  if(!box)return;
+  try{
+    const r=await api('getOtherFundReceipts',{token:token},'Loading Add Funds History...','Reading fund receipts');
+    const rows=(r&&r.records)||[];
+    if(!rows.length){box.innerHTML='<div class="panel-note">No Add Funds records yet.</div>';return;}
+    box.innerHTML='<div class="table-wrap"><table class="member-table"><thead><tr><th>Date</th><th>Source</th><th>Description</th><th>Received From</th><th>Amount</th><th>Reference</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+escapeHtml(formatDisplayDate(x.Date||''))+'</td><td>'+escapeHtml(x['Fund Source']||'')+'</td><td>'+escapeHtml(x.Description||'')+'</td><td>'+escapeHtml(x['Received From']||'')+'</td><td>'+money(Number(x.Amount||0))+'</td><td>'+escapeHtml(x.Reference||'')+'</td></tr>').join('')+'</tbody></table></div>';
+  }catch(e){box.innerHTML='<div class="error">'+escapeHtml(e.message||String(e))+'</div>';}
+}
+
 function openBankPanel(){
   hideAppPanels();
   document.getElementById('bankPanel').classList.remove('hidden');
@@ -6154,6 +6325,7 @@ function hideAppPanels(){
     'memberListPanel',
     'outstandingPanel',
     'reportPanel',
+    'addFundsPanel',
     'expensePanel',
     'bankPanel',
     'editMemberPanel',
@@ -6493,118 +6665,11 @@ async function loadDashboard(options){
 
 
     /* =====================================================
-       CURRENT TREASURER DASHBOARD BALANCES
-
-       Previous Treasurer verified/passbook funds are still
-       accountability until actually turned over. Therefore
-       they must NOT appear as Current Treasurer Bank Balance.
-
-       The existing dashboard bank figure can contain the old
-       verified opening/passbook balance. Remove that base; an
-       actual bank turnover is recorded as a new bank deposit,
-       so only the turned-over/current portion remains.
+       RENDER FRESH DASHBOARD + SAVE FOR INSTANT NEXT LOAD
     ===================================================== */
 
-    let currentTreasurerBank = Number(d.bankBalance || 0);
-
-    try{
-      const ptrResponse = await fetch(
-        API_URL,
-        {
-          method:'POST',
-          body:JSON.stringify({
-            action:'getPreviousTreasurerReconciliationReport',
-            payload:{token:token}
-          }),
-          redirect:'follow'
-        }
-      );
-
-      const ptrText = await ptrResponse.text();
-      const ptrJson = ptrText ? JSON.parse(ptrText) : null;
-
-      if(ptrJson && ptrJson.success === true){
-        const ptrResult = ptrJson.result || {};
-        const ptrSummary = ptrResult.summary || {};
-        const previousVerifiedBank = Number(ptrSummary.verifiedBankFunds || 0);
-
-        currentTreasurerBank = Math.max(
-          0,
-          Number(d.bankBalance || 0) - previousVerifiedBank
-        );
-      }
-    }
-    catch(ptrDashboardError){
-      console.error(
-        '[TOFA DASHBOARD] Unable to isolate Previous Treasurer bank funds',
-        ptrDashboardError
-      );
-    }
-
-    const currentTreasurerCash = Number(d.cashOnHand || 0);
-    const currentAssociationBalance =
-      currentTreasurerBank + currentTreasurerCash;
-
-    /* =====================================================
-       UPDATE DASHBOARD
-       EXACT EXISTING FIELD IDs
-    ===================================================== */
-
-    set(
-      'statAssociation',
-      money(
-        currentAssociationBalance
-      )
-    );
-
-    set(
-      'statBank',
-      money(
-        currentTreasurerBank
-      )
-    );
-
-    set(
-      'statCash',
-      money(
-        currentTreasurerCash
-      )
-    );
-
-    set(
-      'statCurrent',
-      money(
-        d.currentMonthCollections
-      )
-    );
-
-    set(
-      'statPrevious',
-      money(
-        d.previousMonthCollections
-      )
-    );
-
-    set(
-      'statUncollected',
-      money(
-        d.uncollectedAmount
-      )
-    );
-
-    set(
-      'dashboardPeriod',
-      (
-        d.currentMonthName ||
-        'Current Month'
-      ) +
-      ' ' +
-      (
-        d.year ||
-        ''
-      )
-    );
-
+    renderDashboardData(d);
+    saveDashboardCache(d);
 
     console.log(
       '[TOFA DASHBOARD] Refresh completed'
@@ -8155,7 +8220,7 @@ async function loadPTRReconciliationReport(){
 
     set(
       'ptrReportHistoricalExpenses',
-      ptrMoney(historicalExpensesApplied)
+      ptrMoney(totalValidatedHistoricalExpenses)
     );
 
     set(
