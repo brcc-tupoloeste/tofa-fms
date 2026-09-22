@@ -6505,41 +6505,14 @@ async function loadDashboard(options){
        so only the turned-over/current portion remains.
     ===================================================== */
 
-    let currentTreasurerBank = Number(d.bankBalance || 0);
-
-    try{
-      const ptrResponse = await fetch(
-        API_URL,
-        {
-          method:'POST',
-          body:JSON.stringify({
-            action:'getPreviousTreasurerReconciliationReport',
-            payload:{token:token}
-          }),
-          redirect:'follow'
-        }
-      );
-
-      const ptrText = await ptrResponse.text();
-      const ptrJson = ptrText ? JSON.parse(ptrText) : null;
-
-      if(ptrJson && ptrJson.success === true){
-        const ptrResult = ptrJson.result || {};
-        const ptrSummary = ptrResult.summary || {};
-        const previousVerifiedBank = Number(ptrSummary.verifiedBankFunds || 0);
-
-        currentTreasurerBank = Math.max(
-          0,
-          Number(d.bankBalance || 0) - previousVerifiedBank
-        );
-      }
-    }
-    catch(ptrDashboardError){
-      console.error(
-        '[TOFA DASHBOARD] Unable to isolate Previous Treasurer bank funds',
-        ptrDashboardError
-      );
-    }
+    /*
+     * Current Treasurer Bank Balance now comes directly from
+     * Bank Transactions. The erroneous ₱22,000 turnover row
+     * was removed from the sheet, so no Previous Treasurer
+     * reconciliation API call is needed during Dashboard load.
+     * This keeps the Dashboard fast.
+     */
+    const currentTreasurerBank = Number(d.bankBalance || 0);
 
     const currentTreasurerCash = Number(d.cashOnHand || 0);
     const currentAssociationBalance =
