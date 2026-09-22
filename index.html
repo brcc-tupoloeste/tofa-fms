@@ -3779,6 +3779,8 @@ button.danger{
 const API_URL =
   'https://script.google.com/macros/s/AKfycbxzAWl0Oge3Sa6hf0SjMK5aSzkzh9hTnpuB9zEj1zxrBd3pYCEhyjCcO5WCr5yKDAE2YQ/exec';
 
+ console.log('[TOFA BUILD] Add Funds / Apps Script Version 151');
+
 
 let token = '';
 
@@ -4055,7 +4057,7 @@ function ensureTofaBridge(){
     if(!tofaBridgeFrame){
       tofaBridgeFrame = document.createElement('iframe');
       tofaBridgeFrame.id = 'tofaApiBridge';
-      tofaBridgeFrame.src = API_URL;
+      tofaBridgeFrame.src = API_URL + '?bridgeVersion=151&ts=' + Date.now();
       tofaBridgeFrame.setAttribute('aria-hidden','true');
       tofaBridgeFrame.style.position = 'fixed';
       tofaBridgeFrame.style.width = '1px';
