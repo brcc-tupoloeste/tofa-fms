@@ -8027,7 +8027,33 @@ async function loadPTRReconciliationReport(){
     );
 
     const bankPendingPhysical=ptrNum(ptrReportVal(sum,['bankPendingTurnover'],0));
-    const physicalFundsPending=bankPendingPhysical+beginningRemaining;
+
+    /*
+     * Remaining physical funds for turnover:
+     * Bank Pending + Cash on Hand Remaining - ALL VALIDATED Historical Expenses.
+     *
+     * IMPORTANT:
+     * Use total validated historical expenses here, NOT only the portion
+     * allocated to member collections. Expense Allocation remains a separate
+     * tracing layer and is not changed by this report calculation.
+     */
+    const totalValidatedHistoricalExpenses=ptrNum(
+      ptrReportVal(
+        expenseState,
+        ['validatedHistoricalExpenses','totalValidatedExpenses'],
+        ptrReportVal(
+          expenseSummary,
+          ['validatedHistoricalExpenses','totalValidatedExpenses'],
+          0
+        )
+      )
+    );
+
+    const physicalFundsPending=Math.max(
+      0,
+      (bankPendingPhysical+beginningRemaining)-totalValidatedHistoricalExpenses
+    );
+
     set('ptrReportPending',ptrMoney(physicalFundsPending));
 
     /*
