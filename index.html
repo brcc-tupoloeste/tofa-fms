@@ -3221,14 +3221,14 @@ button.danger{
     </div>
 
     <div class="ptr-submenu">
-      <button id="ptrOldPaymentTab" type="button" class="active" onclick="showPTRSection('oldPayment')">🧾 Record Old Payment</button>
-      <button id="ptrExpenseTab" type="button" onclick="showPTRSection('expense')">🧾 Historical Expenses</button>
+      <button id="ptrPassbookTab" type="button" onclick="showPTRSection('passbook')">🏦 Bank / Passbook</button>
+      <button id="ptrBeginningFundsTab" type="button" onclick="showPTRSection('beginningFunds')">💵 Cash on Hand</button>
+      <button id="ptrExpenseTab" type="button" onclick="showPTRSection('expense')">🧾 Expenses</button>
+      <button id="ptrOldPaymentTab" type="button" class="active" onclick="showPTRSection('oldPayment')">📝 Record Old Payment</button>
       <button id="ptrExpenseAllocationTab" type="button" onclick="showPTRSection('expenseAllocation')">🔗 Expense Allocation</button>
-      <button id="ptrUnremittedTab" type="button" onclick="showPTRSection('unremitted')">💵 Unremitted Collections</button>
-      <button id="ptrBeginningFundsTab" type="button" onclick="showPTRSection('beginningFunds')">💰 Cash on Hand</button>
-      <button id="ptrPassbookTab" type="button" onclick="showPTRSection('passbook')">🏦 Bank / Passbook Records</button>
-      <button id="ptrTurnoverTab" type="button" onclick="showPTRSection('turnover')">🔄 Record Turnover</button>
-      <button id="ptrReportTab" type="button" onclick="showPTRSection('report')">📄 Reconciliation Report</button>
+      <button id="ptrUnremittedTab" type="button" onclick="showPTRSection('unremitted')">📋 Unremitted Payments</button>
+      <button id="ptrTurnoverTab" type="button" onclick="showPTRSection('turnover')">💰 Record Turnover</button>
+      <button id="ptrReportTab" type="button" onclick="showPTRSection('report')">📊 Detailed Report</button>
     </div>
 
     <div id="ptrOldPaymentSection" class="ptr-box">
@@ -3345,7 +3345,7 @@ button.danger{
 
     <div id="ptrExpenseAllocationSection" class="ptr-box hidden">
       <div class="panel-note">
-        Allocate a validated historical expense to the historical member collections from which it was paid. This changes Previous Treasurer accountability only; member payment credit remains intact.
+        Link only the portion of member payments actually used for a validated historical expense. <b>Partial allocation is allowed.</b> The expense does not need to be fully covered by selected member payments. Any unallocated portion remains shown as Other / General Funds Portion. Member payment credit remains intact.
       </div>
       <div class="ptr-passbook-summary">
         <div class="ptr-passbook-kpi"><b>Historical Collections</b><span id="ptrAllocCollections">₱0.00</span></div>
@@ -3358,12 +3358,13 @@ button.danger{
         <div class="full"><label>Historical Expense</label><select id="ptrAllocationExpense" onchange="renderPTRExpenseAllocationPayments()"><option value="">Select historical expense</option></select></div>
       </div>
       <div id="ptrAllocationExpenseInfo" class="panel-note">Select a historical expense.</div>
+      <div id="ptrAllocationSelectedInfo" class="panel-note"><b>Selected Member Payments:</b> ₱0.00</div>
       <div class="table-wrap" style="margin-top:14px">
         <table class="member-table"><thead><tr><th>Select</th><th>Payment ID</th><th>Member</th><th>Payment Type</th><th>Amount</th><th>Turned Over</th><th>Expense Applied</th><th>Available</th></tr></thead>
         <tbody id="ptrAllocationPaymentBody"><tr><td colspan="8">Select a historical expense first.</td></tr></tbody></table>
       </div>
       <div class="form-actions-row">
-        <button type="button" onclick="savePTRExpenseAllocation()">🔗 APPLY EXPENSE</button>
+        <button type="button" onclick="savePTRExpenseAllocation()">🔗 APPLY SELECTED PAYMENTS TO EXPENSE</button>
         <button type="button" class="alt" onclick="loadPTRExpenseAllocation()">↻ REFRESH</button>
       </div>
       <div class="table-wrap" style="margin-top:14px">
@@ -3577,6 +3578,7 @@ button.danger{
         <div class="panel-note">
           Read-only Previous Treasurer accountability report. Reversed turnovers remain in the audit history but are excluded from confirmed turnover totals.
         </div>
+        <button type="button" onclick="loadPTRReconciliationReport()">📄 GENERATE DETAILED REPORT</button>
         <button type="button" class="print-btn" onclick="printPTRReconciliationReport()">🖨 PRINT A4 REPORT</button>
         <div id="ptrReportMsg"></div>
       </div>
@@ -7823,14 +7825,15 @@ function renderPTRExpenseOptions(){
 
 function renderPTRExpenseAllocationPayments(){
   const sel=document.getElementById('ptrAllocationExpense'), body=document.getElementById('ptrAllocationPaymentBody'), info=document.getElementById('ptrAllocationExpenseInfo'); if(!sel||!body)return;
-  const expenseId=(sel.value||'').trim(); if(!expenseId){if(info)info.textContent='Select a historical expense.';body.innerHTML='<tr><td colspan="8">Select a historical expense first.</td></tr>';return;}
+  const expenseId=(sel.value||'').trim(); if(!expenseId){if(info)info.textContent='Select a historical expense.';body.innerHTML='<tr><td colspan="8">Select a historical expense first.</td></tr>';const si=document.getElementById('ptrAllocationSelectedInfo');if(si)si.innerHTML='<b>Selected Member Payments:</b> ₱0.00';return;}
   const exp=ptrExpenseRows(ptrExpenseAllocationState).find(x=>ptrExpenseId(x)===expenseId);
   if(!exp){body.innerHTML='<tr><td colspan="8">Historical expense not found.</td></tr>';return;}
   const ea=ptrNum(ptrPick(exp,['amount','expenseAmount'],0)), used=ptrNum(ptrPick(exp,['allocated','allocatedAmount','expenseApplied'],0)), rem=ptrNum(ptrPick(exp,['remaining','remainingAmount'],Math.max(0,ea-used)));
   if(info)info.innerHTML='<b>Expense:</b> '+ptrHtml(expenseId)+' — '+ptrHtml(ptrPick(exp,['particulars','description','category'],''))+'<br><b>Amount:</b> '+ptrMoney(ea)+' &nbsp; <b>Allocated:</b> '+ptrMoney(used)+' &nbsp; <b>Remaining:</b> '+ptrMoney(rem);
   const payments=ptrPaymentRows(ptrExpenseAllocationState).filter(x=>{const amount=ptrNum(ptrPick(x,['amount'],0)),turned=ptrNum(ptrPick(x,['turnedOver','turnedOverAmount'],0)),applied=ptrNum(ptrPick(x,['expenseApplied','allocatedExpense'],0)),avail=ptrNum(ptrPick(x,['available','availableAmount'],Math.max(0,amount-turned-applied)));return avail>0.001;});
   if(!payments.length){body.innerHTML='<tr><td colspan="8">No historical collection is available for allocation.</td></tr>';return;}
-  body.innerHTML=payments.map(x=>{const id=ptrPaymentId(x),amount=ptrNum(ptrPick(x,['amount'],0)),turned=ptrNum(ptrPick(x,['turnedOver','turnedOverAmount'],0)),applied=ptrNum(ptrPick(x,['expenseApplied','allocatedExpense'],0)),avail=ptrNum(ptrPick(x,['available','availableAmount'],Math.max(0,amount-turned-applied)));return '<tr><td><input type="checkbox" class="ptr-expense-payment-check" value="'+ptrHtml(id)+'"></td><td>'+ptrHtml(id)+'</td><td>'+ptrHtml(ptrPick(x,['memberName','memberId'],''))+'</td><td>'+ptrHtml(ptrPick(x,['paymentType'],''))+'</td><td>'+ptrMoney(amount)+'</td><td>'+ptrMoney(turned)+'</td><td>'+ptrMoney(applied)+'</td><td><b>'+ptrMoney(avail)+'</b></td></tr>';}).join('');
+  body.innerHTML=payments.map(x=>{const id=ptrPaymentId(x),amount=ptrNum(ptrPick(x,['amount'],0)),turned=ptrNum(ptrPick(x,['turnedOver','turnedOverAmount'],0)),applied=ptrNum(ptrPick(x,['expenseApplied','allocatedExpense'],0)),avail=ptrNum(ptrPick(x,['available','availableAmount'],Math.max(0,amount-turned-applied)));return '<tr><td><input type="checkbox" class="ptr-expense-payment-check" onchange="updatePTRAllocationSelectedInfo()" value="'+ptrHtml(id)+'"></td><td>'+ptrHtml(id)+'</td><td>'+ptrHtml(ptrPick(x,['memberName','memberId'],''))+'</td><td>'+ptrHtml(ptrPick(x,['paymentType'],''))+'</td><td>'+ptrMoney(amount)+'</td><td>'+ptrMoney(turned)+'</td><td>'+ptrMoney(applied)+'</td><td><b>'+ptrMoney(avail)+'</b></td></tr>';}).join('');
+  updatePTRAllocationSelectedInfo();
 }
 
 function renderPTRAllocationLedger(state){
@@ -7839,12 +7842,55 @@ function renderPTRAllocationLedger(state){
   body.innerHTML=rows.map(x=>{const id=ptrAllocationId(x),type=String(ptrPick(x,['recordType','type'],'ALLOCATION')||'ALLOCATION').toUpperCase(),isActive=type!=='REVERSAL'&&ptrNum(ptrPick(x,['activeAmount','netActiveAmount','amount','allocatedAmount'],0))>0.001;return '<tr><td>'+ptrHtml(id)+'</td><td>'+ptrHtml(ptrPick(x,['historicalExpenseId','expenseId'],''))+'</td><td>'+ptrHtml(ptrPick(x,['historicalPaymentId','paymentId'],''))+'</td><td>'+ptrHtml(ptrPick(x,['memberName'],''))+'</td><td>'+ptrMoney(ptrPick(x,['allocatedAmount','amount'],0))+'</td><td>'+ptrHtml(type)+'</td><td>'+(isActive?'<button type="button" class="alt" onclick="reversePTRExpenseAllocation(\''+ptrHtml(id)+'\')">REVERSE</button>':'—')+'</td></tr>';}).join('');
 }
 
+function updatePTRAllocationSelectedInfo(){
+  const checks=Array.from(document.querySelectorAll('.ptr-expense-payment-check:checked'));
+  let selectedTotal=0;
+  checks.forEach(function(c){
+    const row=c.closest('tr');
+    if(!row)return;
+    const cells=row.querySelectorAll('td');
+    if(cells.length<8)return;
+    const text=String(cells[7].textContent||'').replace(/[^0-9.\-]/g,'');
+    selectedTotal+=ptrNum(text);
+  });
+
+  const expenseId=(document.getElementById('ptrAllocationExpense').value||'').trim();
+  const exp=ptrExpenseRows(ptrExpenseAllocationState).find(x=>ptrExpenseId(x)===expenseId);
+  const expenseAmount=exp?ptrNum(ptrPick(exp,['amount','expenseAmount'],0)):0;
+  const alreadyAllocated=exp?ptrNum(ptrPick(exp,['allocated','allocatedAmount','expenseApplied'],0)):0;
+  const remainingExpense=Math.max(0,expenseAmount-alreadyAllocated);
+  const toApply=Math.min(selectedTotal,remainingExpense);
+  const otherGeneral=Math.max(0,remainingExpense-toApply);
+  const el=document.getElementById('ptrAllocationSelectedInfo');
+  if(el){
+    el.innerHTML='<b>Selected Member Payments:</b> '+ptrMoney(selectedTotal)+
+      ' &nbsp; | &nbsp; <b>Will Apply:</b> '+ptrMoney(toApply)+
+      ' &nbsp; | &nbsp; <b>Other / General Funds Portion:</b> '+ptrMoney(otherGeneral);
+  }
+}
+
 async function savePTRExpenseAllocation(){
   const expenseId=(document.getElementById('ptrAllocationExpense').value||'').trim();
   const paymentIds=Array.from(document.querySelectorAll('.ptr-expense-payment-check:checked')).map(e=>String(e.value||'').trim()).filter(Boolean);
   if(!expenseId){msg('ptrExpenseAllocationMsg','Select a Historical Expense.','error');return;}
   if(!paymentIds.length){msg('ptrExpenseAllocationMsg','Select at least one Historical Collection.','error');return;}
-  if(!confirm('Apply Historical Expense '+expenseId+' to '+paymentIds.length+' selected collection(s)?\n\nMember payment credit will remain unchanged.'))return;
+  const exp=ptrExpenseRows(ptrExpenseAllocationState).find(x=>ptrExpenseId(x)===expenseId);
+  const expenseAmount=exp?ptrNum(ptrPick(exp,['amount','expenseAmount'],0)):0;
+  const alreadyAllocated=exp?ptrNum(ptrPick(exp,['allocated','allocatedAmount','expenseApplied'],0)):0;
+  const remainingExpense=Math.max(0,expenseAmount-alreadyAllocated);
+  let selectedAvailable=0;
+  Array.from(document.querySelectorAll('.ptr-expense-payment-check:checked')).forEach(function(c){
+    const row=c.closest('tr');
+    const cells=row?row.querySelectorAll('td'):[];
+    if(cells.length>=8) selectedAvailable+=ptrNum(String(cells[7].textContent||'').replace(/[^0-9.\-]/g,''));
+  });
+  const willApply=Math.min(selectedAvailable,remainingExpense);
+  const otherGeneral=Math.max(0,remainingExpense-willApply);
+  if(!confirm('Apply selected MEMBER PAYMENTS to Historical Expense '+expenseId+'?\n\n'+
+    'Selected available: '+ptrMoney(selectedAvailable)+'\n'+
+    'Will apply now: '+ptrMoney(willApply)+'\n'+
+    'Other / General Funds Portion remaining: '+ptrMoney(otherGeneral)+'\n\n'+
+    'Partial allocation is allowed. Member payment credit will remain unchanged.'))return;
   try{
     const r=await api('allocatePreviousTreasurerExpense',{token:token,historicalExpenseId:expenseId,paymentIds:paymentIds},'Applying Historical Expense...','Reconciling expense against historical collections');
     msg('ptrExpenseAllocationMsg',(r&&r.message)||'Historical expense allocated successfully.','ok'); await loadPTRExpenseAllocation();
