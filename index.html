@@ -3592,9 +3592,9 @@ button.danger{
         </div>
 
         <div class="ptr-report-summary">
-          <div class="ptr-report-kpi"><b>Total Accountability</b><span id="ptrReportAccountability">₱0.00</span></div>
+          <div class="ptr-report-kpi"><b>Total Physical Funds</b><span id="ptrReportAccountability">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Confirmed Turnover</b><span id="ptrReportConfirmed">₱0.00</span></div>
-          <div class="ptr-report-kpi"><b>Pending Turnover</b><span id="ptrReportPending">₱0.00</span></div>
+          <div class="ptr-report-kpi"><b>Physical Funds Pending Turnover</b><span id="ptrReportPending">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Historical Collections</b><span id="ptrReportHistoricalCollections">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Cash on Hand Recorded</b><span id="ptrReportBeginningCash">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Separate Beginning Funds</b><span id="ptrReportSeparateBeginningFunds">₱0.00</span></div>
@@ -3625,8 +3625,16 @@ button.danger{
         <div class="ptr-report-section-title">EXPENSES / USE OF FUNDS — Historical Expenses</div>
         <div class="table-wrap">
           <table class="member-table">
-            <thead><tr><th>Date</th><th>Expense ID</th><th>Category</th><th>Particulars</th><th>Expense Amount</th><th>Applied to Collections</th><th>Unallocated</th><th>Status</th><th>Reference / Remarks</th></tr></thead>
+            <thead><tr><th>Date</th><th>Expense ID</th><th>Category</th><th>Particulars</th><th>Expense Amount</th><th>Applied to Collections</th><th>Other / General Funds Portion</th><th>Status</th><th>Reference / Remarks</th></tr></thead>
             <tbody id="ptrReportExpensesBody"><tr><td colspan="9">No historical expenses.</td></tr></tbody>
+          </table>
+        </div>
+
+        <div class="ptr-report-section-title">MEMBER PAYMENT → EXPENSE ALLOCATION HISTORY</div>
+        <div class="table-wrap">
+          <table class="member-table">
+            <thead><tr><th>Allocation ID</th><th>Expense ID</th><th>Payment ID</th><th>Member</th><th>Payment Type</th><th>Amount Applied</th><th>Status</th></tr></thead>
+            <tbody id="ptrReportAllocationBody"><tr><td colspan="7">No expense allocation records.</td></tr></tbody>
           </table>
         </div>
 
@@ -7742,7 +7750,12 @@ function clearPTRExpenseForm(){
 
 function ptrExpenseRows(state){ return ptrArray(state,['expenses','historicalExpenses','expenseRecords','validatedExpenses']); }
 function ptrPaymentRows(state){ return ptrArray(state,['payments','historicalPayments','paymentRecords','availablePayments']); }
-function ptrAllocationRows(state){ return ptrArray(state,['allocations','allocationRecords','expenseAllocations','ledger']); }
+function ptrAllocationRows(state){
+  const direct=ptrArray(state,['allocations','allocationRecords','expenseAllocations','ledger']);
+  if(direct.length)return direct;
+  const audit=(state&&state.allocationAudit)||{};
+  return [].concat(Array.isArray(audit.active)?audit.active:[],Array.isArray(audit.reversed)?audit.reversed:[],Array.isArray(audit.reversalRecords)?audit.reversalRecords:[]);
+}
 
 async function loadPTRExpenseState(){
   try{
@@ -7982,7 +7995,11 @@ async function loadPTRReconciliationReport(){
       0
     ));
 
-    set('ptrReportAccountability',ptrMoney(baseAccountability+separateBeginningFunds));
+    // Physical funds are a custody snapshot. Do NOT add member collections again here,
+    // because those collections may already be included in Cash on Hand or Bank.
+    const verifiedBankFunds=ptrNum(ptrReportVal(sum,['verifiedBankFunds'],0));
+    const totalPhysicalFunds=verifiedBankFunds+beginningCashTotal;
+    set('ptrReportAccountability',ptrMoney(totalPhysicalFunds));
     set('ptrReportBeginningCash',ptrMoney(beginningCashTotal));
     set('ptrReportSeparateBeginningFunds',ptrMoney(separateBeginningFunds));
 
@@ -7997,12 +8014,9 @@ async function loadPTRReconciliationReport(){
       )
     );
 
-    const basePending=ptrNum(ptrReportVal(
-      sum,
-      ['totalPendingTurnover','totalRemainingAccountability'],
-      0
-    ));
-    set('ptrReportPending',ptrMoney(basePending+beginningRemaining));
+    const bankPendingPhysical=ptrNum(ptrReportVal(sum,['bankPendingTurnover'],0));
+    const physicalFundsPending=bankPendingPhysical+beginningRemaining;
+    set('ptrReportPending',ptrMoney(physicalFundsPending));
 
     /*
      * Historical Collections and Historical Expenses Applied
@@ -8358,6 +8372,28 @@ async function loadPTRReconciliationReport(){
 
 
     /* =====================================================
+       MEMBER PAYMENT -> EXPENSE ALLOCATION HISTORY
+       ===================================================== */
+    const allocationRows=ptrAllocationRows(expenseState);
+    const allocationBody=document.getElementById('ptrReportAllocationBody');
+    if(allocationBody){
+      allocationBody.innerHTML=allocationRows.length?allocationRows.map(function(x){
+        const type=String(ptrPick(x,['recordType','type'],'ALLOCATION')||'ALLOCATION').toUpperCase();
+        const active=ptrNum(ptrPick(x,['activeAmount','netActiveAmount','allocatedAmount','amount'],0));
+        const status=type==='REVERSAL'?'REVERSAL':(active>0.001?'ACTIVE':'REVERSED');
+        return '<tr>'+ 
+          '<td>'+ptrHtml(ptrAllocationId(x))+'</td>'+ 
+          '<td>'+ptrHtml(ptrPick(x,['historicalExpenseId','expenseId'],''))+'</td>'+ 
+          '<td>'+ptrHtml(ptrPick(x,['historicalPaymentId','paymentId'],''))+'</td>'+ 
+          '<td>'+ptrHtml(ptrPick(x,['memberName'],''))+'</td>'+ 
+          '<td>'+ptrHtml(ptrPick(x,['paymentType'],''))+'</td>'+ 
+          '<td><b>'+ptrMoney(ptrPick(x,['allocatedAmount','amount','activeAmount'],0))+'</b></td>'+ 
+          '<td>'+ptrHtml(status)+'</td>'+ 
+          '</tr>';
+      }).join(''):'<tr><td colspan="7">No expense allocation records.</td></tr>';
+    }
+
+    /* =====================================================
        BANK / PASSBOOK FUNDS
        ===================================================== */
 
@@ -8540,7 +8576,7 @@ async function loadPTRReconciliationReport(){
       '. Verified Bank Funds '+ptrMoney(ptrReportVal(sum,['verifiedBankFunds'],0))+
       ' − Bank Turned Over '+ptrMoney(ptrReportVal(sum,['confirmedBankTurnover'],0))+
       ' = Bank Pending Turnover '+ptrMoney(bankPending)+
-      '. Reversed turnover audit total: '+ptrMoney(audit.reversedTotal||0)+
+      '. Physical funds (Bank + Cash on Hand) are shown separately from member-payment accountability to avoid double counting. Reversed turnover audit total: '+ptrMoney(audit.reversedTotal||0)+
       '.'
     );
 
