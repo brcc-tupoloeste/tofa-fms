@@ -6046,8 +6046,8 @@ async function loadOtherFundHistory(){
     const r=await api('getOtherFundReceipts',{token:token},'Loading Add Funds History...','Reading fund receipts');
     const rows=(r&&r.records)||[];
     if(!rows.length){box.innerHTML='<div class="panel-note">No Add Funds records yet.</div>';return;}
-    box.innerHTML='<div class="table-wrap"><table class="member-table"><thead><tr><th>Date</th><th>Source</th><th>Description</th><th>Received From</th><th>Amount</th><th>Reference</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+escapeHtml(formatDisplayDate(x.Date||''))+'</td><td>'+escapeHtml(x['Fund Source']||'')+'</td><td>'+escapeHtml(x.Description||'')+'</td><td>'+escapeHtml(x['Received From']||'')+'</td><td>'+money(Number(x.Amount||0))+'</td><td>'+escapeHtml(x.Reference||'')+'</td></tr>').join('')+'</tbody></table></div>';
-  }catch(e){box.innerHTML='<div class="error">'+escapeHtml(e.message||String(e))+'</div>';}
+    box.innerHTML='<div class="table-wrap"><table class="member-table"><thead><tr><th>Date</th><th>Source</th><th>Description</th><th>Received From</th><th>Amount</th><th>Reference</th></tr></thead><tbody>'+rows.map(x=>'<tr><td>'+esc(formatDisplayDate(x.Date||''))+'</td><td>'+esc(x['Fund Source']||'')+'</td><td>'+esc(x.Description||'')+'</td><td>'+esc(x['Received From']||'')+'</td><td>'+money(Number(x.Amount||0))+'</td><td>'+esc(x.Reference||'')+'</td></tr>').join('')+'</tbody></table></div>';
+  }catch(e){box.innerHTML='<div class="error">'+esc(e.message||String(e))+'</div>';}
 }
 
 function openBankPanel(){
@@ -6562,84 +6562,21 @@ async function loadDashboard(options){
     if(silent){
 
       console.log(
-        '[TOFA DASHBOARD] Background refresh started'
+        '[TOFA DASHBOARD] Background bridge refresh started'
       );
 
-      const response =
-        await fetch(
-          API_URL,
+      /*
+       * IMPORTANT:
+       * Keep background refresh on the SAME proven Apps Script
+       * postMessage bridge. Do not use cross-origin fetch().
+       */
+      d =
+        await callTofaBridge(
+          'getDashboardSummary',
           {
-            method:'POST',
-
-            body:
-              JSON.stringify({
-                action:'getDashboardSummary',
-
-                payload:{
-                  token:token
-                }
-              }),
-
-            redirect:'follow'
+            token:token
           }
         );
-
-
-      const responseText =
-        await response.text();
-
-
-      if(!responseText){
-
-        throw new Error(
-          'Dashboard server returned an empty response.'
-        );
-
-      }
-
-
-      let result;
-
-
-      try{
-
-        result =
-          JSON.parse(
-            responseText
-          );
-
-      }
-      catch(parseError){
-
-        console.error(
-          '[TOFA DASHBOARD] Invalid response:',
-          responseText
-        );
-
-        throw new Error(
-          'Dashboard server returned an invalid response.'
-        );
-
-      }
-
-
-      if(
-        !result ||
-        result.success !== true
-      ){
-
-        throw new Error(
-          result &&
-          result.message
-            ? result.message
-            : 'Unable to refresh dashboard.'
-        );
-
-      }
-
-
-      d =
-        result.result || {};
 
     }
 
