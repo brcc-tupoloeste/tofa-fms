@@ -3495,7 +3495,6 @@ button.danger{
       <div class="ptr-passbook-summary">
         <div class="ptr-passbook-kpi"><b>Total Cash on Hand Recorded</b><span id="ptrBeginningCashTotal">₱0.00</span></div>
         <div class="ptr-passbook-kpi"><b>From Encoded Historical Collections</b><span id="ptrBeginningHistoricalCustody">₱0.00</span></div>
-        <div class="ptr-passbook-kpi"><b>Separate Beginning Funds</b><span id="ptrBeginningSeparateFunds">₱0.00</span></div>
         <div class="ptr-passbook-kpi"><b>Additional Accountability</b><span id="ptrBeginningRemaining">₱0.00</span></div>
       </div>
 
@@ -3611,7 +3610,6 @@ button.danger{
           <div class="ptr-report-kpi"><b>Pending Turnover</b><span id="ptrReportPending">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Historical Collections</b><span id="ptrReportHistoricalCollections">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Cash on Hand Recorded</b><span id="ptrReportBeginningCash">₱0.00</span></div>
-          <div class="ptr-report-kpi"><b>Separate Beginning Funds</b><span id="ptrReportSeparateBeginningFunds">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Historical Expenses</b><span id="ptrReportHistoricalExpenses">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Unremitted Member Collections</b><span id="ptrReportUnremitted">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Verified Bank Funds</b><span id="ptrReportBankFunds">₱0.00</span></div>
@@ -6495,6 +6493,59 @@ async function loadDashboard(options){
 
 
     /* =====================================================
+       CURRENT TREASURER DASHBOARD BALANCES
+
+       Previous Treasurer verified/passbook funds are still
+       accountability until actually turned over. Therefore
+       they must NOT appear as Current Treasurer Bank Balance.
+
+       The existing dashboard bank figure can contain the old
+       verified opening/passbook balance. Remove that base; an
+       actual bank turnover is recorded as a new bank deposit,
+       so only the turned-over/current portion remains.
+    ===================================================== */
+
+    let currentTreasurerBank = Number(d.bankBalance || 0);
+
+    try{
+      const ptrResponse = await fetch(
+        API_URL,
+        {
+          method:'POST',
+          body:JSON.stringify({
+            action:'getPreviousTreasurerReconciliationReport',
+            payload:{token:token}
+          }),
+          redirect:'follow'
+        }
+      );
+
+      const ptrText = await ptrResponse.text();
+      const ptrJson = ptrText ? JSON.parse(ptrText) : null;
+
+      if(ptrJson && ptrJson.success === true){
+        const ptrResult = ptrJson.result || {};
+        const ptrSummary = ptrResult.summary || {};
+        const previousVerifiedBank = Number(ptrSummary.verifiedBankFunds || 0);
+
+        currentTreasurerBank = Math.max(
+          0,
+          Number(d.bankBalance || 0) - previousVerifiedBank
+        );
+      }
+    }
+    catch(ptrDashboardError){
+      console.error(
+        '[TOFA DASHBOARD] Unable to isolate Previous Treasurer bank funds',
+        ptrDashboardError
+      );
+    }
+
+    const currentTreasurerCash = Number(d.cashOnHand || 0);
+    const currentAssociationBalance =
+      currentTreasurerBank + currentTreasurerCash;
+
+    /* =====================================================
        UPDATE DASHBOARD
        EXACT EXISTING FIELD IDs
     ===================================================== */
@@ -6502,21 +6553,21 @@ async function loadDashboard(options){
     set(
       'statAssociation',
       money(
-        d.associationBalance
+        currentAssociationBalance
       )
     );
 
     set(
       'statBank',
       money(
-        d.bankBalance
+        currentTreasurerBank
       )
     );
 
     set(
       'statCash',
       money(
-        d.cashOnHand
+        currentTreasurerCash
       )
     );
 
