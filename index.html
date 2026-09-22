@@ -3544,6 +3544,8 @@ button.danger{
           <div class="ptr-report-kpi"><b>Total Accountability</b><span id="ptrReportAccountability">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Confirmed Turnover</b><span id="ptrReportConfirmed">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Pending Turnover</b><span id="ptrReportPending">₱0.00</span></div>
+          <div class="ptr-report-kpi"><b>Historical Collections</b><span id="ptrReportHistoricalCollections">₱0.00</span></div>
+          <div class="ptr-report-kpi"><b>Historical Expenses Applied</b><span id="ptrReportHistoricalExpenses">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Unremitted Member Collections</b><span id="ptrReportUnremitted">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Verified Bank Funds</b><span id="ptrReportBankFunds">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Bank Pending Turnover</b><span id="ptrReportBankPending">₱0.00</span></div>
@@ -3551,15 +3553,23 @@ button.danger{
 
         <div id="ptrReportStatus" class="ptr-report-status pending">PENDING TURNOVER</div>
 
-        <div class="ptr-report-section-title">Historical Member Payments</div>
+        <div class="ptr-report-section-title">SOURCE OF FUNDS — Historical Collections</div>
         <div class="table-wrap">
           <table class="member-table">
-            <thead><tr><th>Date</th><th>Member</th><th>Payment Type</th><th>Amount</th><th>Turned Over</th><th>Unremitted</th><th>Status</th><th>Reference / Remarks</th></tr></thead>
-            <tbody id="ptrReportPaymentsBody"><tr><td colspan="8">No historical payments.</td></tr></tbody>
+            <thead><tr><th>Date</th><th>Member / Source</th><th>Payment Type</th><th>Amount</th><th>Expense Applied</th><th>Turned Over</th><th>Unremitted</th><th>Status</th><th>Reference / Remarks</th></tr></thead>
+            <tbody id="ptrReportPaymentsBody"><tr><td colspan="9">No historical collections.</td></tr></tbody>
           </table>
         </div>
 
-        <div class="ptr-report-section-title">Bank Accountability</div>
+        <div class="ptr-report-section-title">EXPENSES / USE OF FUNDS — Historical Expenses</div>
+        <div class="table-wrap">
+          <table class="member-table">
+            <thead><tr><th>Date</th><th>Expense ID</th><th>Category</th><th>Particulars</th><th>Expense Amount</th><th>Applied to Collections</th><th>Unallocated</th><th>Status</th><th>Reference / Remarks</th></tr></thead>
+            <tbody id="ptrReportExpensesBody"><tr><td colspan="9">No historical expenses.</td></tr></tbody>
+          </table>
+        </div>
+
+        <div class="ptr-report-section-title">BANK / PASSBOOK FUNDS</div>
         <div class="table-wrap">
           <table class="member-table">
             <thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Amount / Deposit</th><th>Withdrawal</th><th>Balance</th><th>Reference / Remarks</th></tr></thead>
@@ -7818,99 +7828,601 @@ function ptrReportVal(obj,names,fallback){
 
 async function loadPTRReconciliationReport(){
   try{
+
+    /*
+     * Read-only report sources:
+     * 1. Reconciliation report = collections, bank, turnover.
+     * 2. Expense state = reversal-aware historical expense
+     *    allocations and expense-applied amounts.
+     */
     const r=await api(
       'getPreviousTreasurerReconciliationReport',
       {token:token},
       'Loading Reconciliation Report...',
       'Reading Previous Treasurer accountability'
     );
+
+    const expenseState=await api(
+      'getPreviousTreasurerExpenseState',
+      {token:token},
+      'Loading Reconciliation Report...',
+      'Reading historical expenses and use of funds'
+    );
+
     const sum=(r&&r.summary)||{};
-    set('ptrReportGenerated',r&&r.generatedAt ? 'Generated: '+r.generatedAt : '');
-  set(
-  'ptrReportAccountability',
-  ptrMoney(
-    ptrReportVal(
-      sum,
-      ['netTotalAccountability','grossTotalAccountability','totalAccountability'],
-      0
-    )
-  )
-);
-    set('ptrReportConfirmed',ptrMoney(sum.totalConfirmedTurnover));
-    set('ptrReportPending',ptrMoney(sum.totalPendingTurnover));
-    set('ptrReportUnremitted',ptrMoney(sum.unremittedMemberCollections));
-    set('ptrReportBankFunds',ptrMoney(sum.verifiedBankFunds));
-    set('ptrReportBankPending',ptrMoney(sum.bankPendingTurnover));
+    const expenseSummary=(expenseState&&expenseState.summary)||{};
 
-    const status=String(sum.reconciliationStatus||'').trim()||'PENDING TURNOVER';
-    const statusEl=document.getElementById('ptrReportStatus');
+    set(
+      'ptrReportGenerated',
+      r&&r.generatedAt
+        ? 'Generated: '+r.generatedAt
+        : ''
+    );
+
+    set(
+      'ptrReportAccountability',
+      ptrMoney(
+        ptrReportVal(
+          sum,
+          ['netTotalAccountability','grossTotalAccountability','totalAccountability'],
+          0
+        )
+      )
+    );
+
+    set(
+      'ptrReportConfirmed',
+      ptrMoney(
+        ptrReportVal(
+          sum,
+          ['totalConfirmedTurnover'],
+          0
+        )
+      )
+    );
+
+    set(
+      'ptrReportPending',
+      ptrMoney(
+        ptrReportVal(
+          sum,
+          ['totalPendingTurnover','totalRemainingAccountability'],
+          0
+        )
+      )
+    );
+
+    /*
+     * Historical Collections and Historical Expenses Applied
+     * come from the reversal-aware Expense Allocation state.
+     */
+    const historicalCollections=
+      ptrNum(
+        ptrReportVal(
+          expenseState,
+          ['historicalCollections','totalHistoricalCollections'],
+          ptrReportVal(
+            expenseSummary,
+            ['historicalCollections','totalHistoricalCollections'],
+            ptrReportVal(
+              sum,
+              ['validatedMemberPayments','historicalCollections'],
+              0
+            )
+          )
+        )
+      );
+
+    const historicalExpensesApplied=
+      ptrNum(
+        ptrReportVal(
+          expenseState,
+          ['expenseApplied','allocatedHistoricalExpenses','activeExpenseAllocations'],
+          ptrReportVal(
+            expenseSummary,
+            ['expenseApplied','allocatedHistoricalExpenses','activeExpenseAllocations'],
+            ptrReportVal(
+              sum,
+              ['historicalExpensesApplied'],
+              0
+            )
+          )
+        )
+      );
+
+    set(
+      'ptrReportHistoricalCollections',
+      ptrMoney(historicalCollections)
+    );
+
+    set(
+      'ptrReportHistoricalExpenses',
+      ptrMoney(historicalExpensesApplied)
+    );
+
+    set(
+      'ptrReportUnremitted',
+      ptrMoney(
+        ptrReportVal(
+          sum,
+          ['unremittedMemberCollections'],
+          0
+        )
+      )
+    );
+
+    set(
+      'ptrReportBankFunds',
+      ptrMoney(
+        ptrReportVal(
+          sum,
+          ['verifiedBankFunds'],
+          0
+        )
+      )
+    );
+
+    set(
+      'ptrReportBankPending',
+      ptrMoney(
+        ptrReportVal(
+          sum,
+          ['bankPendingTurnover'],
+          0
+        )
+      )
+    );
+
+
+    /* =====================================================
+       RECONCILIATION STATUS
+       ===================================================== */
+
+    const status=
+      String(
+        sum.reconciliationStatus||''
+      ).trim()||
+      'PENDING ACCOUNTABILITY';
+
+    const statusEl=
+      document.getElementById(
+        'ptrReportStatus'
+      );
+
     if(statusEl){
+
       statusEl.textContent=status;
-      statusEl.classList.toggle('reconciled',status==='FULLY RECONCILED');
-      statusEl.classList.toggle('pending',status!=='FULLY RECONCILED');
+
+      statusEl.classList.toggle(
+        'reconciled',
+        status==='FULLY RECONCILED'
+      );
+
+      statusEl.classList.toggle(
+        'pending',
+        status!=='FULLY RECONCILED'
+      );
     }
 
-    const payments=Array.isArray(r&&r.historicalPayments)?r.historicalPayments:[];
-    const pb=document.getElementById('ptrReportPaymentsBody');
+
+    /* =====================================================
+       SOURCE OF FUNDS — HISTORICAL COLLECTIONS
+       ===================================================== */
+
+    const payments=
+      Array.isArray(r&&r.historicalPayments)
+        ? r.historicalPayments
+        : [];
+
+    /*
+     * Build expense-applied map from the reversal-aware
+     * payment rows returned by Expense Allocation state.
+     */
+    const expenseAppliedByPayment={};
+
+    ptrPaymentRows(expenseState)
+      .forEach(function(x){
+
+        const paymentId=
+          ptrPaymentId(x);
+
+        if(!paymentId){
+          return;
+        }
+
+        expenseAppliedByPayment[paymentId]=
+          ptrNum(
+            ptrPick(
+              x,
+              ['expenseApplied','allocatedExpense','allocatedAmount'],
+              0
+            )
+          );
+      });
+
+    const pb=
+      document.getElementById(
+        'ptrReportPaymentsBody'
+      );
+
     if(pb){
-      pb.innerHTML=payments.length?payments.map(x=>
-        '<tr>'+
-        '<td>'+esc(x.paymentDate||'')+'</td>'+
-        '<td>'+esc(x.memberName||x.memberId||'')+'</td>'+
-        '<td>'+esc(x.paymentType||'')+'</td>'+
-        '<td><b>'+ptrMoney(x.amount)+'</b></td>'+
-        '<td>'+ptrMoney(x.turnedOverAmount)+'</td>'+
-        '<td><b>'+ptrMoney(x.unremittedBalance)+'</b></td>'+
-        '<td>'+esc(x.turnoverStatus||x.validationStatus||'')+'</td>'+
-        '<td>'+esc([x.reference,x.remarks].filter(Boolean).join(' | '))+'</td>'+
-        '</tr>'
-      ).join(''):'<tr><td colspan="8">No historical payments.</td></tr>';
+
+      pb.innerHTML=
+        payments.length
+          ? payments.map(function(x){
+
+              const paymentId=
+                String(
+                  x.historicalPaymentId||
+                  x.paymentId||
+                  x.id||
+                  ''
+                ).trim();
+
+              const amount=
+                ptrNum(x.amount);
+
+              const turnedOver=
+                ptrNum(x.turnedOverAmount);
+
+              const expenseApplied=
+                ptrNum(
+                  x.expenseApplied!==undefined
+                    ? x.expenseApplied
+                    : (
+                        expenseAppliedByPayment[paymentId]||
+                        0
+                      )
+                );
+
+              const unremitted=
+                ptrNum(
+                  x.unremittedBalance!==undefined
+                    ? x.unremittedBalance
+                    : Math.max(
+                        0,
+                        amount-
+                        turnedOver-
+                        expenseApplied
+                      )
+                );
+
+              return '<tr>'+
+                '<td>'+esc(x.paymentDate||'')+'</td>'+
+                '<td>'+esc(x.memberName||x.memberId||'')+'</td>'+
+                '<td>'+esc(x.paymentType||'')+'</td>'+
+                '<td><b>'+ptrMoney(amount)+'</b></td>'+
+                '<td>'+ptrMoney(expenseApplied)+'</td>'+
+                '<td>'+ptrMoney(turnedOver)+'</td>'+
+                '<td><b>'+ptrMoney(unremitted)+'</b></td>'+
+                '<td>'+esc(x.turnoverStatus||x.validationStatus||'')+'</td>'+
+                '<td>'+esc(
+                  [x.reference,x.remarks]
+                    .filter(Boolean)
+                    .join(' | ')
+                )+'</td>'+
+                '</tr>';
+
+            }).join('')
+          : '<tr><td colspan="9">No historical collections.</td></tr>';
     }
 
-    const banks=Array.isArray(r&&r.bankRecords)?r.bankRecords:[];
-    const bb=document.getElementById('ptrReportBankBody');
+
+    /* =====================================================
+       EXPENSES / USE OF FUNDS
+       ===================================================== */
+
+    const expenses=
+      ptrExpenseRows(expenseState);
+
+    const eb=
+      document.getElementById(
+        'ptrReportExpensesBody'
+      );
+
+    if(eb){
+
+      eb.innerHTML=
+        expenses.length
+          ? expenses.map(function(x){
+
+              const id=
+                ptrExpenseId(x);
+
+              const amount=
+                ptrNum(
+                  ptrPick(
+                    x,
+                    ['amount','expenseAmount'],
+                    0
+                  )
+                );
+
+              const allocated=
+                ptrNum(
+                  ptrPick(
+                    x,
+                    ['allocated','allocatedAmount','expenseApplied'],
+                    0
+                  )
+                );
+
+              const remaining=
+                ptrNum(
+                  ptrPick(
+                    x,
+                    ['remaining','remainingAmount'],
+                    Math.max(
+                      0,
+                      amount-allocated
+                    )
+                  )
+                );
+
+              const status=
+                String(
+                  ptrPick(
+                    x,
+                    ['validationStatus','status'],
+                    'VALIDATED'
+                  )||''
+                ).toUpperCase();
+
+              const category=
+                ptrPick(
+                  x,
+                  ['category','expenseCategory'],
+                  ''
+                );
+
+              const particulars=
+                ptrPick(
+                  x,
+                  ['particulars','description'],
+                  ''
+                );
+
+              const reference=
+                ptrPick(
+                  x,
+                  ['reference','referenceNo','receiptReference'],
+                  ''
+                );
+
+              const remarks=
+                ptrPick(
+                  x,
+                  ['remarks'],
+                  ''
+                );
+
+              return '<tr>'+
+                '<td>'+ptrHtml(
+                  ptrPick(
+                    x,
+                    ['expenseDate','date'],
+                    ''
+                  )
+                )+'</td>'+
+                '<td>'+ptrHtml(id)+'</td>'+
+                '<td>'+ptrHtml(category)+'</td>'+
+                '<td>'+ptrHtml(particulars)+'</td>'+
+                '<td><b>'+ptrMoney(amount)+'</b></td>'+
+                '<td><b>'+ptrMoney(allocated)+'</b></td>'+
+                '<td>'+ptrMoney(remaining)+'</td>'+
+                '<td>'+ptrHtml(status)+'</td>'+
+                '<td>'+ptrHtml(
+                  [reference,remarks]
+                    .filter(Boolean)
+                    .join(' | ')
+                )+'</td>'+
+                '</tr>';
+
+            }).join('')
+          : '<tr><td colspan="9">No historical expenses.</td></tr>';
+    }
+
+
+    /* =====================================================
+       BANK / PASSBOOK FUNDS
+       ===================================================== */
+
+    const banks=
+      Array.isArray(r&&r.bankRecords)
+        ? r.bankRecords
+        : [];
+
+    const bb=
+      document.getElementById(
+        'ptrReportBankBody'
+      );
+
     if(bb){
-      bb.innerHTML=banks.length?banks.map(x=>{
-        const type=ptrReportVal(x,['transactionType','type'],'');
-        const amount=Number(ptrReportVal(x,['amount','deposit'],0)||0);
-        const deposit=Number(ptrReportVal(x,['deposit'],type&&String(type).toLowerCase().includes('withdraw')?0:amount)||0);
-        const withdrawal=Number(ptrReportVal(x,['withdrawal'],String(type).toLowerCase().includes('withdraw')?amount:0)||0);
-        return '<tr>'+
-          '<td>'+esc(ptrReportVal(x,['transactionDate','date'],'')||'')+'</td>'+
-          '<td>'+esc(type)+'</td>'+
-          '<td>'+esc(ptrReportVal(x,['description','particulars'],'')||'')+'</td>'+
-          '<td>'+ptrMoney(deposit)+'</td>'+
-          '<td>'+ptrMoney(withdrawal)+'</td>'+
-          '<td><b>'+ptrMoney(ptrReportVal(x,['runningBalance','balance'],0))+'</b></td>'+
-          '<td>'+esc([ptrReportVal(x,['reference'],'')||'',ptrReportVal(x,['remarks'],'')||''].filter(Boolean).join(' | '))+'</td>'+
-          '</tr>';
-      }).join(''):'<tr><td colspan="7">No bank records.</td></tr>';
+
+      bb.innerHTML=
+        banks.length
+          ? banks.map(function(x){
+
+              const type=
+                ptrReportVal(
+                  x,
+                  ['transactionType','type'],
+                  ''
+                );
+
+              const amount=
+                Number(
+                  ptrReportVal(
+                    x,
+                    ['amount','deposit'],
+                    0
+                  )||0
+                );
+
+              const deposit=
+                Number(
+                  ptrReportVal(
+                    x,
+                    ['deposit'],
+                    type&&
+                    String(type)
+                      .toLowerCase()
+                      .includes('withdraw')
+                      ? 0
+                      : amount
+                  )||0
+                );
+
+              const withdrawal=
+                Number(
+                  ptrReportVal(
+                    x,
+                    ['withdrawal'],
+                    String(type)
+                      .toLowerCase()
+                      .includes('withdraw')
+                      ? amount
+                      : 0
+                  )||0
+                );
+
+              return '<tr>'+
+                '<td>'+esc(
+                  ptrReportVal(
+                    x,
+                    ['transactionDate','date'],
+                    ''
+                  )||''
+                )+'</td>'+
+                '<td>'+esc(type)+'</td>'+
+                '<td>'+esc(
+                  ptrReportVal(
+                    x,
+                    ['description','particulars'],
+                    ''
+                  )||''
+                )+'</td>'+
+                '<td>'+ptrMoney(deposit)+'</td>'+
+                '<td>'+ptrMoney(withdrawal)+'</td>'+
+                '<td><b>'+ptrMoney(
+                  ptrReportVal(
+                    x,
+                    ['runningBalance','balance'],
+                    0
+                  )
+                )+'</b></td>'+
+                '<td>'+esc(
+                  [
+                    ptrReportVal(
+                      x,
+                      ['reference'],
+                      ''
+                    )||'',
+                    ptrReportVal(
+                      x,
+                      ['remarks'],
+                      ''
+                    )||''
+                  ]
+                    .filter(Boolean)
+                    .join(' | ')
+                )+'</td>'+
+                '</tr>';
+
+            }).join('')
+          : '<tr><td colspan="7">No bank records.</td></tr>';
     }
 
-    const turns=Array.isArray(r&&r.turnovers)?r.turnovers:[];
-    const tb=document.getElementById('ptrReportTurnoverBody');
+
+    /* =====================================================
+       ACTUAL TURNOVER / AUDIT HISTORY
+       ===================================================== */
+
+    const turns=
+      Array.isArray(r&&r.turnovers)
+        ? r.turnovers
+        : [];
+
+    const tb=
+      document.getElementById(
+        'ptrReportTurnoverBody'
+      );
+
     if(tb){
-      tb.innerHTML=turns.length?turns.map(x=>
-        '<tr>'+
-        '<td>'+esc(x.turnoverDate||'')+'</td>'+
-        '<td>'+esc(x.turnoverId||'')+'</td>'+
-        '<td>'+esc(x.turnoverType||'')+'</td>'+
-        '<td><b>'+ptrMoney(x.amount)+'</b></td>'+
-        '<td>'+esc(x.receivedBy||'')+'</td>'+
-        '<td>'+esc([x.reference,x.remarks].filter(Boolean).join(' | '))+'</td>'+
-        '<td><b>'+esc(x.status||'')+'</b></td>'+
-        '</tr>'
-      ).join(''):'<tr><td colspan="7">No turnover records.</td></tr>';
+
+      tb.innerHTML=
+        turns.length
+          ? turns.map(function(x){
+
+              return '<tr>'+
+                '<td>'+esc(x.turnoverDate||'')+'</td>'+
+                '<td>'+esc(x.turnoverId||'')+'</td>'+
+                '<td>'+esc(x.turnoverType||'')+'</td>'+
+                '<td><b>'+ptrMoney(x.amount)+'</b></td>'+
+                '<td>'+esc(x.receivedBy||'')+'</td>'+
+                '<td>'+esc(
+                  [x.reference,x.remarks]
+                    .filter(Boolean)
+                    .join(' | ')
+                )+'</td>'+
+                '<td><b>'+esc(x.status||'')+'</b></td>'+
+                '</tr>';
+
+            }).join('')
+          : '<tr><td colspan="7">No turnover records.</td></tr>';
     }
+
+
+    /* =====================================================
+       AUDIT NOTE / EQUATIONS
+       ===================================================== */
 
     const audit=(r&&r.audit)||{};
+
+    const unremitted=
+      ptrNum(
+        ptrReportVal(
+          sum,
+          ['unremittedMemberCollections'],
+          0
+        )
+      );
+
+    const bankPending=
+      ptrNum(
+        ptrReportVal(
+          sum,
+          ['bankPendingTurnover'],
+          0
+        )
+      );
+
     set(
       'ptrReportAuditNote',
-      'Reversed turnover audit total: '+ptrMoney(audit.reversedTotal||0)+
-      '. Reversed transactions are shown for audit purposes and are excluded from confirmed turnover totals.'
+      'Historical Collections '+ptrMoney(historicalCollections)+
+      ' − Historical Expenses Applied '+ptrMoney(historicalExpensesApplied)+
+      ' − Cash Turned Over '+ptrMoney(ptrReportVal(sum,['memberPaymentsTurnedOver','confirmedCashTurnover'],0))+
+      ' = Unremitted Collections '+ptrMoney(unremitted)+
+      '. Verified Bank Funds '+ptrMoney(ptrReportVal(sum,['verifiedBankFunds'],0))+
+      ' − Bank Turned Over '+ptrMoney(ptrReportVal(sum,['confirmedBankTurnover'],0))+
+      ' = Bank Pending Turnover '+ptrMoney(bankPending)+
+      '. Reversed turnover audit total: '+ptrMoney(audit.reversedTotal||0)+
+      '.'
     );
-    msg('ptrReportMsg','','');
-  }catch(e){fail(e,'ptrReportMsg');}
+
+    msg(
+      'ptrReportMsg',
+      '',
+      ''
+    );
+
+  }catch(e){
+
+    fail(
+      e,
+      'ptrReportMsg'
+    );
+  }
 }
 
 function printPTRReconciliationReport(){
