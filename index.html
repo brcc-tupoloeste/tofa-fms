@@ -4011,79 +4011,177 @@ function fail(
 }
 
 /* =========================================================
-   TOFA APPS SCRIPT BRIDGE
-   DESKTOP: POPUP BRIDGE
-   MOBILE: IFRAME BRIDGE
-
-   Reason:
-   Desktop Chromium is loading the Apps Script iframe wrapper
-   but the nested HtmlService page is not completing the
-   postMessage handshake. A popup is a top-level browsing
-   context and avoids that nested-iframe limitation.
+   TOFA DIRECT POST API
+   GitHub Pages -> Apps Script doPost()
+   No iframe / no popup / no postMessage bridge
 ========================================================= */
 
-let tofaBridgeFrame = null;
-let tofaBridgePopup = null;
-let tofaBridgeWindow = null;
-let tofaBridgeReady = false;
-let tofaBridgeWaiters = {};
-let tofaBridgeReadyPromise = null;
+async function api(action, payload, title, sub){
 
-function isTofaDesktop(){
+  showBusy(
+    title || 'Please wait...',
+    sub || 'Processing request'
+  );
 
-  const ua =
-    navigator.userAgent || '';
+  try{
 
-  const mobile =
-    /Android|iPhone|iPad|iPod|Mobile/i
-      .test(ua);
-
-  return !mobile;
-}
-window.addEventListener('message', function(ev){
-
-  const m = ev.data || {};
-
-  if(m.__onlineBridgeReady === true){
-
-    console.log('[TOFA BRIDGE CLIENT] READY', ev.origin);
-
-    tofaBridgeWindow = ev.source;
-    tofaBridgeReady = true;
-
-    window.dispatchEvent(
-      new Event('tofa-bridge-ready-internal')
+    console.log(
+      '[TOFA DIRECT API] START',
+      action
     );
 
-    return;
-  }
+    const response = await fetch(
+      API_URL,
+      {
+        method: 'POST',
 
-  if(m.__onlineApi !== true || !m.id){
-    return;
-  }
+        /*
+         * Apps Script ContentService redirects its response
+         * to script.googleusercontent.com.
+         */
+        redirect: 'follow',
 
-  const pending = tofaBridgeWaiters[m.id];
+        /*
+         * Do NOT use application/json here.
+         * text/plain keeps this a simple cross-origin POST
+         * and avoids an OPTIONS preflight.
+         */
+        headers: {
+          'Content-Type':
+            'text/plain;charset=utf-8'
+        },
 
-  if(!pending){
-    return;
-  }
+        body: JSON.stringify({
+          action: action,
+          payload: payload || {}
+        })
+      }
+    );
 
-  delete tofaBridgeWaiters[m.id];
-  clearTimeout(pending.timer);
 
-  if(m.ok){
-    pending.resolve(
-      m.data === undefined || m.data === null
+    if(!response.ok){
+
+      throw new Error(
+        'TOFA server returned HTTP ' +
+        response.status +
+        '.'
+      );
+
+    }
+
+
+    const raw =
+      await response.text();
+
+
+    if(!raw){
+
+      throw new Error(
+        'TOFA server returned an empty response.'
+      );
+
+    }
+
+
+    let envelope;
+
+    try{
+
+      envelope =
+        JSON.parse(raw);
+
+    }catch(parseError){
+
+      console.error(
+        '[TOFA DIRECT API] INVALID RESPONSE',
+        raw
+      );
+
+      throw new Error(
+        'TOFA server returned an invalid response.'
+      );
+
+    }
+
+
+    /*
+     * Matches your existing doPost():
+     *
+     * {
+     *   success: true,
+     *   action: "...",
+     *   result: ...
+     * }
+     */
+
+    if(
+      !envelope ||
+      envelope.success !== true
+    ){
+
+      throw new Error(
+        envelope &&
+        envelope.message
+          ? envelope.message
+          : 'TOFA server request failed.'
+      );
+
+    }
+
+
+    const result =
+      envelope.result === undefined ||
+      envelope.result === null
         ? {}
-        : m.data
-    );
-  }else{
-    pending.reject(
-      new Error(m.error || 'Request failed.')
-    );
-  }
-});
+        : envelope.result;
 
+
+    console.log(
+      '[TOFA DIRECT API] SUCCESS',
+      action,
+      result
+    );
+
+
+    return result;
+
+  }catch(error){
+
+    console.error(
+      '[TOFA DIRECT API] FAILED',
+      action,
+      error
+    );
+
+
+    /*
+     * Give a useful message if Chromium blocks the
+     * ContentService redirect/CORS response.
+     */
+    if(
+      error instanceof TypeError &&
+      /fetch/i.test(
+        String(error.message || '')
+      )
+    ){
+
+      throw new Error(
+        'Unable to connect directly to the TOFA server. ' +
+        'Please check the browser connection and try again.'
+      );
+
+    }
+
+
+    throw error;
+
+  }finally{
+
+    hideBusy();
+
+  }
+
+}
 
 function resetTofaBridge(){
 
