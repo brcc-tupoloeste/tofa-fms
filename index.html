@@ -3273,6 +3273,12 @@ button.danger{
             </select>
           </div>
 
+          <div id="ptrOtherCollectionWrap" class="full hidden">
+            <label>Collection Description / Purpose</label>
+            <input id="ptrCollectionDescription" autocomplete="off"
+                   placeholder="Example: T-shirt payment, activity contribution, special collection">
+          </div>
+
           <div>
             <label>Actual Old Payment Date</label>
             <input id="ptrPaymentDate" type="date">
@@ -7315,9 +7321,22 @@ function resetPTRArea(){
 }
 
 function clearPTRPaymentForm(keepMember){
-  const ids=['ptrPaymentType','ptrObligationId','ptrPaymentDate','ptrAmount','ptrReference','ptrRemarks'];
+  const ids=[
+    'ptrPaymentType',
+    'ptrObligationId',
+    'ptrCollectionDescription',
+    'ptrPaymentDate',
+    'ptrAmount',
+    'ptrReference',
+    'ptrRemarks'
+  ];
   ids.forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
-  const ow=document.getElementById('ptrObligationWrap'); if(ow) ow.classList.add('hidden');
+
+  const ow=document.getElementById('ptrObligationWrap');
+  if(ow) ow.classList.add('hidden');
+
+  const ocw=document.getElementById('ptrOtherCollectionWrap');
+  if(ocw) ocw.classList.add('hidden');
   if(!keepMember){
     ptrSelectedMember=null;
     ptrSelectedObligations=[];
@@ -7376,7 +7395,8 @@ async function selectPTRMember(memberId){
     sel.innerHTML='<option value="">Select payment type</option>'+
       '<option value="Registration Fee">Registration Fee — '+ptrMoney(reg)+'</option>'+
       '<option value="Monthly Membership">Monthly Dues — '+ptrMoney(monthly)+'</option>'+
-      (ptrSelectedObligations.length?'<option value="Other Obligation">Other Obligation</option>':'');
+      (ptrSelectedObligations.length?'<option value="Other Obligation">Other Obligation</option>':'')+
+      '<option value="Other Collection">Other Collection</option>';
 
     const os=document.getElementById('ptrObligationId');
     os.innerHTML='<option value="">Select obligation</option>'+
@@ -7398,14 +7418,27 @@ function obligationRowBalance(o){
 
 function ptrPaymentTypeChanged(){
   const type=document.getElementById('ptrPaymentType').value;
-  const wrap=document.getElementById('ptrObligationWrap');
-  wrap.classList.toggle('hidden',type!=='Other Obligation');
+  const obligationWrap=document.getElementById('ptrObligationWrap');
+  const otherCollectionWrap=document.getElementById('ptrOtherCollectionWrap');
+
+  obligationWrap.classList.toggle('hidden',type!=='Other Obligation');
+  otherCollectionWrap.classList.toggle('hidden',type!=='Other Collection');
+
   document.getElementById('ptrObligationId').value='';
+  document.getElementById('ptrCollectionDescription').value='';
+
   const amount=document.getElementById('ptrAmount');
+
   if(type==='Registration Fee'){
-    amount.value=ptrProfileBalance(ptrSelectedMember,['registrationBalance','registrationFeeBalance'])||'';
+    amount.value=ptrProfileBalance(
+      ptrSelectedMember,
+      ['registrationBalance','registrationFeeBalance']
+    )||'';
   }else if(type==='Monthly Membership'){
-    amount.value=ptrProfileBalance(ptrSelectedMember,['yearBalance','monthlyBalance','membershipBalance'])||'';
+    amount.value=ptrProfileBalance(
+      ptrSelectedMember,
+      ['yearBalance','monthlyBalance','membershipBalance']
+    )||'';
   }else{
     amount.value='';
   }
@@ -7418,65 +7451,190 @@ function ptrObligationChanged(){
 }
 
 async function savePTRHistoricalPayment(){
-  if(!ptrSelectedMember){msg('ptrMsg','Select a member first.','error');return;}
-
-  const memberId=ptrSelectedMember.memberId||ptrSelectedMember.id||'';
-  const memberName=ptrSelectedMember.name||ptrSelectedMember.memberName||memberId;
-  const type=document.getElementById('ptrPaymentType').value;
-  const obligationId=type==='Other Obligation'?document.getElementById('ptrObligationId').value:'';
-  const paymentDate=document.getElementById('ptrPaymentDate').value;
-  const amount=Number(document.getElementById('ptrAmount').value||0);
-  const receiptReference=(document.getElementById('ptrReference').value||'').trim();
-  const remarks=(document.getElementById('ptrRemarks').value||'').trim();
-
-  if(!type){msg('ptrMsg','Select a payment type.','error');return;}
-  if(type==='Other Obligation'&&!obligationId){msg('ptrMsg','Select the exact Other Obligation.','error');return;}
-  if(!paymentDate){msg('ptrMsg','Enter the actual old payment date.','error');return;}
-  if(!(amount>0)){msg('ptrMsg','Enter a valid amount paid.','error');return;}
-
-  let maxBalance=0;
-  if(type==='Registration Fee') maxBalance=ptrProfileBalance(ptrSelectedMember,['registrationBalance','registrationFeeBalance']);
-  else if(type==='Monthly Membership') maxBalance=ptrProfileBalance(ptrSelectedMember,['yearBalance','monthlyBalance','membershipBalance']);
-  else{
-    const row=ptrSelectedObligations.find(o=>obligationRowId(o)===obligationId);
-    maxBalance=row?obligationRowBalance(row):0;
-  }
-  if(maxBalance>0 && amount>maxBalance+0.0001){
-    msg('ptrMsg','Amount exceeds the current balance of '+ptrMoney(maxBalance)+'.','error');
+  if(!ptrSelectedMember){
+    msg('ptrMsg','Select a member first.','error');
     return;
   }
 
-  const label=type==='Monthly Membership'?'Monthly Dues':type;
+  const memberId=
+    ptrSelectedMember.memberId||
+    ptrSelectedMember.id||
+    '';
+
+  const memberName=
+    ptrSelectedMember.name||
+    ptrSelectedMember.memberName||
+    memberId;
+
+  const type=
+    document.getElementById('ptrPaymentType').value;
+
+  const obligationId=
+    type==='Other Obligation'
+      ? document.getElementById('ptrObligationId').value
+      : '';
+
+  const collectionDescription=
+    type==='Other Collection'
+      ? (document.getElementById('ptrCollectionDescription').value||'').trim()
+      : '';
+
+  const paymentDate=
+    document.getElementById('ptrPaymentDate').value;
+
+  const amount=
+    Number(document.getElementById('ptrAmount').value||0);
+
+  const receiptReference=
+    (document.getElementById('ptrReference').value||'').trim();
+
+  const remarks=
+    (document.getElementById('ptrRemarks').value||'').trim();
+
+
+  if(!type){
+    msg('ptrMsg','Select a payment type.','error');
+    return;
+  }
+
+  if(type==='Other Obligation'&&!obligationId){
+    msg('ptrMsg','Select the exact Other Obligation.','error');
+    return;
+  }
+
+  if(type==='Other Collection'&&!collectionDescription){
+    msg('ptrMsg','Enter the Collection Description / Purpose.','error');
+    return;
+  }
+
+  if(!paymentDate){
+    msg('ptrMsg','Enter the actual old payment date.','error');
+    return;
+  }
+
+  if(!(amount>0)){
+    msg('ptrMsg','Enter a valid amount paid.','error');
+    return;
+  }
+
+
+  /*
+   * Balance limit applies only to payment types that
+   * settle an existing member balance.
+   *
+   * Other Collection is accountability-only and does
+   * not reduce Registration, Monthly Dues, or an
+   * existing Other Obligation.
+   */
+  let maxBalance=0;
+
+  if(type==='Registration Fee'){
+    maxBalance=ptrProfileBalance(
+      ptrSelectedMember,
+      ['registrationBalance','registrationFeeBalance']
+    );
+  }
+  else if(type==='Monthly Membership'){
+    maxBalance=ptrProfileBalance(
+      ptrSelectedMember,
+      ['yearBalance','monthlyBalance','membershipBalance']
+    );
+  }
+  else if(type==='Other Obligation'){
+    const row=
+      ptrSelectedObligations.find(
+        o=>obligationRowId(o)===obligationId
+      );
+
+    maxBalance=
+      row
+        ? obligationRowBalance(row)
+        : 0;
+  }
+
+  if(
+    type!=='Other Collection' &&
+    maxBalance>0 &&
+    amount>maxBalance+0.0001
+  ){
+    msg(
+      'ptrMsg',
+      'Amount exceeds the current balance of '+ptrMoney(maxBalance)+'.',
+      'error'
+    );
+    return;
+  }
+
+
+  const label=
+    type==='Monthly Membership'
+      ? 'Monthly Dues'
+      : type;
+
+  const descriptionLine=
+    type==='Other Collection'
+      ? 'Description: '+collectionDescription+'\n'
+      : '';
+
+  const effectText=
+    type==='Other Collection'
+      ? 'This is historical accountability only. It will NOT reduce the member Registration Fee, Monthly Dues, or Other Obligations, and will NOT add money to current cash/bank.'
+      : 'This will credit the applicable member balance but will NOT add money to current cash/bank.';
+
+
   if(!confirm(
     'Record this OLD PAYMENT?\n\n'+
     'Member: '+memberName+'\n'+
     'Payment Type: '+label+'\n'+
+    descriptionLine+
     'Amount: '+ptrMoney(amount)+'\n'+
     'Actual Payment Date: '+paymentDate+'\n\n'+
     'Status after recording: VALIDATED – UNREMITTED\n\n'+
-    'This will credit the member balance but will NOT add money to current cash/bank.'
+    effectText
   )) return;
 
+
   try{
+
     const r=await api(
       'recordPreviousTreasurerPayment',
-      {token:token,paymentData:{
-        memberId:memberId,
-        memberName:memberName,
-        paymentDate:paymentDate,
-        paymentType:type,
-        obligationId:obligationId,
-        amount:amount,
-        receiptReference:receiptReference,
-        remarks:remarks
-      }},
-      'Recording Old Payment...',
+      {
+        token:token,
+        paymentData:{
+          memberId:memberId,
+          memberName:memberName,
+          paymentDate:paymentDate,
+          paymentType:type,
+          obligationId:obligationId,
+          collectionDescription:collectionDescription,
+          amount:amount,
+          receiptReference:receiptReference,
+          remarks:remarks
+        }
+      },
+      type==='Other Collection'
+        ? 'Recording Other Collection...'
+        : 'Recording Old Payment...',
       'Validating historical payment'
     );
-    msg('ptrMsg',(r&&r.message)||'Old payment recorded successfully as VALIDATED – UNREMITTED.','ok');
+
+    msg(
+      'ptrMsg',
+      (r&&r.message)||
+      (
+        type==='Other Collection'
+          ? 'Other collection recorded successfully as VALIDATED – UNREMITTED.'
+          : 'Old payment recorded successfully as VALIDATED – UNREMITTED.'
+      ),
+      'ok'
+    );
+
     await selectPTRMember(memberId);
     await loadDashboard();
-  }catch(e){fail(e,'ptrMsg');}
+
+  }catch(e){
+    fail(e,'ptrMsg');
+  }
 }
 
 
