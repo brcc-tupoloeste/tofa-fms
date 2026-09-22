@@ -7070,9 +7070,17 @@ function formatReportDate(v){
 function renderFinancialReport(r){
   const isAnnual=String(r.reportType||'').toLowerCase()==='annual';
   const cb=r.collectionBreakdown||[];
+  const fb=r.fundReceiptBreakdown||[];
   const eb=r.expenseBreakdown||[];
   const ms=r.monthlySummary||[];
   const ys=r.yearlySummary||[];
+  const fundReceipts=r.fundReceipts||[];
+
+  const totalFundReceipts=Number(r.totalFundReceipts||0);
+  const totalFundsReceived=(r.totalFundsReceived!==undefined && r.totalFundsReceived!==null)
+    ? Number(r.totalFundsReceived||0)
+    : Number(r.totalCollections||0)+totalFundReceipts;
+  const fundReceiptCount=Number(r.fundReceiptCount||fundReceipts.length||0);
 
   const signName=function(v){
     v=String(v||'').trim();
@@ -7085,12 +7093,20 @@ function renderFinancialReport(r){
           '<td>'+esc(x.year)+'</td>'+
           '<td>'+money(x.beginningBalance)+'</td>'+
           '<td>'+money(x.totalCollections)+'</td>'+
+          '<td>'+money(x.totalFundReceipts||0)+'</td>'+
+          '<td>'+money(x.totalFundsReceived!==undefined?x.totalFundsReceived:(Number(x.totalCollections||0)+Number(x.totalFundReceipts||0)))+'</td>'+
           '<td>'+money(x.totalExpenses)+'</td>'+
           '<td>'+money(x.netIncome)+'</td>'+
           '<td>'+money(x.endingBalance)+'</td>'+
         '</tr>'
       ).join('')
-    : '<tr><td colspan="6">No yearly summary available.</td></tr>';
+    : '<tr><td colspan="8">No yearly summary available.</td></tr>';
+
+  const fundBreakdownRows=fb.length
+    ? fb.map(x=>'<tr><td>'+esc(x.fundSource||x.source||x.type||'Other Fund Receipt')+'</td><td>'+esc(x.transactions!==undefined?x.transactions:(x.count||0))+'</td><td>'+money(x.amount)+'</td></tr>').join('')
+    : (totalFundReceipts>0
+        ? '<tr><td>Other Fund Receipts / Add Funds</td><td>'+fundReceiptCount+'</td><td>'+money(totalFundReceipts)+'</td></tr>'
+        : '<tr><td colspan="3">No fund receipts for this period.</td></tr>');
 
   const reportHtml=''
     +'<div class="fr-official-header">'
@@ -7109,18 +7125,25 @@ function renderFinancialReport(r){
     +'<div class="fr-section-heading">Financial Summary</div>'
     +'<div class="report-summary">'
       +'<div class="report-kpi"><b>Beginning Balance</b><span>'+money(r.beginningBalance)+'</span></div>'
-      +'<div class="report-kpi"><b>Total Collections</b><span>'+money(r.totalCollections)+'</span></div>'
+      +'<div class="report-kpi"><b>Member Collections</b><span>'+money(r.totalCollections)+'</span></div>'
+      +'<div class="report-kpi"><b>Fund Receipts / Add Funds</b><span>'+money(totalFundReceipts)+'</span></div>'
+      +'<div class="report-kpi"><b>Total Funds Received</b><span>'+money(totalFundsReceived)+'</span></div>'
       +'<div class="report-kpi"><b>Total Expenses</b><span>'+money(r.totalExpenses)+'</span></div>'
       +'<div class="report-kpi"><b>Net Income</b><span>'+money(r.netIncome)+'</span></div>'
       +'<div class="report-kpi"><b>Association Balance</b><span>'+money(r.associationBalance)+'</span></div>'
       +'<div class="report-kpi"><b>Bank Balance</b><span>'+money(r.bankBalance)+'</span></div>'
       +'<div class="report-kpi"><b>Cash Position</b><span>'+money(r.cashPosition)+'</span></div>'
-      +'<div class="report-kpi"><b>Transactions</b><span>'+((r.collectionCount||0)+(r.expenseCount||0))+'</span></div>'
+      +'<div class="report-kpi"><b>Transactions</b><span>'+((r.collectionCount||0)+fundReceiptCount+(r.expenseCount||0))+'</span></div>'
     +'</div>'
 
-    +'<div class="report-section"><h4>Collection Breakdown</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Type</th><th>Transactions</th><th>Amount</th></tr></thead><tbody>'
+    +'<div class="report-section"><h4>Member Collection Breakdown</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Type</th><th>Transactions</th><th>Amount</th></tr></thead><tbody>'
       +cb.map(x=>'<tr><td>'+esc(x.type)+'</td><td>'+esc(x.transactions)+'</td><td>'+money(x.amount)+'</td></tr>').join('')
       +'<tr><th>Total</th><th>'+cb.reduce((a,x)=>a+Number(x.transactions||0),0)+'</th><th>'+money(r.totalCollections)+'</th></tr>'
+    +'</tbody></table></div></div>'
+
+    +'<div class="report-section"><h4>Fund Receipts / Add Funds Breakdown</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Fund Source</th><th>Transactions</th><th>Amount</th></tr></thead><tbody>'
+      +fundBreakdownRows
+      +'<tr><th>Total</th><th>'+fundReceiptCount+'</th><th>'+money(totalFundReceipts)+'</th></tr>'
     +'</tbody></table></div></div>'
 
     +'<div class="report-section"><h4>Expense Breakdown</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Category</th><th>Transactions</th><th>Amount</th></tr></thead><tbody>'
@@ -7128,17 +7151,20 @@ function renderFinancialReport(r){
       +'<tr><th>Total</th><th>'+eb.reduce((a,x)=>a+Number(x.transactions||0),0)+'</th><th>'+money(r.totalExpenses)+'</th></tr>'
     +'</tbody></table></div></div>'
 
-    +'<div class="report-section"><h4>Monthly Summary</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Month</th><th>Collections</th><th>Expenses</th><th>Net</th></tr></thead><tbody>'
-      +ms.map(x=>'<tr><td>'+esc(x.monthName)+'</td><td>'+money(x.collections)+'</td><td>'+money(x.expenses)+'</td><td>'+money(x.net)+'</td></tr>').join('')
+    +'<div class="report-section"><h4>Monthly Summary</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Month</th><th>Member Collections</th><th>Fund Receipts</th><th>Total Funds Received</th><th>Expenses</th><th>Net</th></tr></thead><tbody>'
+      +ms.map(x=>'<tr><td>'+esc(x.monthName)+'</td><td>'+money(x.collections)+'</td><td>'+money(x.fundReceipts||0)+'</td><td>'+money(x.totalFundsReceived!==undefined?x.totalFundsReceived:(Number(x.collections||0)+Number(x.fundReceipts||0)))+'</td><td>'+money(x.expenses)+'</td><td>'+money(x.net)+'</td></tr>').join('')
     +'</tbody></table></div></div>'
 
-    +'<div class="report-section"><h4>Yearly Summary</h4><div class="table-wrap"><table class="report-table fr-yearly-table"><thead><tr><th>Year</th><th>Beginning Balance</th><th>Collections</th><th>Expenses</th><th>Net Income</th><th>Ending Balance</th></tr></thead><tbody>'
+    +'<div class="report-section"><h4>Yearly Summary</h4><div class="table-wrap"><table class="report-table fr-yearly-table"><thead><tr><th>Year</th><th>Beginning Balance</th><th>Member Collections</th><th>Fund Receipts</th><th>Total Funds Received</th><th>Expenses</th><th>Net Income</th><th>Ending Balance</th></tr></thead><tbody>'
       +yearlyRows+
     '</tbody></table></div></div>'
 
     +(isAnnual ? '' :
-      '<div class="report-section"><h4>Selected Collections</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Date</th><th>Member</th><th>Type</th><th>Amount</th></tr></thead><tbody>'
+      '<div class="report-section"><h4>Selected Member Collections</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Date</th><th>Member</th><th>Type</th><th>Amount</th></tr></thead><tbody>'
       +(r.collections||[]).map(x=>'<tr><td>'+formatReportDate(x.date)+'</td><td>'+esc(x.memberName||x.memberId)+'</td><td>'+esc(x.type)+'</td><td>'+money(x.amount)+'</td></tr>').join('')
+      +'</tbody></table></div></div>'
+      +'<div class="report-section"><h4>Selected Fund Receipts / Add Funds</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Date</th><th>Fund Source</th><th>Received From</th><th>Description</th><th>Amount</th></tr></thead><tbody>'
+      +fundReceipts.map(x=>'<tr><td>'+formatReportDate(x.date)+'</td><td>'+esc(x.fundSource||'')+'</td><td>'+esc(x.receivedFrom||'')+'</td><td>'+esc(x.description||'')+'</td><td>'+money(x.amount)+'</td></tr>').join('')
       +'</tbody></table></div></div>'
       +'<div class="report-section"><h4>Selected Expenses</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Date</th><th>Category</th><th>Particulars</th><th>Amount</th></tr></thead><tbody>'
       +(r.expenses||[]).map(x=>'<tr><td>'+formatReportDate(x.date)+'</td><td>'+esc(x.category)+'</td><td>'+esc(x.particulars)+'</td><td>'+money(x.amount)+'</td></tr>').join('')
