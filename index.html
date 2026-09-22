@@ -4030,10 +4030,16 @@ let tofaBridgeWaiters = {};
 let tofaBridgeReadyPromise = null;
 
 function isTofaDesktop(){
-  return window.matchMedia &&
-         window.matchMedia('(min-width:620px)').matches;
-}
 
+  const ua =
+    navigator.userAgent || '';
+
+  const mobile =
+    /Android|iPhone|iPad|iPod|Mobile/i
+      .test(ua);
+
+  return !mobile;
+}
 window.addEventListener('message', function(ev){
 
   const m = ev.data || {};
