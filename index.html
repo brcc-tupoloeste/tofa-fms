@@ -3606,13 +3606,12 @@ button.danger{
         </div>
 
         <div class="ptr-report-summary">
-          <div class="ptr-report-kpi"><b>Total Physical Funds</b><span id="ptrReportAccountability">₱0.00</span></div>
+          <div class="ptr-report-kpi"><b>Total Accountable Funds</b><span id="ptrReportAccountability">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Confirmed Turnover</b><span id="ptrReportConfirmed">₱0.00</span></div>
-          <div class="ptr-report-kpi"><b>Physical Funds Pending Turnover</b><span id="ptrReportPending">₱0.00</span></div>
+          <div class="ptr-report-kpi"><b>Pending Turnover</b><span id="ptrReportPending">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Historical Collections</b><span id="ptrReportHistoricalCollections">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Cash on Hand Recorded</b><span id="ptrReportBeginningCash">₱0.00</span></div>
-          <div class="ptr-report-kpi"><b>Separate Beginning Funds</b><span id="ptrReportSeparateBeginningFunds">₱0.00</span></div>
-          <div class="ptr-report-kpi"><b>Historical Expenses Applied</b><span id="ptrReportHistoricalExpenses">₱0.00</span></div>
+          <div class="ptr-report-kpi"><b>Historical Expenses</b><span id="ptrReportHistoricalExpenses">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Unremitted Member Collections</b><span id="ptrReportUnremitted">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Verified Bank Funds</b><span id="ptrReportBankFunds">₱0.00</span></div>
           <div class="ptr-report-kpi"><b>Bank Pending Turnover</b><span id="ptrReportBankPending">₱0.00</span></div>
@@ -8007,13 +8006,8 @@ async function loadPTRReconciliationReport(){
       0
     ));
 
-    // Physical funds are a custody snapshot. Do NOT add member collections again here,
-    // because those collections may already be included in Cash on Hand or Bank.
     const verifiedBankFunds=ptrNum(ptrReportVal(sum,['verifiedBankFunds'],0));
-    const totalPhysicalFunds=verifiedBankFunds+beginningCashTotal;
-    set('ptrReportAccountability',ptrMoney(totalPhysicalFunds));
     set('ptrReportBeginningCash',ptrMoney(beginningCashTotal));
-    set('ptrReportSeparateBeginningFunds',ptrMoney(separateBeginningFunds));
 
     set(
       'ptrReportConfirmed',
@@ -8025,10 +8019,6 @@ async function loadPTRReconciliationReport(){
         )
       )
     );
-
-    const bankPendingPhysical=ptrNum(ptrReportVal(sum,['bankPendingTurnover'],0));
-    const physicalFundsPending=bankPendingPhysical+beginningRemaining;
-    set('ptrReportPending',ptrMoney(physicalFundsPending));
 
     /*
      * Historical Collections and Historical Expenses Applied
@@ -8051,22 +8041,21 @@ async function loadPTRReconciliationReport(){
         )
       );
 
-    const historicalExpensesApplied=
-      ptrNum(
-        ptrReportVal(
-          expenseState,
-          ['expenseApplied','allocatedHistoricalExpenses','activeExpenseAllocations'],
-          ptrReportVal(
-            expenseSummary,
-            ['expenseApplied','allocatedHistoricalExpenses','activeExpenseAllocations'],
-            ptrReportVal(
-              sum,
-              ['historicalExpensesApplied'],
-              0
-            )
-          )
-        )
-      );
+    // Total VALIDATED historical expenses are deductions from Previous Treasurer
+    // accountability even when they are not currently allocated to member payments.
+    const historicalExpenses=
+      ptrExpenseRows(expenseState)
+        .filter(function(x){
+          const status=String(
+            ptrPick(x,['validationStatus','status'],'VALIDATED')||''
+          ).trim().toUpperCase();
+          return status==='VALIDATED';
+        })
+        .reduce(function(total,x){
+          return total + ptrNum(
+            ptrPick(x,['amount','expenseAmount'],0)
+          );
+        },0);
 
     set(
       'ptrReportHistoricalCollections',
@@ -8075,7 +8064,42 @@ async function loadPTRReconciliationReport(){
 
     set(
       'ptrReportHistoricalExpenses',
-      ptrMoney(historicalExpensesApplied)
+      ptrMoney(historicalExpenses)
+    );
+
+    // Final accountability rule:
+    // Verified Bank Funds + Previous Cash on Hand + Historical Member Collections.
+    // Historical Collections are separate from the recorded Cash on Hand.
+    const totalAccountableFunds=
+      verifiedBankFunds +
+      beginningCashTotal +
+      historicalCollections;
+
+    const confirmedTurnover=
+      ptrNum(
+        ptrReportVal(
+          sum,
+          ['totalConfirmedTurnover'],
+          0
+        )
+      );
+
+    const pendingTurnover=
+      Math.max(
+        0,
+        totalAccountableFunds -
+        historicalExpenses -
+        confirmedTurnover
+      );
+
+    set(
+      'ptrReportAccountability',
+      ptrMoney(totalAccountableFunds)
+    );
+
+    set(
+      'ptrReportPending',
+      ptrMoney(pendingTurnover)
     );
 
     set(
