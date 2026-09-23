@@ -10654,11 +10654,43 @@ function clearAttendanceSelections(){
 }
 
 function resetAttendanceEntryAfterSave(){
+  // Clear all Present / Excused selections first.
   clearAttendanceSelections();
-  const presentDetails=document.getElementById('attendancePresentList');
-  const excusedDetails=document.getElementById('attendanceExcusedList');
-  if(presentDetails)presentDetails.scrollTop=0;
-  if(excusedDetails)excusedDetails.scrollTop=0;
+
+  // Clear the loaded member data so the next entry starts fresh.
+  attendanceMembers=[];
+
+  // Clear Meeting Date and Activity / Meeting.
+  const dateEl=document.getElementById('attendanceDate');
+  const activityEl=document.getElementById('attendanceActivity');
+  if(dateEl)dateEl.value='';
+  if(activityEl)activityEl.value='';
+
+  // Clear the rendered member lists and reset counters.
+  const presentBox=document.getElementById('attendancePresentList');
+  const excusedBox=document.getElementById('attendanceExcusedList');
+  if(presentBox){
+    presentBox.innerHTML='';
+    presentBox.scrollTop=0;
+  }
+  if(excusedBox){
+    excusedBox.innerHTML='';
+    excusedBox.scrollTop=0;
+  }
+
+  ['attendanceTotalMembers','attendancePresentCount','attendanceAbsentCount','attendanceExcusedCount'].forEach(function(id){
+    const el=document.getElementById(id);
+    if(el)el.textContent='0';
+  });
+
+  const presentSelected=document.getElementById('attendancePresentSelected');
+  const excusedSelected=document.getElementById('attendanceExcusedSelected');
+  if(presentSelected)presentSelected.textContent='0';
+  if(excusedSelected)excusedSelected.textContent='0';
+
+  // Close the entire loaded-members area after successful save.
+  const workArea=document.getElementById('attendanceWorkArea');
+  if(workArea)workArea.classList.add('hidden');
 }
 
 function openAttendance(){
