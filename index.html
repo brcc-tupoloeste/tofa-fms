@@ -2339,10 +2339,15 @@ body{
       <label>Other Position</label>
       <input id="officerOtherPosition" placeholder="Enter designation">
     </div>
+    <div class="full">
+      <label>Additional Designation <span style="font-weight:normal;">(optional)</span></label>
+      <input id="officerAdditionalDesignation" placeholder="Example: Chairman, Committee on Agriculture">
+    </div>
   </div>
 
+  <input type="hidden" id="officerEditingId" value="">
   <div class="form-actions-row">
-    <button type="button" onclick="saveOfficerAssignment()">💾 SAVE OFFICER</button>
+    <button type="button" id="officerSaveBtn" onclick="saveOfficerAssignment()">💾 SAVE OFFICER</button>
     <button class="alt" type="button" onclick="printOfficersList()">🖨️ PRINT OFFICERS LIST</button>
   </div>
   <div id="officerMsg"></div>
@@ -7050,8 +7055,11 @@ function renderOfficersList(){
     return '<tr>'+
       '<td>'+(i+1)+'</td>'+
       '<td><b>'+tofaOfficerEsc(o.name||o.memberName||'')+'</b></td>'+
-      '<td>'+tofaOfficerEsc(o.position||o.designation||'')+'</td>'+
-      '<td><button type="button" class="danger-btn" data-officer-id="'+tofaOfficerEsc(id)+'" onclick="removeOfficerAssignment(this.getAttribute(\'data-officer-id\'))">Remove</button></td>'+
+      '<td>'+tofaOfficerEsc((o.position||o.designation||'')+(o.additionalDesignation?' / '+o.additionalDesignation:''))+'</td>'+
+      '<td style="white-space:nowrap">'+
+        '<button type="button" class="alt" data-officer-id="'+tofaOfficerEsc(id)+'" onclick="editOfficerAssignment(this.getAttribute(\'data-officer-id\'))">Edit</button> '+
+        '<button type="button" class="danger-btn" data-officer-id="'+tofaOfficerEsc(id)+'" onclick="removeOfficerAssignment(this.getAttribute(\'data-officer-id\'))">Remove</button>'+
+      '</td>'+
     '</tr>';
   }).join('') || '<tr><td colspan="4">No officers assigned.</td></tr>';
 }
@@ -7072,23 +7080,63 @@ async function saveOfficerAssignment(){
   const memberName = manualOfficerName || (String(opt?.dataset?.name||opt?.textContent||'').trim());
   let position=String(document.getElementById('officerPosition').value||'').trim();
   if(position==='OTHER')position=String(document.getElementById('officerOtherPosition').value||'').trim();
+  const additionalDesignation=String(document.getElementById('officerAdditionalDesignation').value||'').trim();
+  const editingId=String(document.getElementById('officerEditingId').value||'').trim();
 
   if(!memberName){msg('officerMsg','Select a member or enter a Manual Officer Name.','error');return;}
   if(!position){msg('officerMsg','Select or enter the officer position.','error');return;}
 
   showBusy('Saving Officer...','Updating current officer assignment');
   try{
-    const r=await callTofaBridge('saveOfficer',{token:token,memberId:(memberId || ('MANUAL-' + manualOfficerName.toUpperCase().replace(/[^A-Z0-9]+/g,'-').replace(/^-|-$/g,''))),memberName:memberName,position:position});
+    const payload={token:token,memberId:(memberId || ('MANUAL-' + manualOfficerName.toUpperCase().replace(/[^A-Z0-9]+/g,'-').replace(/^-|-$/g,''))),memberName:memberName,position:position,additionalDesignation:additionalDesignation};
+    const r=editingId
+      ? await callTofaBridge('updateOfficer',Object.assign({},payload,{officerId:editingId}))
+      : await callTofaBridge('saveOfficer',payload);
     tofaOfficerRows=Array.isArray(r)?r:(r?.officers||[]);
     renderOfficersList();
     memberSel.value='';
     document.getElementById('officerPosition').value='';
     document.getElementById('officerOtherPosition').value='';
+    document.getElementById('officerAdditionalDesignation').value='';
+    document.getElementById('officerEditingId').value='';
+    const _saveBtn=document.getElementById('officerSaveBtn'); if(_saveBtn)_saveBtn.textContent='💾 SAVE OFFICER';
     document.getElementById('officerOtherWrap').classList.add('hidden');
     msg('officerMsg','Officer assignment saved successfully.','ok');
   var _mn=document.getElementById('tofaOfficerManualName'); if(_mn) _mn.value='';
   }catch(e){fail(e,'officerMsg');}
   finally{hideBusy();}
+}
+
+
+function editOfficerAssignment(officerId){
+  const o=(tofaOfficerRows||[]).find(function(x){return String(x.officerId||x.id||'')===String(officerId||'');});
+  if(!o)return;
+
+  const memberSel=document.getElementById('officerMember');
+  const manual=document.getElementById('tofaOfficerManualName');
+  const positionSel=document.getElementById('officerPosition');
+  const other=document.getElementById('officerOtherPosition');
+  const additional=document.getElementById('officerAdditionalDesignation');
+  const editing=document.getElementById('officerEditingId');
+  const saveBtn=document.getElementById('officerSaveBtn');
+
+  const memberId=String(o.memberId||'');
+  const hasMember=memberSel && Array.from(memberSel.options).some(function(opt){return String(opt.value||'')===memberId;});
+  if(memberSel)memberSel.value=hasMember?memberId:'';
+  if(manual)manual.value=hasMember?'':String(o.name||o.memberName||'');
+
+  const primary=String(o.position||o.designation||'').trim().toUpperCase();
+  const standard=['PRESIDENT','VICE PRESIDENT','SECRETARY','TREASURER','AUDITOR','PIO','BUSINESS MANAGER','BOARD MEMBER'];
+  if(positionSel)positionSel.value=standard.includes(primary)?primary:'OTHER';
+  if(other)other.value=standard.includes(primary)?'':primary;
+  const wrap=document.getElementById('officerOtherWrap');
+  if(wrap)wrap.classList.toggle('hidden',standard.includes(primary));
+
+  if(additional)additional.value=String(o.additionalDesignation||'');
+  if(editing)editing.value=String(o.officerId||o.id||'');
+  if(saveBtn)saveBtn.textContent='💾 UPDATE OFFICER';
+  msg('officerMsg','Editing '+String(o.name||o.memberName||'')+'.','ok');
+  document.getElementById('officersPanel')?.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 async function removeOfficerAssignment(officerId){
@@ -7135,7 +7183,7 @@ function printOfficersList(){
   if(!tofaOfficerRows.length){alert('No officers assigned.');return;}
   const now=new Date().toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
   const rows=sortOfficersByHierarchy(tofaOfficerRows).map(function(o,i){
-    return '<tr><td>'+(i+1)+'</td><td><b>'+tofaOfficerEsc(o.name||o.memberName||'')+'</b></td><td>'+tofaOfficerEsc(o.position||o.designation||'')+'</td></tr>';
+    return '<tr><td>'+(i+1)+'</td><td><b>'+tofaOfficerEsc(o.name||o.memberName||'')+'</b></td><td>'+tofaOfficerEsc((o.position||o.designation||'')+(o.additionalDesignation?' / '+o.additionalDesignation:''))+'</td></tr>';
   }).join('');
   const body=officialDocumentHeader('OFFICERS LIST','As of '+now)+
     '<table><thead><tr><th>No.</th><th>Officer Name</th><th>Position / Designation</th></tr></thead><tbody>'+rows+'</tbody></table>';
@@ -7144,9 +7192,9 @@ function printOfficersList(){
   if(!w){alert('Please allow pop-ups to print the Officers List.');return;}
   w.document.open();
   w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>Officers List</title><style>'+
-    '@page{size:A4 portrait;margin:12mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#111;margin:0;font-size:11px}'+
+    '@page{size:A4 portrait;margin:18mm 16mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#111;margin:0;font-size:11px;max-width:178mm;margin-left:auto;margin-right:auto}'+
     officerPrintCss()+
-    'table{width:100%;border-collapse:collapse;margin-top:10px}th,td{border:1px solid #222;padding:7px 6px}th{background:#eee;text-align:center}td:first-child{text-align:center;width:8%}'+
+    'table{width:100%;border-collapse:collapse;margin:14px auto 0;table-layout:fixed}th,td{border:1px solid #222;padding:6px 8px;vertical-align:middle}th{background:#f1f1f1;text-align:center;font-weight:700}th:nth-child(1),td:nth-child(1){text-align:center;width:9%}th:nth-child(2),td:nth-child(2){width:41%}th:nth-child(3),td:nth-child(3){width:50%}tbody tr{height:29px}@media print{body{max-width:none}}'+
     '</style></head><body>'+body+'<script>window.onload=function(){window.print();};<\\/script></body></html>');
   w.document.close();
 }
