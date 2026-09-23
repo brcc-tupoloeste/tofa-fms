@@ -2296,6 +2296,58 @@ body{
     <button class="quick-btn" type="button" onclick="openSearch()">🔎 Search Member</button>
     <button class="quick-btn" type="button" onclick="openMemberList()">👥 Member List</button>
     <button class="quick-btn" type="button" onclick="openAddMember()">➕ Add Member</button>
+    <button class="quick-btn" type="button" onclick="openOfficersManagement()">👔 Officers / Signatories</button>
+  </div>
+</div>
+
+
+<!-- =======================================================
+     OFFICERS / SIGNATORIES
+======================================================= -->
+<div id="officersPanel" class="card hidden">
+  <div class="panel-nav">
+    <button type="button" class="back-dashboard" onclick="openMemberManagementMenu()">← Back to Member Management</button>
+  </div>
+  <h3 class="panel-title">👔 Officers / Signatories</h3>
+  <div class="panel-note">Assign current officers from the existing member list. Financial Report signatory names are taken automatically from Treasurer, Auditor and President.</div>
+
+  <div class="form-grid">
+    <div>
+      <label>Member</label>
+      <select id="officerMember"></select>
+    </div>
+    <div>
+      <label>Position / Designation</label>
+      <select id="officerPosition">
+        <option value="">Select position</option>
+        <option>PRESIDENT</option>
+        <option>VICE PRESIDENT</option>
+        <option>SECRETARY</option>
+        <option>TREASURER</option>
+        <option>AUDITOR</option>
+        <option>PIO</option>
+        <option>BUSINESS MANAGER</option>
+        <option>BOARD MEMBER</option>
+        <option>OTHER</option>
+      </select>
+    </div>
+    <div class="full hidden" id="officerOtherWrap">
+      <label>Other Position</label>
+      <input id="officerOtherPosition" placeholder="Enter designation">
+    </div>
+  </div>
+
+  <div class="form-actions-row">
+    <button type="button" onclick="saveOfficerAssignment()">💾 SAVE OFFICER</button>
+    <button class="alt" type="button" onclick="printOfficersList()">🖨️ PRINT OFFICERS LIST</button>
+  </div>
+  <div id="officerMsg"></div>
+
+  <div class="table-wrap" style="margin-top:12px">
+    <table class="member-table">
+      <thead><tr><th>No.</th><th>Officer Name</th><th>Position / Designation</th><th>Action</th></tr></thead>
+      <tbody id="officersBody"></tbody>
+    </table>
   </div>
 </div>
 
@@ -6377,6 +6429,7 @@ function hideAppPanels(){
     'obligationsManagementPanel',
     'paymentTypeReportPanel',
     'memberManagementMenu',
+    'officersPanel',
     'reportsMenu',
     'cashBankMenu',
     'textAnnouncementPanel',
@@ -6919,6 +6972,161 @@ async function saveNewMember(){
   }
 }
 
+
+/* =========================================================
+   OFFICERS / SIGNATORIES
+========================================================= */
+let tofaOfficerRows=[];
+
+function tofaOfficerEsc(v){
+  return esc(String(v==null?'':v));
+}
+
+async function openOfficersManagement(){
+  hideAppPanels();
+  document.getElementById('officersPanel').classList.remove('hidden');
+  document.getElementById('searchTopBar').classList.remove('hidden');
+  window.scrollTo({top:0,behavior:'smooth'});
+  msg('officerMsg','','');
+
+  const memberSel=document.getElementById('officerMember');
+  memberSel.innerHTML='<option value="">Loading members...</option>';
+
+  try{
+    const results=await Promise.all([
+      callTofaBridge('getMemberList',{token:token}),
+      callTofaBridge('getOfficers',{token:token})
+    ]);
+    const members=Array.isArray(results[0])?results[0]:[];
+    memberSel.innerHTML='<option value="">Select member</option>'+
+      members.map(function(m){
+        const id=String(m.id||m.memberId||'');
+        const name=String(m.name||m.fullName||m.memberName||'');
+        return '<option value="'+tofaOfficerEsc(id)+'" data-name="'+tofaOfficerEsc(name)+'">'+tofaOfficerEsc(name)+'</option>';
+      }).join('');
+    tofaOfficerRows=Array.isArray(results[1])?results[1]:(results[1]?.officers||[]);
+    renderOfficersList();
+  }catch(e){
+    fail(e,'officerMsg');
+  }
+}
+
+function renderOfficersList(){
+  const body=document.getElementById('officersBody');
+  if(!body)return;
+  body.innerHTML=(tofaOfficerRows||[]).map(function(o,i){
+    const id=String(o.officerId||o.id||'');
+    return '<tr>'+
+      '<td>'+(i+1)+'</td>'+
+      '<td><b>'+tofaOfficerEsc(o.name||o.memberName||'')+'</b></td>'+
+      '<td>'+tofaOfficerEsc(o.position||o.designation||'')+'</td>'+
+      '<td><button type="button" class="danger-btn" onclick="removeOfficerAssignment(\\''+tofaOfficerEsc(id)+'\\')">Remove</button></td>'+
+    '</tr>';
+  }).join('') || '<tr><td colspan="4">No officers assigned.</td></tr>';
+}
+
+document.addEventListener('change',function(e){
+  if(e.target && e.target.id==='officerPosition'){
+    const wrap=document.getElementById('officerOtherWrap');
+    if(wrap)wrap.classList.toggle('hidden',e.target.value!=='OTHER');
+  }
+});
+
+async function saveOfficerAssignment(){
+  const memberSel=document.getElementById('officerMember');
+  const opt=memberSel.options[memberSel.selectedIndex];
+  const memberId=String(memberSel.value||'').trim();
+  const memberName=String(opt?.dataset?.name||opt?.textContent||'').trim();
+  let position=String(document.getElementById('officerPosition').value||'').trim();
+  if(position==='OTHER')position=String(document.getElementById('officerOtherPosition').value||'').trim();
+
+  if(!memberId || !memberName){msg('officerMsg','Select a member.','error');return;}
+  if(!position){msg('officerMsg','Select or enter the officer position.','error');return;}
+
+  showBusy('Saving Officer...','Updating current officer assignment');
+  try{
+    const r=await callTofaBridge('saveOfficer',{token:token,memberId:memberId,memberName:memberName,position:position});
+    tofaOfficerRows=Array.isArray(r)?r:(r?.officers||[]);
+    renderOfficersList();
+    memberSel.value='';
+    document.getElementById('officerPosition').value='';
+    document.getElementById('officerOtherPosition').value='';
+    document.getElementById('officerOtherWrap').classList.add('hidden');
+    msg('officerMsg','Officer assignment saved successfully.','ok');
+  }catch(e){fail(e,'officerMsg');}
+  finally{hideBusy();}
+}
+
+async function removeOfficerAssignment(officerId){
+  if(!confirm('Remove this officer assignment?\\n\\nThe member record will NOT be deleted.'))return;
+  showBusy('Removing Officer...','Updating officer assignments');
+  try{
+    const r=await callTofaBridge('removeOfficer',{token:token,officerId:officerId});
+    tofaOfficerRows=Array.isArray(r)?r:(r?.officers||[]);
+    renderOfficersList();
+    msg('officerMsg','Officer assignment removed.','ok');
+  }catch(e){fail(e,'officerMsg');}
+  finally{hideBusy();}
+}
+
+function officialDocumentHeader(title,subtitle){
+  const sub=subtitle?'<div class="tofa-doc-subtitle">'+tofaOfficerEsc(subtitle)+'</div>':'';
+  return '<div class="tofa-doc-head">'+
+    '<div class="tofa-doc-logo"><img src="'+TOFA_LOGO_SRC+'" alt="TOFA Logo"></div>'+
+    '<div class="tofa-doc-center">'+
+      '<div class="tofa-doc-name">TUPOL OESTE FARMERS ASSOCIATION</div>'+
+      '<div class="tofa-doc-place">Cabatuan, Iloilo</div>'+
+      '<div class="tofa-doc-system">FINANCIAL MANAGEMENT SYSTEM</div>'+
+    '</div>'+
+  '</div>'+
+  '<div class="tofa-doc-rule"></div>'+
+  '<div class="tofa-doc-title">'+tofaOfficerEsc(title)+'</div>'+sub;
+}
+
+function officerPrintCss(){
+  return `
+    .tofa-doc-head{display:grid;grid-template-columns:75px 1fr 75px;align-items:center;margin-bottom:5px}
+    .tofa-doc-logo img{width:62px;height:62px;object-fit:contain}
+    .tofa-doc-center{text-align:center}
+    .tofa-doc-name{font-size:17px;font-weight:800;letter-spacing:.2px}
+    .tofa-doc-place{font-size:10px;margin-top:2px}
+    .tofa-doc-system{font-size:9px;font-weight:800;letter-spacing:1.3px;margin-top:4px}
+    .tofa-doc-rule{border-top:1px solid #176b3a;margin:6px 0 10px}
+    .tofa-doc-title{text-align:center;font-size:16px;font-weight:800;margin:0 0 3px}
+    .tofa-doc-subtitle{text-align:center;font-size:10px;margin-bottom:12px}
+  `;
+}
+
+function printOfficersList(){
+  if(!tofaOfficerRows.length){alert('No officers assigned.');return;}
+  const now=new Date().toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
+  const rows=tofaOfficerRows.map(function(o,i){
+    return '<tr><td>'+(i+1)+'</td><td><b>'+tofaOfficerEsc(o.name||o.memberName||'')+'</b></td><td>'+tofaOfficerEsc(o.position||o.designation||'')+'</td></tr>';
+  }).join('');
+  const body=officialDocumentHeader('OFFICERS LIST','As of '+now)+
+    '<table><thead><tr><th>No.</th><th>Officer Name</th><th>Position / Designation</th></tr></thead><tbody>'+rows+'</tbody></table>';
+
+  const w=window.open('','_blank','width=900,height=750');
+  if(!w){alert('Please allow pop-ups to print the Officers List.');return;}
+  w.document.open();
+  w.document.write('<!doctype html><html><head><meta charset="utf-8"><title>Officers List</title><style>'+
+    '@page{size:A4 portrait;margin:12mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#111;margin:0;font-size:11px}'+
+    officerPrintCss()+
+    'table{width:100%;border-collapse:collapse;margin-top:10px}th,td{border:1px solid #222;padding:7px 6px}th{background:#eee;text-align:center}td:first-child{text-align:center;width:8%}'+
+    '</style></head><body>'+body+'<script>window.onload=function(){window.print();};<\\/script></body></html>');
+  w.document.close();
+}
+
+async function getCurrentOfficerMap(){
+  const r=await callTofaBridge('getOfficers',{token:token});
+  const rows=Array.isArray(r)?r:(r?.officers||[]);
+  const map={};
+  rows.forEach(function(o){
+    map[String(o.position||o.designation||'').trim().toUpperCase()]=String(o.name||o.memberName||'').trim();
+  });
+  return map;
+}
+
 /* =========================================================
    PRINT MEMBER LIST
 ========================================================= */
@@ -6955,12 +7163,7 @@ function printMemberList(){
   });
 
   const printBody = `
-    <div class="head">
-      <h1>TUPOL OESTE FARMERS ASSOCIATION</h1>
-      <h2>MEMBER LIST</h2>
-      <p>Barangay Tupol Oeste, Cabatuan, Iloilo</p>
-      <p>As of ${dateText}</p>
-    </div>
+    ${officialDocumentHeader('MEMBER LIST','As of '+dateText)}
     <table>
       <thead>
         <tr><th>No.</th><th>Full Name</th><th>Address / Sitio</th><th>Contact</th><th>Status</th></tr>
@@ -7003,6 +7206,15 @@ function printMemberList(){
           font-size:11px;
         }
         #androidMemberListPrintArea .head{text-align:center;margin-bottom:12px}
+        #androidMemberListPrintArea .tofa-doc-head{display:grid;grid-template-columns:75px 1fr 75px;align-items:center;margin-bottom:5px}
+        #androidMemberListPrintArea .tofa-doc-logo img{width:62px;height:62px;object-fit:contain}
+        #androidMemberListPrintArea .tofa-doc-center{text-align:center}
+        #androidMemberListPrintArea .tofa-doc-name{font-size:17px;font-weight:800}
+        #androidMemberListPrintArea .tofa-doc-place{font-size:10px;margin-top:2px}
+        #androidMemberListPrintArea .tofa-doc-system{font-size:9px;font-weight:800;letter-spacing:1.3px;margin-top:4px}
+        #androidMemberListPrintArea .tofa-doc-rule{border-top:1px solid #176b3a;margin:6px 0 10px}
+        #androidMemberListPrintArea .tofa-doc-title{text-align:center;font-size:16px;font-weight:800;margin-bottom:3px}
+        #androidMemberListPrintArea .tofa-doc-subtitle{text-align:center;font-size:10px;margin-bottom:12px}
         #androidMemberListPrintArea .head h1{font-size:18px;margin:0 0 3px}
         #androidMemberListPrintArea .head h2{font-size:15px;margin:0 0 3px}
         #androidMemberListPrintArea .head p{margin:2px 0}
@@ -7057,6 +7269,15 @@ function printMemberList(){
   *{box-sizing:border-box}
   body{font-family:Arial,sans-serif;color:#111;margin:0;font-size:11px}
   .head{text-align:center;margin-bottom:12px}
+  .tofa-doc-head{display:grid;grid-template-columns:75px 1fr 75px;align-items:center;margin-bottom:5px}
+  .tofa-doc-logo img{width:62px;height:62px;object-fit:contain}
+  .tofa-doc-center{text-align:center}
+  .tofa-doc-name{font-size:17px;font-weight:800}
+  .tofa-doc-place{font-size:10px;margin-top:2px}
+  .tofa-doc-system{font-size:9px;font-weight:800;letter-spacing:1.3px;margin-top:4px}
+  .tofa-doc-rule{border-top:1px solid #176b3a;margin:6px 0 10px}
+  .tofa-doc-title{text-align:center;font-size:16px;font-weight:800;margin-bottom:3px}
+  .tofa-doc-subtitle{text-align:center;font-size:10px;margin-bottom:12px}
   .head h1{font-size:18px;margin:0 0 3px}
   .head h2{font-size:15px;margin:0 0 3px}
   .head p{margin:2px 0}
@@ -7592,13 +7813,23 @@ async function generateOnlineFinancialReport(){
   );
 
   try{
-    const r=await callTofaBridge('getFinancialReport',{
-      token:token,
-      year:year,
-      fromMonth:fromMonth,
-      toMonth:toMonth,
-      reportType:reportType
-    });
+    const results=await Promise.all([
+      callTofaBridge('getFinancialReport',{
+        token:token,
+        year:year,
+        fromMonth:fromMonth,
+        toMonth:toMonth,
+        reportType:reportType
+      }),
+      getCurrentOfficerMap()
+    ]);
+    const r=results[0];
+    const officerMap=results[1]||{};
+
+    // Keep the existing report/signature layout. Change NAMES only.
+    r.signaturePreparedBy=officerMap.TREASURER||'';
+    r.signatureAuditedBy=officerMap.AUDITOR||'';
+    r.signatureApprovedBy=officerMap.PRESIDENT||'';
 
     renderFinancialReport(r);
     msg('reportMsg','Report generated successfully.','ok');
