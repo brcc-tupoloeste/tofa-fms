@@ -7020,7 +7020,7 @@ function renderOfficersList(){
       '<td>'+(i+1)+'</td>'+
       '<td><b>'+tofaOfficerEsc(o.name||o.memberName||'')+'</b></td>'+
       '<td>'+tofaOfficerEsc(o.position||o.designation||'')+'</td>'+
-      '<td><button type="button" class="danger-btn" onclick="removeOfficerAssignment(\\''+tofaOfficerEsc(id)+'\\')">Remove</button></td>'+
+      '<td><button type="button" class="danger-btn" data-officer-id="'+tofaOfficerEsc(id)+'" onclick="removeOfficerAssignment(this.getAttribute(\'data-officer-id\'))">Remove</button></td>'+
     '</tr>';
   }).join('') || '<tr><td colspan="4">No officers assigned.</td></tr>';
 }
