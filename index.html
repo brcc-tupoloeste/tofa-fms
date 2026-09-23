@@ -7167,9 +7167,7 @@ function renderFinancialReport(r){
       +fundReceipts.map(x=>'<tr><td>'+formatReportDate(x.date)+'</td><td>'+esc(x.fundSource||'')+'</td><td>'+esc(x.receivedFrom||'')+'</td><td>'+esc(x.description||'')+'</td><td>'+money(x.amount)+'</td></tr>').join('')
       +'</tbody></table></div></div>'
       +'<div class="report-section"><h4>Selected Expenses</h4><div class="table-wrap"><table class="report-table"><thead><tr><th>Date</th><th>Category</th><th>Particulars</th><th>Amount</th></tr></thead><tbody>'
-      +((r.expenses||[]).length
-        ? (r.expenses||[]).map(x=>'<tr><td>'+formatReportDate(x.date)+'</td><td>'+esc(x.category)+'</td><td>'+esc(x.particulars)+'</td><td>'+money(x.amount)+'</td></tr>').join('')
-        : '<tr><td colspan="3" style="text-align:center;">No expenses recorded for this period.</td><td style="text-align:right;font-weight:700;">'+money(0)+'</td></tr>')
+      +(r.expenses||[]).map(x=>'<tr><td>'+formatReportDate(x.date)+'</td><td>'+esc(x.category)+'</td><td>'+esc(x.particulars)+'</td><td>'+money(x.amount)+'</td></tr>').join('')
       +'</tbody></table></div></div>'
     )
 
@@ -8944,24 +8942,31 @@ function renderPTRTurnoverBeginningList(){
 }
 
 function ptrTurnoverBeginningSelectionChanged(){
-  let selectedOriginal=0;
+  let rawSelected=0;
   document.querySelectorAll('.ptr-turnover-bf-check:checked').forEach(el=>{
-    selectedOriginal+=Number(el.getAttribute('data-remaining')||0);
+    rawSelected+=Number(el.getAttribute('data-remaining')||0);
   });
 
-  const total=Math.min(
-    selectedOriginal,
-    Number(ptrTurnoverBeginningAvailable||0)
+  /*
+   * Beginning Fund rows remain raw audit records.
+   * The amount available for actual turnover is capped by the
+   * backend-approved net Cash on Hand accountability.
+   */
+  const allowed=Math.max(
+    0,
+    Math.min(
+      rawSelected,
+      Number(ptrTurnoverBeginningAvailable||0)
+    )
   );
 
-  set('ptrTurnoverBeginningSelectedTotal',ptrMoney(total));
+  set('ptrTurnoverBeginningSelectedTotal',ptrMoney(allowed));
 
   const amount=document.getElementById('ptrTurnoverAmount');
   if(amount){
-    amount.max=Number(ptrTurnoverBeginningAvailable||0).toFixed(2);
-    if(!(Number(amount.value)>0)&&total>0) amount.value=total.toFixed(2);
-    if(Number(amount.value)>Number(ptrTurnoverBeginningAvailable||0)){
-      amount.value=Number(ptrTurnoverBeginningAvailable||0).toFixed(2);
+    amount.max=String(Number(ptrTurnoverBeginningAvailable||0));
+    if(!amount.value || Number(amount.value)>allowed){
+      amount.value=allowed>0?allowed.toFixed(2):'';
     }
   }
 }
@@ -9095,7 +9100,11 @@ async function loadPTRTurnover(){
     const r=await api('getPreviousTreasurerTurnover',{token:token},'Loading Turnover...','Reading Previous Treasurer accountability');
     ptrTurnoverUnremittedRows=(r&&r.unremittedPayments)||[];
     ptrTurnoverBeginningRows=(r&&r.beginningFundRecords)||[];
-    ptrTurnoverBeginningAvailable=Number((r&&r.beginningFundsAvailable)||0);
+
+    /* Backend-approved net Cash on Hand accountability.
+       This is Beginning Funds less validated historical expenses. */
+    ptrTurnoverBeginningAvailable=Math.max(0,Number((r&&r.beginningFundsAvailable)||0));
+
     set('ptrTurnoverCashAvailable',ptrMoney(r&&r.cashAvailable));
     set('ptrTurnoverBeginningAvailable',ptrMoney(ptrTurnoverBeginningAvailable));
     set('ptrTurnoverBankAvailable',ptrMoney(r&&r.bankAvailable));
