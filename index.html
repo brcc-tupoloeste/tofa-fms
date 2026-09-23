@@ -10855,7 +10855,11 @@ async function loadAttendanceHistoryDetail(index){
         '<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap">'+
           '<div><h4 style="margin:0 0 4px">📋 Attendance Details</h4>'+
           '<div><b>'+esc(meeting.meetingDate||'')+'</b> — '+esc(meeting.activity||'')+'</div></div>'+
-          '<button type="button" class="alt" id="attendanceHistoryDetailClose">Close</button>'+
+          '<div style="display:flex;gap:7px;flex-wrap:wrap">'+
+            '<button type="button" class="alt" id="attendanceHistoryDetailClose" style="width:auto;margin:0">Close</button>'+
+            '<button type="button" id="attendanceHistoryEditBtn" style="width:auto;margin:0;background:#166534">✏️ Edit Attendance</button>'+
+            '<button type="button" id="attendanceHistoryDeleteBtn" style="width:auto;margin:0;background:#991b1b">🗑️ Delete Attendance</button>'+
+          '</div>'+
         '</div>'+
         '<div class="attendance-summary-grid" style="margin-top:12px">'+
           '<div class="attendance-kpi"><b>Present</b><span>'+present.length+'</span></div>'+
@@ -10871,9 +10875,83 @@ async function loadAttendanceHistoryDetail(index){
     const closeBtn=document.getElementById('attendanceHistoryDetailClose');
     if(closeBtn)closeBtn.onclick=function(){detail.classList.add('hidden');};
 
+    const editBtn=document.getElementById('attendanceHistoryEditBtn');
+    if(editBtn)editBtn.onclick=function(){editAttendanceHistoryRecord(index);};
+
+    const deleteBtn=document.getElementById('attendanceHistoryDeleteBtn');
+    if(deleteBtn)deleteBtn.onclick=function(){deleteAttendanceHistoryRecord(index);};
+
     detail.classList.remove('hidden');
     detail.scrollIntoView({behavior:'smooth',block:'start'});
   }catch(e){fail(e,'attendanceMsg');}
+}
+
+
+async function editAttendanceHistoryRecord(index){
+  const meeting=attendanceHistoryRows[index];
+  if(!meeting)return;
+
+  const dateEl=document.getElementById('attendanceDate');
+  const activityEl=document.getElementById('attendanceActivity');
+  if(!dateEl||!activityEl)return;
+
+  dateEl.value=String(meeting.meetingDate||'');
+  activityEl.value=String(meeting.activity||'');
+
+  const historyWrap=document.getElementById('attendanceHistoryWrap');
+  if(historyWrap)historyWrap.classList.add('hidden');
+
+  await loadAttendanceMembers();
+
+  msg(
+    'attendanceMsg',
+    'Editing saved attendance for '+String(meeting.meetingDate||'')+
+      ' — '+String(meeting.activity||'')+
+      '. Update the member statuses, then click SAVE ATTENDANCE. Existing records will be updated; no duplicate will be created.',
+    'ok'
+  );
+
+  const work=document.getElementById('attendanceWorkArea');
+  if(work)work.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+async function deleteAttendanceHistoryRecord(index){
+  const meeting=attendanceHistoryRows[index];
+  if(!meeting)return;
+
+  const meetingDate=String(meeting.meetingDate||'');
+  const activity=String(meeting.activity||'');
+
+  const confirmed=window.confirm(
+    'Delete the ENTIRE attendance record for '+activity+
+    ' on '+meetingDate+'?\n\n'+
+    'This will delete all Present, Absent, and Excused member records for this meeting.'
+  );
+  if(!confirmed)return;
+
+  try{
+    const r=await api(
+      'deleteAttendanceMeeting',
+      {token:token,meetingDate:meetingDate,activity:activity},
+      'Deleting Attendance...',
+      'Removing selected meeting attendance'
+    );
+
+    msg(
+      'attendanceMsg',
+      (r&&r.message)||'Attendance record deleted successfully.',
+      'ok'
+    );
+
+    clearAttendanceSelections();
+    attendanceMembers=[];
+    const work=document.getElementById('attendanceWorkArea');
+    if(work)work.classList.add('hidden');
+
+    await loadAttendanceHistory();
+  }catch(e){
+    fail(e,'attendanceMsg');
+  }
 }
 
 async function loadAttendanceSummary(){
