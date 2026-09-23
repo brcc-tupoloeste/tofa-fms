@@ -7103,6 +7103,128 @@ function printMemberList(){
   .quick-btn{min-height:94px!important;padding:13px 10px!important;border-radius:14px!important;font-size:14px!important;line-height:1.2!important;font-weight:800!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:8px!important;text-align:center!important;}
   .quick-btn .quick-icon,.quick-btn .icon{font-size:27px!important;line-height:1!important;}
 }
+
+/* =========================================================
+   TOFA-FMS ANDROID — REFERENCE-SIZE DASHBOARD FINAL
+   Mobile dashboard presentation only.
+   No IDs, JS, API, accounting or navigation changed.
+========================================================= */
+@media (max-width:619px){
+
+  /* Use the full phone width */
+  .wrap{
+    width:100%!important;
+    max-width:none!important;
+    padding:0 0 12px!important;
+  }
+
+  /* Reference-style taller header */
+  .brand{
+    padding:16px 8px 19px!important;
+    border-radius:0 0 22px 22px!important;
+  }
+  .brand-logo-wrap{
+    width:88px!important;
+    height:88px!important;
+    margin:0 auto 7px!important;
+  }
+  .brand h1{
+    font-size:21px!important;
+    line-height:1.12!important;
+  }
+  .brand-system{
+    margin-top:5px!important;
+    font-size:10.5px!important;
+    line-height:1.15!important;
+    letter-spacing:2.1px!important;
+  }
+  .brand-tagline{
+    margin-top:4px!important;
+    font-size:11px!important;
+    line-height:1.15!important;
+  }
+
+  /* Financial Management bar */
+  #searchTopBar.top{
+    min-height:52px!important;
+    margin:8px 4px 9px!important;
+    padding:10px 11px!important;
+    border-radius:15px!important;
+  }
+  #searchTopBar.top b{
+    font-size:16px!important;
+  }
+  #searchTopBar button.danger{
+    min-height:36px!important;
+    padding:8px 13px!important;
+    font-size:12px!important;
+    border-radius:12px!important;
+  }
+
+  /* Main white dashboard panel */
+  #dashboardView.dashboard{
+    margin:0 4px 8px!important;
+    padding:13px 11px 14px!important;
+    border-radius:19px!important;
+  }
+  .dashboard-head{
+    margin-bottom:11px!important;
+  }
+  .dashboard-title{
+    font-size:21px!important;
+    line-height:1.1!important;
+  }
+  .dashboard-period{
+    font-size:11px!important;
+  }
+
+  /* 3 x 2 financial overview — larger like reference */
+  .stats{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:7px!important;
+    margin-bottom:17px!important;
+  }
+  .stat{
+    min-height:108px!important;
+    padding:11px 4px!important;
+    border-radius:14px!important;
+  }
+  .stat:before{
+    font-size:27px!important;
+    margin-bottom:7px!important;
+  }
+  .stat-label{
+    min-height:27px!important;
+    font-size:10.5px!important;
+    line-height:1.08!important;
+  }
+  .stat-value,
+  .stat-value.small{
+    margin-top:7px!important;
+    font-size:15px!important;
+    line-height:1.05!important;
+  }
+
+  /* 2 x 3 quick actions — taller and easier to read */
+  .quick-title{
+    margin:3px 0 10px!important;
+    font-size:20px!important;
+    line-height:1.1!important;
+  }
+  .quick-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:9px!important;
+  }
+  .quick-btn{
+    min-height:88px!important;
+    padding:12px 9px!important;
+    border-radius:15px!important;
+    font-size:13px!important;
+    line-height:1.18!important;
+    white-space:normal!important;
+  }
+}
+
 </style>
 </head>
 <body>
