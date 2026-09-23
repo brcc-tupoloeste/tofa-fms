@@ -7015,10 +7015,37 @@ async function openOfficersManagement(){
   }
 }
 
+function sortOfficersByHierarchy(rows){
+  const order={
+    'PRESIDENT':1,
+    'VICE PRESIDENT':2,
+    'SECRETARY':3,
+    'TREASURER':4,
+    'AUDITOR':5,
+    'PIO':6,
+    'BUSINESS MANAGER':7,
+    'BOARD MEMBER':8,
+    'OTHER':9
+  };
+
+  return (Array.isArray(rows)?rows:[]).slice().sort(function(a,b){
+    const pa=String(a.position||a.designation||'').trim().toUpperCase();
+    const pb=String(b.position||b.designation||'').trim().toUpperCase();
+    const oa=order[pa] || (pa ? 90 : 99);
+    const ob=order[pb] || (pb ? 90 : 99);
+
+    if(oa!==ob)return oa-ob;
+
+    const na=String(a.name||a.memberName||'').trim();
+    const nb=String(b.name||b.memberName||'').trim();
+    return na.localeCompare(nb);
+  });
+}
+
 function renderOfficersList(){
   const body=document.getElementById('officersBody');
   if(!body)return;
-  body.innerHTML=(tofaOfficerRows||[]).map(function(o,i){
+  body.innerHTML=sortOfficersByHierarchy(tofaOfficerRows).map(function(o,i){
     const id=String(o.officerId||o.id||'');
     return '<tr>'+
       '<td>'+(i+1)+'</td>'+
@@ -7046,7 +7073,7 @@ async function saveOfficerAssignment(){
   let position=String(document.getElementById('officerPosition').value||'').trim();
   if(position==='OTHER')position=String(document.getElementById('officerOtherPosition').value||'').trim();
 
-  if(!memberId || !memberName){msg('officerMsg','Select a member.','error');return;}
+  if(!memberName){msg('officerMsg','Select a member or enter a Manual Officer Name.','error');return;}
   if(!position){msg('officerMsg','Select or enter the officer position.','error');return;}
 
   showBusy('Saving Officer...','Updating current officer assignment');
@@ -7107,7 +7134,7 @@ function officerPrintCss(){
 function printOfficersList(){
   if(!tofaOfficerRows.length){alert('No officers assigned.');return;}
   const now=new Date().toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
-  const rows=tofaOfficerRows.map(function(o,i){
+  const rows=sortOfficersByHierarchy(tofaOfficerRows).map(function(o,i){
     return '<tr><td>'+(i+1)+'</td><td><b>'+tofaOfficerEsc(o.name||o.memberName||'')+'</b></td><td>'+tofaOfficerEsc(o.position||o.designation||'')+'</td></tr>';
   }).join('');
   const body=officialDocumentHeader('OFFICERS LIST','As of '+now)+
