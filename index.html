@@ -2453,7 +2453,7 @@ body{
     <div class="report-controls">
       <div><label>Report Type</label><select id="reportType" onchange="financialReportTypeChanged()"><option value="monthly">Monthly Report</option><option value="annual">Annual Summary Report</option></select></div>
       <div><label>Year</label><select id="reportYear"></select></div>
-      <div id="reportFromWrap"><label>From Month</label><select id="reportFromMonth"></select></div>
+      <div id="reportFromWrap"><label><span id="reportFromLabel">From Month</span></label><select id="reportFromMonth"></select></div>
       <div id="reportToWrap"><label>To Month</label><select id="reportToMonth"></select></div>
     </div>
     <div class="form-actions-row">
@@ -7407,19 +7407,24 @@ function financialReportTypeChanged(){
   const type=String(document.getElementById('reportType')?.value||'monthly');
   const fromWrap=document.getElementById('reportFromWrap');
   const toWrap=document.getElementById('reportToWrap');
+  const fromLabel=document.getElementById('reportFromLabel');
   const from=document.getElementById('reportFromMonth');
   const to=document.getElementById('reportToMonth');
+
   if(type==='annual'){
     if(fromWrap) fromWrap.style.display='none';
     if(toWrap) toWrap.style.display='none';
     if(from) from.value='1';
     if(to) to.value='12';
+  }else if(type==='monthly'){
+    if(fromWrap) fromWrap.style.display='block';
+    if(toWrap) toWrap.style.display='none';
+    if(fromLabel) fromLabel.textContent='Month';
+    if(to && from) to.value=from.value;
   }else{
     if(fromWrap) fromWrap.style.display='block';
     if(toWrap) toWrap.style.display='block';
-    const m=String(new Date().getMonth()+1);
-    if(from) from.value=m;
-    if(to) to.value=m;
+    if(fromLabel) fromLabel.textContent='From Month';
   }
 }
 
@@ -7562,8 +7567,19 @@ function renderFinancialReport(r){
 async function generateOnlineFinancialReport(){
   const reportType=String(document.getElementById('reportType')?.value||'monthly');
   const year=Number(document.getElementById('reportYear').value);
-  const fromMonth=reportType==='annual'?1:Number(document.getElementById('reportFromMonth').value);
-  const toMonth=reportType==='annual'?12:Number(document.getElementById('reportToMonth').value);
+  let fromMonth;
+  let toMonth;
+
+  if(reportType==='annual'){
+    fromMonth=1;
+    toMonth=12;
+  }else if(reportType==='monthly'){
+    fromMonth=Number(document.getElementById('reportFromMonth').value);
+    toMonth=fromMonth;
+  }else{
+    fromMonth=Number(document.getElementById('reportFromMonth').value);
+    toMonth=Number(document.getElementById('reportToMonth').value);
+  }
 
   if(fromMonth>toMonth){
     msg('reportMsg','FROM MONTH cannot be later than TO MONTH.','error');
