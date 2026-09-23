@@ -2366,8 +2366,11 @@ body{
         <option>PRESIDENT</option>
         <option>VICE PRESIDENT</option>
         <option>SECRETARY</option>
+        <option>ASSISTANT SECRETARY</option>
         <option>TREASURER</option>
+        <option>ASSISTANT TREASURER</option>
         <option>AUDITOR</option>
+        <option>ASSISTANT AUDITOR</option>
         <option>PIO</option>
         <option>BUSINESS MANAGER</option>
         <option>BOARD MEMBER</option>
@@ -7067,12 +7070,15 @@ function sortOfficersByHierarchy(rows){
     'PRESIDENT':1,
     'VICE PRESIDENT':2,
     'SECRETARY':3,
-    'TREASURER':4,
-    'AUDITOR':5,
-    'PIO':6,
-    'BUSINESS MANAGER':7,
-    'BOARD MEMBER':8,
-    'OTHER':9
+    'ASSISTANT SECRETARY':4,
+    'TREASURER':5,
+    'ASSISTANT TREASURER':6,
+    'AUDITOR':7,
+    'ASSISTANT AUDITOR':8,
+    'PIO':9,
+    'BUSINESS MANAGER':10,
+    'BOARD MEMBER':11,
+    'OTHER':12
   };
 
   return (Array.isArray(rows)?rows:[]).slice().sort(function(a,b){
@@ -7168,7 +7174,7 @@ function editOfficerAssignment(officerId){
   if(manual)manual.value=hasMember?'':String(o.name||o.memberName||'');
 
   const primary=String(o.position||o.designation||'').trim().toUpperCase();
-  const standard=['PRESIDENT','VICE PRESIDENT','SECRETARY','TREASURER','AUDITOR','PIO','BUSINESS MANAGER','BOARD MEMBER'];
+  const standard=['PRESIDENT','VICE PRESIDENT','SECRETARY','ASSISTANT SECRETARY','TREASURER','ASSISTANT TREASURER','AUDITOR','ASSISTANT AUDITOR','PIO','BUSINESS MANAGER','BOARD MEMBER'];
   if(positionSel)positionSel.value=standard.includes(primary)?primary:'OTHER';
   if(other)other.value=standard.includes(primary)?'':primary;
   const wrap=document.getElementById('officerOtherWrap');
