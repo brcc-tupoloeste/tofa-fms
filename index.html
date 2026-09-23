@@ -8900,6 +8900,7 @@ async function savePTRPassbookRecord(){
 
 let ptrTurnoverUnremittedRows=[];
 let ptrTurnoverBeginningRows=[];
+let ptrTurnoverBeginningAvailable=0;
 
 function clearPTRTurnoverForm(){
   ['ptrTurnoverDate','ptrTurnoverType','ptrTurnoverAmount','ptrTurnoverReceivedBy','ptrTurnoverReference','ptrTurnoverRemarks']
@@ -8943,9 +8944,26 @@ function renderPTRTurnoverBeginningList(){
 }
 
 function ptrTurnoverBeginningSelectionChanged(){
-  let total=0;document.querySelectorAll('.ptr-turnover-bf-check:checked').forEach(el=>{total+=Number(el.getAttribute('data-remaining')||0);});
+  let selectedOriginal=0;
+  document.querySelectorAll('.ptr-turnover-bf-check:checked').forEach(el=>{
+    selectedOriginal+=Number(el.getAttribute('data-remaining')||0);
+  });
+
+  const total=Math.min(
+    selectedOriginal,
+    Number(ptrTurnoverBeginningAvailable||0)
+  );
+
   set('ptrTurnoverBeginningSelectedTotal',ptrMoney(total));
-  const amount=document.getElementById('ptrTurnoverAmount');if(amount&&!(Number(amount.value)>0)&&total>0)amount.value=total.toFixed(2);
+
+  const amount=document.getElementById('ptrTurnoverAmount');
+  if(amount){
+    amount.max=Number(ptrTurnoverBeginningAvailable||0).toFixed(2);
+    if(!(Number(amount.value)>0)&&total>0) amount.value=total.toFixed(2);
+    if(Number(amount.value)>Number(ptrTurnoverBeginningAvailable||0)){
+      amount.value=Number(ptrTurnoverBeginningAvailable||0).toFixed(2);
+    }
+  }
 }
 
 function ptrTurnoverSelectionChanged(){
@@ -9077,8 +9095,9 @@ async function loadPTRTurnover(){
     const r=await api('getPreviousTreasurerTurnover',{token:token},'Loading Turnover...','Reading Previous Treasurer accountability');
     ptrTurnoverUnremittedRows=(r&&r.unremittedPayments)||[];
     ptrTurnoverBeginningRows=(r&&r.beginningFundRecords)||[];
+    ptrTurnoverBeginningAvailable=Number((r&&r.beginningFundsAvailable)||0);
     set('ptrTurnoverCashAvailable',ptrMoney(r&&r.cashAvailable));
-    set('ptrTurnoverBeginningAvailable',ptrMoney(r&&r.beginningFundsAvailable));
+    set('ptrTurnoverBeginningAvailable',ptrMoney(ptrTurnoverBeginningAvailable));
     set('ptrTurnoverBankAvailable',ptrMoney(r&&r.bankAvailable));
     renderPTRTurnoverPaymentList();
     renderPTRTurnoverBeginningList();
