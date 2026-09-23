@@ -2151,7 +2151,9 @@ body{
 
   <div id="attendanceHistoryWrap" class="hidden">
     <h4>📚 Attendance History</h4>
+    <div class="panel-note">Tap a meeting/date to view the names recorded as Present, Absent, and Excused.</div>
     <div id="attendanceHistory" class="table-wrap"></div>
+    <div id="attendanceHistoryDetail" class="hidden"></div>
   </div>
 
   <div id="attendanceSummaryWrap" class="hidden">
@@ -10636,6 +10638,25 @@ async function sendTextAnnouncement(){
    ATTENDANCE MODULE
 ========================================================= */
 let attendanceMembers = [];
+let attendanceHistoryRows = [];
+
+function clearAttendanceSelections(){
+  attendanceMembers.forEach(function(_,i){
+    const p=document.getElementById('attPresent_'+i);
+    const e=document.getElementById('attExcused_'+i);
+    if(p)p.checked=false;
+    if(e)e.checked=false;
+  });
+  updateAttendanceCounts();
+}
+
+function resetAttendanceEntryAfterSave(){
+  clearAttendanceSelections();
+  const presentDetails=document.getElementById('attendancePresentList');
+  const excusedDetails=document.getElementById('attendanceExcusedList');
+  if(presentDetails)presentDetails.scrollTop=0;
+  if(excusedDetails)excusedDetails.scrollTop=0;
+}
 
 function openAttendance(){
   hideAppPanels();
@@ -10734,8 +10755,8 @@ async function saveAttendance(){
   });
   try{
     const r=await api('saveAttendance',{token:token,attendanceData:{meetingDate:meetingDate,activity:activity,records:records}},'Saving Attendance...','Updating attendance records');
-    msg('attendanceMsg',(r&&r.message)||'Attendance saved successfully.','ok');
-    await loadAttendanceMembers();
+    msg('attendanceMsg',(r&&r.message)||'Attendance saved successfully. Checklist cleared and ready for the next attendance.','ok');
+    resetAttendanceEntryAfterSave();
   }catch(e){fail(e,'attendanceMsg');}
 }
 
@@ -10777,12 +10798,75 @@ async function loadAttendanceHistory(){
   try{
     const r=await api('getAttendanceHistory',{token:token},'Loading History...','Retrieving attendance history');
     const rows=Array.isArray(r)?r:[];
+    attendanceHistoryRows=rows;
     const box=document.getElementById('attendanceHistory');
+    const detail=document.getElementById('attendanceHistoryDetail');
     document.getElementById('attendanceHistoryWrap').classList.remove('hidden');
+    if(detail){detail.classList.add('hidden');detail.innerHTML='';}
     if(!rows.length){box.innerHTML='<div class="panel-note">No attendance history found.</div>';return;}
     let h='<table class="report-table"><thead><tr><th>Date</th><th>Activity / Meeting</th><th>Present</th><th>Absent</th><th>Excused</th><th>Total</th></tr></thead><tbody>';
-    rows.forEach(function(x){h+='<tr><td>'+esc(x.meetingDate||'')+'</td><td>'+esc(x.activity||'')+'</td><td>'+Number(x.present||0)+'</td><td>'+Number(x.absent||0)+'</td><td>'+Number(x.excused||0)+'</td><td>'+Number(x.total||0)+'</td></tr>';});
+    rows.forEach(function(x,i){
+      h+='<tr onclick="loadAttendanceHistoryDetail('+i+')" style="cursor:pointer" title="Tap to view member names">'+
+        '<td><b>'+esc(x.meetingDate||'')+'</b></td>'+
+        '<td>'+esc(x.activity||'')+'</td>'+
+        '<td>'+Number(x.present||0)+'</td>'+
+        '<td>'+Number(x.absent||0)+'</td>'+
+        '<td>'+Number(x.excused||0)+'</td>'+
+        '<td>'+Number(x.total||0)+'</td></tr>';
+    });
     box.innerHTML=h+'</tbody></table>';
+  }catch(e){fail(e,'attendanceMsg');}
+}
+
+async function loadAttendanceHistoryDetail(index){
+  const meeting=attendanceHistoryRows[index];
+  if(!meeting)return;
+  const detail=document.getElementById('attendanceHistoryDetail');
+  if(!detail)return;
+  try{
+    const r=await api(
+      'getAttendanceMembers',
+      {token:token,meetingDate:meeting.meetingDate||'',activity:meeting.activity||''},
+      'Loading Attendance Details...',
+      'Retrieving member attendance'
+    );
+    const rows=Array.isArray(r)?r:((r&&r.records)||[]);
+    const present=[], absent=[], excused=[];
+    rows.forEach(function(m){
+      const name=String(m.memberName||'').trim();
+      const status=String(m.status||'ABSENT').toUpperCase();
+      if(status==='PRESENT')present.push(name);
+      else if(status==='EXCUSED')excused.push(name);
+      else absent.push(name);
+    });
+
+    function namesList(items){
+      if(!items.length)return '<div class="panel-note">None</div>';
+      return '<ol style="margin:8px 0 0 22px;padding:0">'+items.map(function(name){
+        return '<li style="padding:4px 0">'+esc(name)+'</li>';
+      }).join('')+'</ol>';
+    }
+
+    detail.innerHTML=
+      '<div class="card" style="margin-top:12px;padding:14px">'+
+        '<div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap">'+
+          '<div><h4 style="margin:0 0 4px">📋 Attendance Details</h4>'+
+          '<div><b>'+esc(meeting.meetingDate||'')+'</b> — '+esc(meeting.activity||'')+'</div></div>'+
+          '<button type="button" class="alt" onclick="document.getElementById(\\'attendanceHistoryDetail\\').classList.add(\\'hidden\\')">Close</button>'+
+        '</div>'+
+        '<div class="attendance-summary-grid" style="margin-top:12px">'+
+          '<div class="attendance-kpi"><b>Present</b><span>'+present.length+'</span></div>'+
+          '<div class="attendance-kpi"><b>Absent</b><span>'+absent.length+'</span></div>'+
+          '<div class="attendance-kpi"><b>Excused</b><span>'+excused.length+'</span></div>'+
+          '<div class="attendance-kpi"><b>Total</b><span>'+rows.length+'</span></div>'+
+        '</div>'+
+        '<details class="attendance-select-box" open><summary><b>Present Members — '+present.length+'</b></summary>'+namesList(present)+'</details>'+
+        '<details class="attendance-select-box"><summary><b>Absent Members — '+absent.length+'</b></summary>'+namesList(absent)+'</details>'+
+        '<details class="attendance-select-box"><summary><b>Excused Members — '+excused.length+'</b></summary>'+namesList(excused)+'</details>'+
+      '</div>';
+
+    detail.classList.remove('hidden');
+    detail.scrollIntoView({behavior:'smooth',block:'start'});
   }catch(e){fail(e,'attendanceMsg');}
 }
 
@@ -10830,6 +10914,26 @@ function printAnnualAttendanceSummary(){
   const cleanup=function(){document.body.classList.remove('print-annual-attendance');window.removeEventListener('afterprint',cleanup);};
   window.addEventListener('afterprint',cleanup);window.print();setTimeout(cleanup,1500);
 }
+
+
+(function(){
+  function bindAttendanceEntryReset(){
+    const date=document.getElementById('attendanceDate');
+    const activity=document.getElementById('attendanceActivity');
+    function resetIfLoaded(){
+      if(!attendanceMembers.length)return;
+      clearAttendanceSelections();
+      const work=document.getElementById('attendanceWorkArea');
+      if(work)work.classList.add('hidden');
+      attendanceMembers=[];
+      msg('attendanceMsg','Date/activity changed. Click LOAD MEMBERS for the new attendance.','');
+    }
+    if(date&&!date.dataset.resetBound){date.addEventListener('change',resetIfLoaded);date.dataset.resetBound='1';}
+    if(activity&&!activity.dataset.resetBound){activity.addEventListener('change',resetIfLoaded);activity.dataset.resetBound='1';}
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bindAttendanceEntryReset);
+  else bindAttendanceEntryReset();
+})();
 
 </script>
 
