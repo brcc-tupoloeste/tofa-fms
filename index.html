@@ -5985,7 +5985,7 @@ async function loadFundReceiptHistory(){
       const by=x.receivedBy||x['Received By']||'';
       const ref=x.reference||x.Reference||'';
       const status=x.status||x.Status||'ACTIVE';
-      return '<tr><td>'+escapeHtml(formatDisplayDate(date))+'</td><td>'+escapeHtml(source)+'</td><td>'+escapeHtml(desc)+'</td><td>'+escapeHtml(from)+'</td><td>'+money(amt)+'</td><td>'+escapeHtml(by)+'</td><td>'+escapeHtml(ref)+'</td><td>'+escapeHtml(status)+'</td></tr>';
+      return '<tr><td>'+esc(formatDisplayDate(date))+'</td><td>'+esc(source)+'</td><td>'+esc(desc)+'</td><td>'+esc(from)+'</td><td>'+money(amt)+'</td><td>'+esc(by)+'</td><td>'+esc(ref)+'</td><td>'+esc(status)+'</td></tr>';
     }).join('')+'</tbody></table></div>';
   }catch(e){ fail(e,'fundReceiptMsg'); }
 }
