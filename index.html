@@ -8942,31 +8942,21 @@ function renderPTRTurnoverBeginningList(){
 }
 
 function ptrTurnoverBeginningSelectionChanged(){
-  let rawSelected=0;
+  let total=0;
   document.querySelectorAll('.ptr-turnover-bf-check:checked').forEach(el=>{
-    rawSelected+=Number(el.getAttribute('data-remaining')||0);
+    total+=Number(el.getAttribute('data-remaining')||0);
   });
 
-  /*
-   * Beginning Fund rows remain raw audit records.
-   * The amount available for actual turnover is capped by the
-   * backend-approved net Cash on Hand accountability.
-   */
-  const allowed=Math.max(
-    0,
-    Math.min(
-      rawSelected,
-      Number(ptrTurnoverBeginningAvailable||0)
-    )
-  );
+  const allowed=Math.max(0,Number(ptrTurnoverBeginningAvailable||0));
+  const selectedTotal=Math.min(total,allowed);
 
-  set('ptrTurnoverBeginningSelectedTotal',ptrMoney(allowed));
+  set('ptrTurnoverBeginningSelectedTotal',ptrMoney(selectedTotal));
 
   const amount=document.getElementById('ptrTurnoverAmount');
   if(amount){
-    amount.max=String(Number(ptrTurnoverBeginningAvailable||0));
-    if(!amount.value || Number(amount.value)>allowed){
-      amount.value=allowed>0?allowed.toFixed(2):'';
+    amount.max=allowed.toFixed(2);
+    if(!(Number(amount.value)>0)&&selectedTotal>0){
+      amount.value=selectedTotal.toFixed(2);
     }
   }
 }
@@ -9100,11 +9090,7 @@ async function loadPTRTurnover(){
     const r=await api('getPreviousTreasurerTurnover',{token:token},'Loading Turnover...','Reading Previous Treasurer accountability');
     ptrTurnoverUnremittedRows=(r&&r.unremittedPayments)||[];
     ptrTurnoverBeginningRows=(r&&r.beginningFundRecords)||[];
-
-    /* Backend-approved net Cash on Hand accountability.
-       This is Beginning Funds less validated historical expenses. */
     ptrTurnoverBeginningAvailable=Math.max(0,Number((r&&r.beginningFundsAvailable)||0));
-
     set('ptrTurnoverCashAvailable',ptrMoney(r&&r.cashAvailable));
     set('ptrTurnoverBeginningAvailable',ptrMoney(ptrTurnoverBeginningAvailable));
     set('ptrTurnoverBankAvailable',ptrMoney(r&&r.bankAvailable));
