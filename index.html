@@ -1788,8 +1788,27 @@ body{
   body.print-officers-list #officersPrintArea *{visibility:visible!important}
   body.print-officers-list #officersPrintArea{
     display:block!important;position:absolute!important;left:0!important;top:0!important;
-    width:100%!important;margin:0!important;padding:0!important;background:#fff!important;color:#000!important
+    width:100%!important;margin:0!important;padding:0!important;background:#fff!important;color:#000!important;
+    font-family:Arial,sans-serif!important;font-size:10pt!important
   }
+  body.print-officers-list #officersPrintArea .tofa-doc-head{
+    display:grid!important;grid-template-columns:75px 1fr 75px!important;align-items:center!important;
+    width:100%!important;margin:0 0 5px 0!important;padding:0!important
+  }
+  body.print-officers-list #officersPrintArea .tofa-doc-logo{
+    width:75px!important;height:65px!important;display:flex!important;align-items:center!important;justify-content:flex-start!important
+  }
+  body.print-officers-list #officersPrintArea .tofa-doc-logo img{
+    width:62px!important;height:62px!important;max-width:62px!important;max-height:62px!important;
+    min-width:0!important;min-height:0!important;object-fit:contain!important;margin:0!important;padding:0!important
+  }
+  body.print-officers-list #officersPrintArea .tofa-doc-center{text-align:center!important}
+  body.print-officers-list #officersPrintArea .tofa-doc-name{font-size:17px!important;line-height:1.15!important;font-weight:800!important;letter-spacing:.2px!important}
+  body.print-officers-list #officersPrintArea .tofa-doc-place{font-size:10px!important;line-height:1.2!important;margin-top:2px!important}
+  body.print-officers-list #officersPrintArea .tofa-doc-system{font-size:9px!important;line-height:1.2!important;font-weight:800!important;letter-spacing:1.3px!important;margin-top:4px!important}
+  body.print-officers-list #officersPrintArea .tofa-doc-rule{border-top:1px solid #176b3a!important;margin:6px 0 10px!important}
+  body.print-officers-list #officersPrintArea .tofa-doc-title{text-align:center!important;font-size:16px!important;line-height:1.2!important;font-weight:800!important;margin:0 0 3px!important}
+  body.print-officers-list #officersPrintArea .tofa-doc-subtitle{text-align:center!important;font-size:10px!important;line-height:1.2!important;margin:0 0 12px!important}
   body.print-officers-list #officersPrintArea table{min-width:0!important;width:100%!important;border-collapse:collapse!important;table-layout:fixed!important}
   body.print-officers-list #officersPrintArea th,body.print-officers-list #officersPrintArea td{border:1px solid #222!important;padding:6px 8px!important;font-size:9pt!important;color:#000!important}
   body.print-officers-list #officersPrintArea th{background:#f1f1f1!important;text-align:center!important}
