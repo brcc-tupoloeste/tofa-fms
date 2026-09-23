@@ -2391,8 +2391,51 @@ button.danger{
   <h3 class="panel-title">💰 Cash &amp; Bank Management</h3>
   <div class="panel-note">Select the financial transaction function you want to use.</div>
   <div class="quick-grid">
+    <button class="quick-btn" type="button" onclick="openFundReceiptPanel()">➕ Add Funds</button>
     <button class="quick-btn" type="button" onclick="openExpensePanel()">💸 Expenses</button>
     <button class="quick-btn" type="button" onclick="openBankPanel()">🏦 Bank</button>
+  </div>
+</div>
+
+<!-- =======================================================
+     ADD FUNDS / FUND RECEIPTS
+======================================================= -->
+<div id="fundReceiptPanel" class="card hidden">
+  <div class="panel-nav">
+    <button type="button" class="back-dashboard" onclick="openCashBankMenu()">← Back to Cash &amp; Bank</button>
+  </div>
+
+  <h3 class="panel-title">➕ Add Funds</h3>
+  <div class="panel-note">Record actual cash received by the Current Treasurer that is not a member payment. This adds to Cash on Hand and Association Balance, not Bank Balance.</div>
+
+  <div class="form-grid">
+    <div><label>Date</label><input id="fundReceiptDate" type="date"></div>
+    <div><label>Fund Source</label><select id="fundReceiptSource">
+      <option value="">Select fund source</option>
+      <option value="SALE OF PRODUCE">Sale of Produce / Vegetables</option>
+      <option value="RETURNED/EXCESS EXPENSE FUNDS">Returned / Excess Expense Funds</option>
+      <option value="DONATION">Donation</option>
+      <option value="REFUND/REIMBURSEMENT">Refund / Reimbursement</option>
+      <option value="OTHER INCOME / FUND SOURCE">Other Income / Fund Source</option>
+    </select></div>
+    <div><label>Received From</label><input id="fundReceiptFrom" placeholder="Person / source (optional)"></div>
+    <div><label>Amount</label><input id="fundReceiptAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00"></div>
+    <div class="full"><label>Description</label><input id="fundReceiptDescription" placeholder="Example: Returned excess transportation funds"></div>
+    <div><label>Received By</label><input id="fundReceiptReceivedBy" placeholder="Current Treasurer / receiver"></div>
+    <div><label>Reference</label><input id="fundReceiptReference" placeholder="Optional receipt / reference"></div>
+    <div class="full"><label>Remarks</label><textarea id="fundReceiptRemarks" placeholder="Optional remarks"></textarea></div>
+  </div>
+
+  <div class="form-actions-row">
+    <button type="button" onclick="saveOnlineFundReceipt()">ADD FUNDS</button>
+    <button type="button" class="alt" onclick="openCashBankMenu()">CANCEL</button>
+  </div>
+  <div id="fundReceiptMsg"></div>
+
+  <button id="fundReceiptHistoryToggleBtn" type="button" class="alt" onclick="toggleFundReceiptHistory()">📋 View Add Funds History</button>
+  <div id="fundReceiptHistorySection" class="hidden" style="margin-top:12px">
+    <h3 style="margin:0 0 10px">📋 Add Funds History</h3>
+    <div id="fundReceiptHistoryContent" class="scroll"><div class="panel-note">Click View Add Funds History to load records.</div></div>
   </div>
 </div>
 
@@ -4253,7 +4296,7 @@ async function logout(){
 
   document.getElementById('searchTopBar').classList.remove('hidden');
 
-  ['dashboardView','searchCard','profileCard','paymentCard','historyCard','addMemberPanel','memberListPanel','outstandingPanel','reportPanel','expensePanel','bankPanel','editMemberPanel']
+  ['dashboardView','searchCard','profileCard','paymentCard','historyCard','addMemberPanel','memberListPanel','outstandingPanel','reportPanel','fundReceiptPanel','expensePanel','bankPanel','editMemberPanel']
     .forEach(function(id){
       const el=document.getElementById(id);
       if(el) el.classList.add('hidden');
@@ -5864,6 +5907,89 @@ function todayInputValue(){
     String(d.getDate()).padStart(2,'0');
 }
 
+function openFundReceiptPanel(){
+  hideAppPanels();
+  document.getElementById('fundReceiptPanel').classList.remove('hidden');
+  document.getElementById('searchTopBar').classList.remove('hidden');
+
+  const date=document.getElementById('fundReceiptDate');
+  if(date && !date.value) date.value=todayInputValue();
+
+  msg('fundReceiptMsg','','');
+  const section=document.getElementById('fundReceiptHistorySection');
+  const btn=document.getElementById('fundReceiptHistoryToggleBtn');
+  if(section) section.classList.add('hidden');
+  if(btn) btn.textContent='📋 View Add Funds History';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+async function saveOnlineFundReceipt(){
+  const source=document.getElementById('fundReceiptSource').value;
+  const amount=Number(document.getElementById('fundReceiptAmount').value||0);
+  const description=document.getElementById('fundReceiptDescription').value.trim();
+
+  if(!source){ msg('fundReceiptMsg','Please select a Fund Source.','error'); return; }
+  if(!(amount>0)){ msg('fundReceiptMsg','Please enter a valid amount.','error'); return; }
+  if(!description){ msg('fundReceiptMsg','Please enter a description.','error'); return; }
+
+  try{
+    const r=await api('saveFundReceipt',{
+      token:token,
+      fundData:{
+        date:document.getElementById('fundReceiptDate').value,
+        fundSource:source,
+        receivedFrom:document.getElementById('fundReceiptFrom').value.trim(),
+        description:description,
+        amount:amount,
+        receivedBy:document.getElementById('fundReceiptReceivedBy').value.trim(),
+        reference:document.getElementById('fundReceiptReference').value.trim(),
+        remarks:document.getElementById('fundReceiptRemarks').value.trim()
+      }
+    },'Adding Funds...','Recording actual cash received');
+
+    msg('fundReceiptMsg',(r&&r.message)||'Fund receipt saved successfully.','ok');
+    ['fundReceiptAmount','fundReceiptFrom','fundReceiptDescription','fundReceiptReference','fundReceiptRemarks'].forEach(function(id){
+      const el=document.getElementById(id); if(el) el.value='';
+    });
+    document.getElementById('fundReceiptSource').value='';
+
+    await loadDashboard({silent:true});
+    const section=document.getElementById('fundReceiptHistorySection');
+    if(section && !section.classList.contains('hidden')) await loadFundReceiptHistory();
+  }catch(e){ fail(e,'fundReceiptMsg'); }
+}
+
+async function toggleFundReceiptHistory(){
+  const section=document.getElementById('fundReceiptHistorySection');
+  const btn=document.getElementById('fundReceiptHistoryToggleBtn');
+  if(!section||!btn) return;
+  const show=section.classList.contains('hidden');
+  section.classList.toggle('hidden',!show);
+  btn.textContent=show?'▲ Hide Add Funds History':'📋 View Add Funds History';
+  if(show) await loadFundReceiptHistory();
+}
+
+async function loadFundReceiptHistory(){
+  const box=document.getElementById('fundReceiptHistoryContent');
+  if(!box) return;
+  try{
+    const r=await api('getFundReceiptHistory',{token:token},'Loading Add Funds History...','Reading fund receipts');
+    const rows=Array.isArray(r)?r:((r&&r.records)||[]);
+    if(!rows.length){ box.innerHTML='<div class="panel-note">No Add Funds records yet.</div>'; return; }
+    box.innerHTML='<div class="table-wrap"><table class="member-table"><thead><tr><th>Date</th><th>Source</th><th>Description</th><th>Received From</th><th>Amount</th><th>Received By</th><th>Reference</th><th>Status</th></tr></thead><tbody>'+rows.map(function(x){
+      const date=x.date||x.Date||x['Date']||'';
+      const source=x.fundSource||x['Fund Source']||'';
+      const desc=x.description||x.Description||'';
+      const from=x.receivedFrom||x['Received From']||'';
+      const amt=Number(x.amount||x.Amount||0);
+      const by=x.receivedBy||x['Received By']||'';
+      const ref=x.reference||x.Reference||'';
+      const status=x.status||x.Status||'ACTIVE';
+      return '<tr><td>'+escapeHtml(formatDisplayDate(date))+'</td><td>'+escapeHtml(source)+'</td><td>'+escapeHtml(desc)+'</td><td>'+escapeHtml(from)+'</td><td>'+money(amt)+'</td><td>'+escapeHtml(by)+'</td><td>'+escapeHtml(ref)+'</td><td>'+escapeHtml(status)+'</td></tr>';
+    }).join('')+'</tbody></table></div>';
+  }catch(e){ fail(e,'fundReceiptMsg'); }
+}
+
 function openExpensePanel(){
   hideAppPanels();
   document.getElementById('expensePanel').classList.remove('hidden');
@@ -6155,6 +6281,7 @@ function hideAppPanels(){
     'memberListPanel',
     'outstandingPanel',
     'reportPanel',
+    'fundReceiptPanel',
     'expensePanel',
     'bankPanel',
     'editMemberPanel',
