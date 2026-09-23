@@ -2315,6 +2315,10 @@ body{
     <div>
       <label>Member</label>
       <select id="officerMember"></select>
+        <div style="margin-top:8px;">
+          <label for="tofaOfficerManualName">Manual Officer Name <span style="font-weight:normal;">(optional — for non-member officer)</span></label>
+          <input id="tofaOfficerManualName" type="text" placeholder="Enter full name if officer is not a member" autocomplete="off">
+        </div>
     </div>
     <div>
       <label>Position / Designation</label>
@@ -7033,10 +7037,12 @@ document.addEventListener('change',function(e){
 });
 
 async function saveOfficerAssignment(){
+  var manualOfficerName = (document.getElementById('tofaOfficerManualName')?.value || '').trim();
+
   const memberSel=document.getElementById('officerMember');
   const opt=memberSel.options[memberSel.selectedIndex];
   const memberId=String(memberSel.value||'').trim();
-  const memberName=String(opt?.dataset?.name||opt?.textContent||'').trim();
+  const memberName = manualOfficerName || (String(opt?.dataset?.name||opt?.textContent||'').trim());
   let position=String(document.getElementById('officerPosition').value||'').trim();
   if(position==='OTHER')position=String(document.getElementById('officerOtherPosition').value||'').trim();
 
@@ -7045,7 +7051,7 @@ async function saveOfficerAssignment(){
 
   showBusy('Saving Officer...','Updating current officer assignment');
   try{
-    const r=await callTofaBridge('saveOfficer',{token:token,memberId:memberId,memberName:memberName,position:position});
+    const r=await callTofaBridge('saveOfficer',{token:token,memberId:(memberId || ('MANUAL-' + manualOfficerName.toUpperCase().replace(/[^A-Z0-9]+/g,'-').replace(/^-|-$/g,''))),memberName:memberName,position:position});
     tofaOfficerRows=Array.isArray(r)?r:(r?.officers||[]);
     renderOfficersList();
     memberSel.value='';
@@ -7053,6 +7059,7 @@ async function saveOfficerAssignment(){
     document.getElementById('officerOtherPosition').value='';
     document.getElementById('officerOtherWrap').classList.add('hidden');
     msg('officerMsg','Officer assignment saved successfully.','ok');
+  var _mn=document.getElementById('tofaOfficerManualName'); if(_mn) _mn.value='';
   }catch(e){fail(e,'officerMsg');}
   finally{hideBusy();}
 }
@@ -7072,7 +7079,7 @@ async function removeOfficerAssignment(officerId){
 function officialDocumentHeader(title,subtitle){
   const sub=subtitle?'<div class="tofa-doc-subtitle">'+tofaOfficerEsc(subtitle)+'</div>':'';
   return '<div class="tofa-doc-head">'+
-    '<div class="tofa-doc-logo"><img src="'+TOFA_LOGO_SRC+'" alt="TOFA Logo"></div>'+
+    '<div class="tofa-doc-logo"><img src="'+(document.querySelector('img[src]') ? document.querySelector('img[src]').src : '')+'" alt="TOFA Logo"></div>'+
     '<div class="tofa-doc-center">'+
       '<div class="tofa-doc-name">TUPOL OESTE FARMERS ASSOCIATION</div>'+
       '<div class="tofa-doc-place">Cabatuan, Iloilo</div>'+
