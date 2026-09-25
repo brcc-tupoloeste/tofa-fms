@@ -4211,588 +4211,170 @@ function fail(
 
 /* =========================================================
    API CALL — DIRECT POST
-   CONNECTION-RESILIENT VERSION
+   GitHub Pages -> Apps Script doPost() -> routeTOFAGitHubAPI()
 
-   GitHub Pages
-        ↓
-   Apps Script doPost()
-        ↓
-   route/action
+   No hidden iframe / postMessage bridge.
 ========================================================= */
 
-/* =========================================================
-   APPS SCRIPT IFRAME BRIDGE
-   Avoids browser CORS problems from direct fetch().
-========================================================= */
-let tofaBridgeFrame = null;
-let tofaBridgeWindow = null;
-let tofaBridgeReady = false;
-let tofaBridgeWaiters = {};
-let tofaBridgeReadyPromise = null;
+async function callTofaDirectPost(action, payload){
 
+  const controller = new AbortController();
 
-/* =========================================================
-   RECEIVE MESSAGES FROM APPS SCRIPT BRIDGE
-========================================================= */
-
-window.addEventListener('message', function(ev){
-
-  const m = ev.data || {};
-
-  /* -------------------------------------------------------
-     BRIDGE READY
-  ------------------------------------------------------- */
-
-  if(m.__onlineBridgeReady === true){
-
-    console.log(
-      '[TOFA BRIDGE CLIENT] READY',
-      ev.origin
-    );
-
-    /*
-     * Save the exact window that answered our probe.
-     */
-    tofaBridgeWindow = ev.source;
-    tofaBridgeReady = true;
-
-    window.dispatchEvent(
-      new Event(
-        'tofa-bridge-ready-internal'
-      )
-    );
-
-    return;
-  }
-
-
-  /* -------------------------------------------------------
-     API RESPONSE
-  ------------------------------------------------------- */
-
-  if(
-    m.__onlineApi !== true ||
-    !m.id
-  ){
-    return;
-  }
-
-
-  const pending =
-    tofaBridgeWaiters[m.id];
-
-  if(!pending){
-    return;
-  }
-
-
-  delete tofaBridgeWaiters[m.id];
-
-  clearTimeout(
-    pending.timer
+  const timer = setTimeout(
+    function(){
+      controller.abort();
+    },
+    45000
   );
-
-
-  if(m.ok){
-
-    pending.resolve(
-      m.data === undefined ||
-      m.data === null
-        ? {}
-        : m.data
-    );
-
-  }else{
-
-    pending.reject(
-      new Error(
-        m.error ||
-        'Request failed.'
-      )
-    );
-
-  }
-
-});
-
-
-/* =========================================================
-   RESET BRIDGE
-========================================================= */
-
-function resetTofaBridge(){
-
-  console.warn(
-    '[TOFA BRIDGE CLIENT] RESET'
-  );
-
-  tofaBridgeReady = false;
-  tofaBridgeWindow = null;
-  tofaBridgeReadyPromise = null;
-
-
-  if(tofaBridgeFrame){
-
-    try{
-      tofaBridgeFrame.remove();
-    }
-    catch(e){}
-
-    tofaBridgeFrame = null;
-  }
-
-}
-
-
-/* =========================================================
-   SEND READY PROBE
-========================================================= */
-
-function probeTofaBridge(){
-
-  if(
-    !tofaBridgeFrame ||
-    !tofaBridgeFrame.contentWindow
-  ){
-    return;
-  }
-
 
   try{
 
-    tofaBridgeFrame
-      .contentWindow
-      .postMessage(
-        {
-          __onlineBridgeProbe:
-            true
+    const response = await fetch(
+      API_URL,
+      {
+        method: 'POST',
+
+        /*
+         * text/plain keeps this a CORS "simple request",
+         * while Apps Script doPost() still receives the JSON
+         * body through e.postData.contents.
+         */
+        headers: {
+          'Content-Type': 'text/plain;charset=UTF-8'
         },
-        '*'
+
+        body: JSON.stringify({
+          action: action,
+          payload: payload || {}
+        }),
+
+        redirect: 'follow',
+        cache: 'no-store',
+        signal: controller.signal
+      }
+    );
+
+    if(!response.ok){
+      throw new Error(
+        'TOFA server returned HTTP ' +
+        response.status +
+        '.'
+      );
+    }
+
+    const raw = await response.text();
+
+    let envelope;
+
+    try{
+      envelope = JSON.parse(raw);
+    }catch(parseError){
+      throw new Error(
+        'TOFA server returned an invalid response.'
+      );
+    }
+
+    if(!envelope || envelope.success !== true){
+
+      throw new Error(
+        envelope && envelope.message
+          ? envelope.message
+          : 'TOFA server request failed.'
       );
 
-    console.log(
-      '[TOFA BRIDGE CLIENT] PROBE SENT'
-    );
+    }
 
-  }
-  catch(err){
+    return envelope.result === undefined ||
+           envelope.result === null
+      ? {}
+      : envelope.result;
 
-    console.warn(
-      '[TOFA BRIDGE CLIENT] PROBE ERROR',
-      err
-    );
+  }catch(error){
+
+    if(
+      error &&
+      error.name === 'AbortError'
+    ){
+      throw new Error(
+        'TOFA server request timed out. Please try again.'
+      );
+    }
+
+    throw error;
+
+  }finally{
+
+    clearTimeout(timer);
 
   }
 
 }
 
-
-/* =========================================================
-   ENSURE BRIDGE
-========================================================= */
-
-function ensureTofaBridge(){
-
-  if(
-    tofaBridgeReady &&
-    tofaBridgeWindow
-  ){
-
-    return Promise.resolve();
-
-  }
-
-
-  if(tofaBridgeReadyPromise){
-
-    return tofaBridgeReadyPromise;
-
-  }
-
-
-  tofaBridgeReadyPromise =
-    new Promise(
-      function(resolve,reject){
-
-        let settled = false;
-
-        let probeTimer = null;
-
-        let timeoutTimer = null;
-
-
-        function cleanup(){
-
-          if(probeTimer){
-            clearInterval(
-              probeTimer
-            );
-          }
-
-          if(timeoutTimer){
-            clearTimeout(
-              timeoutTimer
-            );
-          }
-
-          window.removeEventListener(
-            'tofa-bridge-ready-internal',
-            finishReady
-          );
-
-        }
-
-
-        function finishReady(){
-
-          if(settled){
-            return;
-          }
-
-
-          if(
-            !tofaBridgeReady ||
-            !tofaBridgeWindow
-          ){
-            return;
-          }
-
-
-          settled = true;
-
-          cleanup();
-
-          tofaBridgeReadyPromise =
-            null;
-
-
-          console.log(
-            '[TOFA BRIDGE CLIENT] HANDSHAKE COMPLETE'
-          );
-
-
-          resolve();
-
-        }
-
-
-        function failReady(){
-
-          if(settled){
-            return;
-          }
-
-
-          settled = true;
-
-          cleanup();
-
-          tofaBridgeReadyPromise =
-            null;
-
-
-          reject(
-            new Error(
-              'TOFA server bridge did not become ready. Please try again.'
-            )
-          );
-
-        }
-
-
-        /*
-         * Install listener BEFORE iframe/probe.
-         */
-        window.addEventListener(
-          'tofa-bridge-ready-internal',
-          finishReady
-        );
-
-
-        /* ---------------------------------------------------
-           CREATE IFRAME
-        --------------------------------------------------- */
-
-        if(
-          !tofaBridgeFrame ||
-          !tofaBridgeFrame.isConnected
-        ){
-
-          tofaBridgeFrame =
-            document.createElement(
-              'iframe'
-            );
-
-
-          tofaBridgeFrame.id =
-            'tofaApiBridge';
-
-
-          tofaBridgeFrame.setAttribute(
-            'aria-hidden',
-            'true'
-          );
-
-
-          tofaBridgeFrame.style.position =
-            'fixed';
-
-          tofaBridgeFrame.style.width =
-            '1px';
-
-          tofaBridgeFrame.style.height =
-            '1px';
-
-          tofaBridgeFrame.style.opacity =
-            '0';
-
-          tofaBridgeFrame.style.pointerEvents =
-            'none';
-
-          tofaBridgeFrame.style.border =
-            '0';
-
-          tofaBridgeFrame.style.left =
-            '-9999px';
-
-
-          /*
-           * Once iframe loads,
-           * immediately start probing.
-           */
-          tofaBridgeFrame.addEventListener(
-            'load',
-            function(){
-
-              console.log(
-                '[TOFA BRIDGE CLIENT] IFRAME LOADED'
-              );
-
-              probeTofaBridge();
-
-            }
-          );
-
-
-          tofaBridgeFrame.src =
-            API_URL;
-
-
-          document.body.appendChild(
-            tofaBridgeFrame
-          );
-
-        }
-
-
-        /* ---------------------------------------------------
-           REPEATED PROBE
-
-           Important for mobile browsers:
-           if first READY/message is missed,
-           another probe will request it again.
-        --------------------------------------------------- */
-
-        probeTofaBridge();
-
-
-        probeTimer =
-          setInterval(
-            function(){
-
-              if(
-                tofaBridgeReady &&
-                tofaBridgeWindow
-              ){
-
-                finishReady();
-                return;
-
-              }
-
-              probeTofaBridge();
-
-            },
-            1000
-          );
-
-
-        /*
-         * Maximum bridge startup wait.
-         */
-        timeoutTimer =
-          setTimeout(
-            failReady,
-            30000
-          );
-
-
-        /*
-         * READY may already have arrived.
-         */
-        if(
-          tofaBridgeReady &&
-          tofaBridgeWindow
-        ){
-
-          finishReady();
-
-        }
-
-      }
-    );
-
-
-  return tofaBridgeReadyPromise;
-
-}
-
-
-/* =========================================================
-   CALL APPS SCRIPT THROUGH BRIDGE
-========================================================= */
-
-function callTofaBridge(
-  action,
-  payload
-){
-
-  return ensureTofaBridge()
-    .then(
-      function(){
-
-        return new Promise(
-          function(resolve,reject){
-
-            const id =
-              'TOFA-BRIDGE-' +
-              Date.now() +
-              '-' +
-              Math.random()
-                .toString(36)
-                .substring(2,8)
-                .toUpperCase();
-
-
-            const timer =
-              setTimeout(
-                function(){
-
-                  delete tofaBridgeWaiters[id];
-
-                  reject(
-                    new Error(
-                      'TOFA server request timed out. Please try again.'
-                    )
-                  );
-
-                },
-                30000
-              );
-
-
-            tofaBridgeWaiters[id] = {
-
-              resolve:
-                resolve,
-
-              reject:
-                reject,
-
-              timer:
-                timer
-
-            };
-
-
-            try{
-
-              const bridgeTarget =
-                tofaBridgeWindow;
-
-
-              if(!bridgeTarget){
-
-                throw new Error(
-                  'TOFA server bridge window is unavailable.'
-                );
-
-              }
-
-
-              bridgeTarget.postMessage(
-
-                {
-
-                  __onlineApiRequest:
-                    true,
-
-                  id:
-                    id,
-
-                  action:
-                    action,
-
-                  payload:
-                    payload || {}
-
-                },
-
-                '*'
-
-              );
-
-
-              console.log(
-                '[TOFA BRIDGE CLIENT] REQUEST SENT',
-                action,
-                id
-              );
-
-
-            }
-            catch(err){
-
-              clearTimeout(
-                timer
-              );
-
-              delete tofaBridgeWaiters[id];
-
-              reject(err);
-
-            }
-
-          }
-        );
-
-      }
-    );
-
-}
-
-
-/* =========================================================
-   MAIN API FUNCTION
-========================================================= */
 
 async function api(action,payload,title,sub){
+
   showBusy(
     title || 'Please wait...',
     sub || 'Processing request'
   );
 
   try{
-    console.log('[TOFA API BRIDGE] START',action);
-    const result = await callTofaBridge(action,payload || {});
-    console.log('[TOFA API BRIDGE] SUCCESS',action,result);
+
+    console.log(
+      '[TOFA DIRECT POST] START',
+      action
+    );
+
+    const result =
+      await callTofaDirectPost(
+        action,
+        payload || {}
+      );
+
+    console.log(
+      '[TOFA DIRECT POST] SUCCESS',
+      action,
+      result
+    );
+
     return result;
+
   }catch(error){
-    console.error('[TOFA API BRIDGE] FAILED',action,error);
+
+    console.error(
+      '[TOFA DIRECT POST] FAILED',
+      action,
+      error
+    );
+
+    /*
+     * Browsers commonly report blocked cross-origin network
+     * responses as TypeError / Failed to fetch. Keep the user
+     * message understandable without changing backend logic.
+     */
+    if(
+      error instanceof TypeError ||
+      /failed to fetch|networkerror|load failed/i.test(
+        String(
+          error && error.message
+            ? error.message
+            : error
+        )
+      )
+    ){
+      throw new Error(
+        'Unable to connect to the TOFA server. Please check the Apps Script deployment and internet connection.'
+      );
+    }
+
     throw error;
+
   }finally{
+
     hideBusy();
+
   }
+
 }
 
 
