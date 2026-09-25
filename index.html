@@ -5805,6 +5805,51 @@ async function savePayment(){
     if(obligationWrap)
       obligationWrap.classList.add('hidden');
 
+    /*
+     * PAYMENT SMS — BACKGROUND REQUEST
+     * The core payment is already saved at this point.
+     * Do NOT await this request, so the cashier can immediately
+     * proceed to the next payment while SMS is sent separately.
+     */
+    if(r && r.smsRequest){
+
+      console.log(
+        '[TOFA PAYMENT SMS] START',
+        r.smsRequest
+      );
+
+      callTofaDirectPost(
+        'sendPaymentSMS',
+        {
+          token:token,
+          smsRequest:r.smsRequest
+        }
+      )
+      .then(function(smsResult){
+
+        console.log(
+          '[TOFA PAYMENT SMS] SUCCESS',
+          smsResult
+        );
+
+      })
+      .catch(function(smsError){
+
+        console.error(
+          '[TOFA PAYMENT SMS] FAILED',
+          smsError
+        );
+
+      });
+
+    }else{
+
+      console.warn(
+        '[TOFA PAYMENT SMS] SKIPPED — no smsRequest returned by savePayment'
+      );
+
+    }
+
   }catch(e){
 
     const errorText =
