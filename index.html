@@ -4256,7 +4256,16 @@ function ensureTofaBridge(){
     if(!tofaBridgeFrame){
       tofaBridgeFrame = document.createElement('iframe');
       tofaBridgeFrame.id = 'tofaApiBridge';
-      tofaBridgeFrame.src = API_URL;
+
+      // Force a fresh Apps Script bridge document after every deployment.
+      // This avoids an old/cached bridge page remaining inside the hidden iframe.
+      const bridgeSep = API_URL.indexOf('?') >= 0 ? '&' : '?';
+      tofaBridgeFrame.src =
+        API_URL +
+        bridgeSep +
+        'tofa_bridge=1&v=' +
+        encodeURIComponent(String(Date.now()));
+
       tofaBridgeFrame.setAttribute('aria-hidden','true');
       tofaBridgeFrame.style.position = 'fixed';
       tofaBridgeFrame.style.width = '1px';
@@ -4265,6 +4274,26 @@ function ensureTofaBridge(){
       tofaBridgeFrame.style.pointerEvents = 'none';
       tofaBridgeFrame.style.border = '0';
       tofaBridgeFrame.style.left = '-9999px';
+
+      // The server bridge already supports __onlineBridgeProbe.
+      // Probe after load and a few times afterward so READY is not lost
+      // because of iframe / Apps Script timing differences.
+      tofaBridgeFrame.addEventListener('load',function(){
+        [0,300,1000,2500].forEach(function(delay){
+          setTimeout(function(){
+            try{
+              if(tofaBridgeReady) return;
+              if(tofaBridgeFrame && tofaBridgeFrame.contentWindow){
+                tofaBridgeFrame.contentWindow.postMessage(
+                  {__onlineBridgeProbe:true},
+                  '*'
+                );
+              }
+            }catch(err){}
+          },delay);
+        });
+      });
+
       document.body.appendChild(tofaBridgeFrame);
     }
 
@@ -5791,26 +5820,6 @@ async function savePayment(){
 
     if(obligationWrap)
       obligationWrap.classList.add('hidden');
-
-
-    /*
-     * PAYMENT IS ALREADY SAVED AT THIS POINT.
-     * Send the SMS separately without awaiting it, so the cashier
-     * can immediately continue with the next payment.
-     */
-    if(r.smsRequest){
-      callTofaBridge(
-        'sendPaymentSMS',
-        {
-          token:token,
-          smsRequest:r.smsRequest
-        }
-      ).then(function(smsResult){
-        console.log('[TOFA PAYMENT SMS] COMPLETE',smsResult);
-      }).catch(function(smsError){
-        console.warn('[TOFA PAYMENT SMS] FAILED',smsError);
-      });
-    }
 
   }catch(e){
 
