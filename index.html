@@ -5792,6 +5792,26 @@ async function savePayment(){
     if(obligationWrap)
       obligationWrap.classList.add('hidden');
 
+
+    /*
+     * PAYMENT IS ALREADY SAVED AT THIS POINT.
+     * Send the SMS separately without awaiting it, so the cashier
+     * can immediately continue with the next payment.
+     */
+    if(r.smsRequest){
+      callTofaBridge(
+        'sendPaymentSMS',
+        {
+          token:token,
+          smsRequest:r.smsRequest
+        }
+      ).then(function(smsResult){
+        console.log('[TOFA PAYMENT SMS] COMPLETE',smsResult);
+      }).catch(function(smsError){
+        console.warn('[TOFA PAYMENT SMS] FAILED',smsError);
+      });
+    }
+
   }catch(e){
 
     const errorText =
