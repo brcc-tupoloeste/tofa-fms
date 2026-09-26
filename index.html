@@ -4311,6 +4311,16 @@ async function callTofaDirectPost(action, payload){
 }
 
 
+/* =========================================================
+   LEGACY API NAME COMPATIBILITY
+   Older modules still using callTofaBridge() are routed
+   through the working Direct POST transport.
+========================================================= */
+async function callTofaBridge(action, payload){
+  return callTofaDirectPost(action, payload || {});
+}
+
+
 async function api(action,payload,title,sub){
 
   showBusy(
