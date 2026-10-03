@@ -1780,42 +1780,170 @@ body{
 
 
 /* =========================================================
-   OFFICERS LIST — A4 PRINT
+   TOFA-FMS — STABLE ANDROID PRINT
+   Keeps a permanent report copy while Android changes printer.
 ========================================================= */
-@media print{
-  body.print-officers-list *{visibility:hidden!important}
-  body.print-officers-list #officersPrintArea,
-  body.print-officers-list #officersPrintArea *{visibility:visible!important}
-  body.print-officers-list #officersPrintArea{
-    display:block!important;position:absolute!important;left:0!important;top:0!important;
-    width:100%!important;margin:0!important;padding:0!important;background:#fff!important;color:#000!important;
-    font-family:Arial,sans-serif!important;font-size:10pt!important
-  }
-  body.print-officers-list #officersPrintArea .tofa-doc-head{
-    display:grid!important;grid-template-columns:75px 1fr 75px!important;align-items:center!important;
-    width:100%!important;margin:0 0 5px 0!important;padding:0!important
-  }
-  body.print-officers-list #officersPrintArea .tofa-doc-logo{
-    width:75px!important;height:65px!important;display:flex!important;align-items:center!important;justify-content:flex-start!important
-  }
-  body.print-officers-list #officersPrintArea .tofa-doc-logo img{
-    width:62px!important;height:62px!important;max-width:62px!important;max-height:62px!important;
-    min-width:0!important;min-height:0!important;object-fit:contain!important;margin:0!important;padding:0!important
-  }
-  body.print-officers-list #officersPrintArea .tofa-doc-center{text-align:center!important}
-  body.print-officers-list #officersPrintArea .tofa-doc-name{font-size:17px!important;line-height:1.15!important;font-weight:800!important;letter-spacing:.2px!important}
-  body.print-officers-list #officersPrintArea .tofa-doc-place{font-size:10px!important;line-height:1.2!important;margin-top:2px!important}
-  body.print-officers-list #officersPrintArea .tofa-doc-system{font-size:9px!important;line-height:1.2!important;font-weight:800!important;letter-spacing:1.3px!important;margin-top:4px!important}
-  body.print-officers-list #officersPrintArea .tofa-doc-rule{border-top:1px solid #176b3a!important;margin:6px 0 10px!important}
-  body.print-officers-list #officersPrintArea .tofa-doc-title{text-align:center!important;font-size:16px!important;line-height:1.2!important;font-weight:800!important;margin:0 0 3px!important}
-  body.print-officers-list #officersPrintArea .tofa-doc-subtitle{text-align:center!important;font-size:10px!important;line-height:1.2!important;margin:0 0 12px!important}
-  body.print-officers-list #officersPrintArea table{min-width:0!important;width:100%!important;border-collapse:collapse!important;table-layout:fixed!important}
-  body.print-officers-list #officersPrintArea th,body.print-officers-list #officersPrintArea td{border:1px solid #222!important;padding:6px 8px!important;font-size:9pt!important;color:#000!important}
-  body.print-officers-list #officersPrintArea th{background:#f1f1f1!important;text-align:center!important}
-  body.print-officers-list #officersPrintArea th:nth-child(1),body.print-officers-list #officersPrintArea td:nth-child(1){width:9%;text-align:center!important}
-  body.print-officers-list #officersPrintArea th:nth-child(2),body.print-officers-list #officersPrintArea td:nth-child(2){width:41%}
-  body.print-officers-list #officersPrintArea th:nth-child(3),body.print-officers-list #officersPrintArea td:nth-child(3){width:50%}
+
+#tofaStablePrintArea{
+  /*
+   * Keep the print document in the layout tree at all times.
+   * Android WebView may perform another print-layout pass after the
+   * printer is selected. display:none can make that second pass blank.
+   */
+  display:block;
+  position:fixed;
+  left:-100000px;
+  top:0;
+  width:100%;
+  max-width:210mm;
+  visibility:hidden;
+  pointer-events:none;
+  overflow:visible;
 }
+
+@media print{
+
+  @page{
+    size:A4 portrait;
+    margin:8mm 10mm;
+  }
+
+  body.tofa-stable-print{
+    background:#fff !important;
+  }
+
+  /* Only the dedicated copied report participates in printing. */
+  body.tofa-stable-print > *:not(#tofaStablePrintArea){
+    display:none !important;
+  }
+
+  body.tofa-stable-print #tofaStablePrintArea{
+    display:block !important;
+    visibility:visible !important;
+    pointer-events:auto !important;
+    position:static !important;
+    left:auto !important;
+    top:auto !important;
+    width:100% !important;
+    max-width:none !important;
+    min-height:0 !important;
+    margin:0 !important;
+    padding:0 !important;
+    border:0 !important;
+    box-shadow:none !important;
+    background:#fff !important;
+    color:#000 !important;
+    overflow:visible !important;
+  }
+
+  body.tofa-stable-print #tofaStablePrintArea,
+  body.tofa-stable-print #tofaStablePrintArea *{
+    visibility:visible !important;
+  }
+
+  body.tofa-stable-print #tofaStablePrintArea .hidden{
+    display:none !important;
+  }
+
+  body.tofa-stable-print #tofaStablePrintArea .table-wrap{
+    overflow:visible !important;
+    max-height:none !important;
+  }
+
+  body.tofa-stable-print #tofaStablePrintArea table{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+  }
+
+  /* Remove controls from copied report. */
+  body.tofa-stable-print #tofaStablePrintArea .tofa-report-only-actions,
+  body.tofa-stable-print #tofaStablePrintArea .payment-type-no-print,
+  body.tofa-stable-print #tofaStablePrintArea .ptr-report-no-print,
+  body.tofa-stable-print #tofaStablePrintArea .attendance-no-print,
+  body.tofa-stable-print #tofaStablePrintArea #outstandingActions,
+  body.tofa-stable-print #tofaStablePrintArea button,
+  body.tofa-stable-print #tofaStablePrintArea input,
+  body.tofa-stable-print #tofaStablePrintArea select,
+  body.tofa-stable-print #tofaStablePrintArea textarea{
+    display:none !important;
+  }
+
+  /* Financial Report */
+  body.tofa-stable-print #tofaStablePrintArea .fr-official-header{
+    margin-top:0 !important;
+  }
+
+  body.tofa-stable-print #tofaStablePrintArea .fr-screen-only{
+    display:none !important;
+  }
+
+  body.tofa-stable-print #tofaStablePrintArea .report-table th,
+  body.tofa-stable-print #tofaStablePrintArea .report-table td{
+    font-size:9pt !important;
+    padding:5px !important;
+    color:#000 !important;
+  }
+
+  /* Payment Type */
+  body.tofa-stable-print #tofaStablePrintArea .payment-type-table{
+    min-width:0 !important;
+    width:100% !important;
+  }
+
+  body.tofa-stable-print #tofaStablePrintArea .payment-type-table th,
+  body.tofa-stable-print #tofaStablePrintArea .payment-type-table td{
+    font-size:9pt !important;
+    padding:5px !important;
+  }
+
+  /* Previous Treasurer */
+  body.tofa-stable-print #tofaStablePrintArea .ptr-report-summary{
+    grid-template-columns:repeat(3,1fr) !important;
+    gap:5pt !important;
+  }
+
+  body.tofa-stable-print #tofaStablePrintArea .ptr-report-kpi{
+    padding:6pt !important;
+    border:1px solid #bbb !important;
+  }
+
+  body.tofa-stable-print #tofaStablePrintArea .ptr-report-kpi b{
+    font-size:7pt !important;
+    color:#000 !important;
+  }
+
+  body.tofa-stable-print #tofaStablePrintArea .ptr-report-kpi span{
+    font-size:9pt !important;
+    color:#000 !important;
+  }
+
+  body.tofa-stable-print #tofaStablePrintArea .ptr-report-signatories{
+    grid-template-columns:repeat(3,1fr) !important;
+    gap:18pt !important;
+    margin-top:34pt !important;
+  }
+
+  /* Attendance */
+  body.tofa-stable-print #tofaStablePrintArea .attendance-summary-grid{
+    grid-template-columns:repeat(4,1fr) !important;
+  }
+
+  body.tofa-stable-print #tofaStablePrintArea .attendance-print-org{
+    font-size:13pt !important;
+    color:#000 !important;
+  }
+
+  body.tofa-stable-print #tofaStablePrintArea .attendance-print-title{
+    font-size:14pt !important;
+  }
+
+  body.tofa-stable-print #tofaStablePrintArea .attendance-print-meta{
+    font-size:9pt !important;
+    color:#000 !important;
+  }
+}
+
 </style>
 
 </head>
@@ -2335,75 +2463,8 @@ body{
     <button class="quick-btn" type="button" onclick="openSearch()">🔎 Search Member</button>
     <button class="quick-btn" type="button" onclick="openMemberList()">👥 Member List</button>
     <button class="quick-btn" type="button" onclick="openAddMember()">➕ Add Member</button>
-    <button class="quick-btn" type="button" onclick="openOfficersManagement()">👔 Officers / Signatories</button>
   </div>
 </div>
-
-
-<!-- =======================================================
-     OFFICERS / SIGNATORIES
-======================================================= -->
-<div id="officersPanel" class="card hidden">
-  <div class="panel-nav">
-    <button type="button" class="back-dashboard" onclick="openMemberManagementMenu()">← Back to Member Management</button>
-  </div>
-  <h3 class="panel-title">👔 Officers / Signatories</h3>
-  <div class="panel-note">Assign current officers from the existing member list. Financial Report signatory names are taken automatically from Treasurer, Auditor and President.</div>
-
-  <div class="form-grid">
-    <div>
-      <label>Member</label>
-      <select id="officerMember"></select>
-        <div style="margin-top:8px;">
-          <label for="tofaOfficerManualName">Manual Officer Name <span style="font-weight:normal;">(optional — for non-member officer)</span></label>
-          <input id="tofaOfficerManualName" type="text" placeholder="Enter full name if officer is not a member" autocomplete="off">
-        </div>
-    </div>
-    <div>
-      <label>Position / Designation</label>
-      <select id="officerPosition">
-        <option value="">Select position</option>
-        <option>PRESIDENT</option>
-        <option>VICE PRESIDENT</option>
-        <option>SECRETARY</option>
-        <option>ASSISTANT SECRETARY</option>
-        <option>TREASURER</option>
-        <option>ASSISTANT TREASURER</option>
-        <option>AUDITOR</option>
-        <option>ASSISTANT AUDITOR</option>
-        <option>PIO</option>
-        <option>BUSINESS MANAGER</option>
-        <option>BOARD MEMBER</option>
-        <option>OTHER</option>
-      </select>
-    </div>
-    <div class="full hidden" id="officerOtherWrap">
-      <label>Other Position</label>
-      <input id="officerOtherPosition" placeholder="Enter designation">
-    </div>
-    <div class="full">
-      <label>Additional Designation <span style="font-weight:normal;">(optional)</span></label>
-      <input id="officerAdditionalDesignation" placeholder="Example: Chairman, Committee on Agriculture">
-    </div>
-  </div>
-
-  <input type="hidden" id="officerEditingId" value="">
-  <div class="form-actions-row">
-    <button type="button" id="officerSaveBtn" onclick="saveOfficerAssignment()">💾 SAVE OFFICER</button>
-    <button class="alt" type="button" onclick="printOfficersList()">🖨️ PRINT OFFICERS LIST</button>
-  </div>
-  <div id="officerMsg"></div>
-
-  <div class="table-wrap" style="margin-top:12px">
-    <table class="member-table">
-      <thead><tr><th>No.</th><th>Officer Name</th><th>Position / Designation</th><th>Action</th></tr></thead>
-      <tbody id="officersBody"></tbody>
-    </table>
-  </div>
-</div>
-
-<!-- OFFICERS LIST — temporary A4 print area -->
-<div id="officersPrintArea" class="hidden"></div>
 
 <!-- =======================================================
      REPORTS MENU
@@ -2570,7 +2631,7 @@ body{
   <div id="reportMsg"></div>
   <div id="reportOutput" class="hidden"></div>
   <div id="reportActions" class="form-actions-row hidden">
-    <button class="print-btn" onclick="window.print()">🖨️ PRINT A4</button>
+<button class="print-btn" onclick="printFinancialReportStable()">🖨️ PRINT A4</button>
     <button class="alt" onclick="openReportsMenu()">← Dashboard</button>
   </div>
 </div>
@@ -4211,9 +4272,24 @@ function fail(
 
 /* =========================================================
    API CALL — DIRECT POST
-   GitHub Pages -> Apps Script doPost() -> routeTOFAGitHubAPI()
+   CONNECTION-RESILIENT VERSION
 
-   No hidden iframe / postMessage bridge.
+   GitHub Pages
+        ↓
+   Apps Script doPost()
+        ↓
+   route/action
+========================================================= */
+
+/* =========================================================
+   API CALL — DIRECT POST
+   GitHub Pages / Android WebView -> Apps Script doPost()
+
+   IMPORTANT:
+   - No hidden iframe
+   - No postMessage bridge
+   - Keeps legacy callTofaBridge() name only as a compatibility
+     wrapper so older modules do not break.
 ========================================================= */
 
 async function callTofaDirectPost(action, payload){
@@ -4235,9 +4311,8 @@ async function callTofaDirectPost(action, payload){
         method: 'POST',
 
         /*
-         * text/plain keeps this a CORS "simple request",
-         * while Apps Script doPost() still receives the JSON
-         * body through e.postData.contents.
+         * text/plain keeps the request simple while Apps Script
+         * doPost() still receives JSON through e.postData.contents.
          */
         headers: {
           'Content-Type': 'text/plain;charset=UTF-8'
@@ -4269,19 +4344,18 @@ async function callTofaDirectPost(action, payload){
     try{
       envelope = JSON.parse(raw);
     }catch(parseError){
+      console.error('[TOFA DIRECT POST] RAW RESPONSE', raw);
       throw new Error(
         'TOFA server returned an invalid response.'
       );
     }
 
     if(!envelope || envelope.success !== true){
-
       throw new Error(
         envelope && envelope.message
           ? envelope.message
           : 'TOFA server request failed.'
       );
-
     }
 
     return envelope.result === undefined ||
@@ -4291,10 +4365,7 @@ async function callTofaDirectPost(action, payload){
 
   }catch(error){
 
-    if(
-      error &&
-      error.name === 'AbortError'
-    ){
+    if(error && error.name === 'AbortError'){
       throw new Error(
         'TOFA server request timed out. Please try again.'
       );
@@ -4303,18 +4374,15 @@ async function callTofaDirectPost(action, payload){
     throw error;
 
   }finally{
-
     clearTimeout(timer);
-
   }
-
 }
 
 
 /* =========================================================
-   LEGACY API NAME COMPATIBILITY
-   Older modules still using callTofaBridge() are routed
-   through the working Direct POST transport.
+   LEGACY FUNCTION NAME COMPATIBILITY
+   Any older module that still calls callTofaBridge() is sent
+   through Direct POST. There is no iframe bridge anymore.
 ========================================================= */
 async function callTofaBridge(action, payload){
   return callTofaDirectPost(action, payload || {});
@@ -4322,69 +4390,29 @@ async function callTofaBridge(action, payload){
 
 
 async function api(action,payload,title,sub){
-
   showBusy(
     title || 'Please wait...',
     sub || 'Processing request'
   );
 
   try{
+    console.log('[TOFA DIRECT POST] START',action);
 
-    console.log(
-      '[TOFA DIRECT POST] START',
-      action
-    );
-
-    const result =
-      await callTofaDirectPost(
-        action,
-        payload || {}
-      );
-
-    console.log(
-      '[TOFA DIRECT POST] SUCCESS',
+    const result = await callTofaDirectPost(
       action,
-      result
+      payload || {}
     );
 
+    console.log('[TOFA DIRECT POST] SUCCESS',action,result);
     return result;
 
   }catch(error){
-
-    console.error(
-      '[TOFA DIRECT POST] FAILED',
-      action,
-      error
-    );
-
-    /*
-     * Browsers commonly report blocked cross-origin network
-     * responses as TypeError / Failed to fetch. Keep the user
-     * message understandable without changing backend logic.
-     */
-    if(
-      error instanceof TypeError ||
-      /failed to fetch|networkerror|load failed/i.test(
-        String(
-          error && error.message
-            ? error.message
-            : error
-        )
-      )
-    ){
-      throw new Error(
-        'Unable to connect to the TOFA server. Please check the Apps Script deployment and internet connection.'
-      );
-    }
-
+    console.error('[TOFA DIRECT POST] FAILED',action,error);
     throw error;
 
   }finally{
-
     hideBusy();
-
   }
-
 }
 
 
@@ -5815,51 +5843,6 @@ async function savePayment(){
     if(obligationWrap)
       obligationWrap.classList.add('hidden');
 
-    /*
-     * PAYMENT SMS — BACKGROUND REQUEST
-     * The core payment is already saved at this point.
-     * Do NOT await this request, so the cashier can immediately
-     * proceed to the next payment while SMS is sent separately.
-     */
-    if(r && r.smsRequest){
-
-      console.log(
-        '[TOFA PAYMENT SMS] START',
-        r.smsRequest
-      );
-
-      callTofaDirectPost(
-        'sendPaymentSMS',
-        {
-          token:token,
-          smsRequest:r.smsRequest
-        }
-      )
-      .then(function(smsResult){
-
-        console.log(
-          '[TOFA PAYMENT SMS] SUCCESS',
-          smsResult
-        );
-
-      })
-      .catch(function(smsError){
-
-        console.error(
-          '[TOFA PAYMENT SMS] FAILED',
-          smsError
-        );
-
-      });
-
-    }else{
-
-      console.warn(
-        '[TOFA PAYMENT SMS] SKIPPED — no smsRequest returned by savePayment'
-      );
-
-    }
-
   }catch(e){
 
     const errorText =
@@ -6551,7 +6534,6 @@ function hideAppPanels(){
     'obligationsManagementPanel',
     'paymentTypeReportPanel',
     'memberManagementMenu',
-    'officersPanel',
     'reportsMenu',
     'cashBankMenu',
     'textAnnouncementPanel',
@@ -7094,246 +7076,6 @@ async function saveNewMember(){
   }
 }
 
-
-/* =========================================================
-   OFFICERS / SIGNATORIES
-========================================================= */
-let tofaOfficerRows=[];
-
-function tofaOfficerEsc(v){
-  return esc(String(v==null?'':v));
-}
-
-async function openOfficersManagement(){
-  hideAppPanels();
-  document.getElementById('officersPanel').classList.remove('hidden');
-  document.getElementById('searchTopBar').classList.remove('hidden');
-  window.scrollTo({top:0,behavior:'smooth'});
-  msg('officerMsg','','');
-
-  const memberSel=document.getElementById('officerMember');
-  memberSel.innerHTML='<option value="">Loading members...</option>';
-
-  try{
-    const results=await Promise.all([
-      callTofaBridge('getMemberList',{token:token}),
-      callTofaBridge('getOfficers',{token:token})
-    ]);
-    const members=Array.isArray(results[0])?results[0]:[];
-    memberSel.innerHTML='<option value="">Select member</option>'+
-      members.map(function(m){
-        const id=String(m.id||m.memberId||'');
-        const name=String(m.name||m.fullName||m.memberName||'');
-        return '<option value="'+tofaOfficerEsc(id)+'" data-name="'+tofaOfficerEsc(name)+'">'+tofaOfficerEsc(name)+'</option>';
-      }).join('');
-    tofaOfficerRows=Array.isArray(results[1])?results[1]:(results[1]?.officers||[]);
-    renderOfficersList();
-  }catch(e){
-    fail(e,'officerMsg');
-  }
-}
-
-function sortOfficersByHierarchy(rows){
-  const order={
-    'PRESIDENT':1,
-    'VICE PRESIDENT':2,
-    'SECRETARY':3,
-    'ASSISTANT SECRETARY':4,
-    'TREASURER':5,
-    'ASSISTANT TREASURER':6,
-    'AUDITOR':7,
-    'ASSISTANT AUDITOR':8,
-    'PIO':9,
-    'BUSINESS MANAGER':10,
-    'BOARD MEMBER':11,
-    'OTHER':12
-  };
-
-  return (Array.isArray(rows)?rows:[]).slice().sort(function(a,b){
-    const pa=String(a.position||a.designation||'').trim().toUpperCase();
-    const pb=String(b.position||b.designation||'').trim().toUpperCase();
-    const oa=order[pa] || (pa ? 90 : 99);
-    const ob=order[pb] || (pb ? 90 : 99);
-
-    if(oa!==ob)return oa-ob;
-
-    const na=String(a.name||a.memberName||'').trim();
-    const nb=String(b.name||b.memberName||'').trim();
-    return na.localeCompare(nb);
-  });
-}
-
-function renderOfficersList(){
-  const body=document.getElementById('officersBody');
-  if(!body)return;
-  body.innerHTML=sortOfficersByHierarchy(tofaOfficerRows).map(function(o,i){
-    const id=String(o.officerId||o.id||'');
-    return '<tr>'+
-      '<td>'+(i+1)+'</td>'+
-      '<td><b>'+tofaOfficerEsc(o.name||o.memberName||'')+'</b></td>'+
-      '<td>'+tofaOfficerEsc((o.position||o.designation||'')+(o.additionalDesignation?' / '+o.additionalDesignation:''))+'</td>'+
-      '<td style="white-space:nowrap">'+
-        '<button type="button" class="alt" data-officer-id="'+tofaOfficerEsc(id)+'" onclick="editOfficerAssignment(this.getAttribute(\'data-officer-id\'))">Edit</button> '+
-        '<button type="button" class="danger-btn" data-officer-id="'+tofaOfficerEsc(id)+'" onclick="removeOfficerAssignment(this.getAttribute(\'data-officer-id\'))">Remove</button>'+
-      '</td>'+
-    '</tr>';
-  }).join('') || '<tr><td colspan="4">No officers assigned.</td></tr>';
-}
-
-document.addEventListener('change',function(e){
-  if(e.target && e.target.id==='officerPosition'){
-    const wrap=document.getElementById('officerOtherWrap');
-    if(wrap)wrap.classList.toggle('hidden',e.target.value!=='OTHER');
-  }
-});
-
-async function saveOfficerAssignment(){
-  var manualOfficerName = (document.getElementById('tofaOfficerManualName')?.value || '').trim();
-
-  const memberSel=document.getElementById('officerMember');
-  const opt=memberSel.options[memberSel.selectedIndex];
-  const memberId=String(memberSel.value||'').trim();
-  const memberName = manualOfficerName || (String(opt?.dataset?.name||opt?.textContent||'').trim());
-  let position=String(document.getElementById('officerPosition').value||'').trim();
-  if(position==='OTHER')position=String(document.getElementById('officerOtherPosition').value||'').trim();
-  const additionalDesignation=String(document.getElementById('officerAdditionalDesignation').value||'').trim();
-  const editingId=String(document.getElementById('officerEditingId').value||'').trim();
-
-  if(!memberName){msg('officerMsg','Select a member or enter a Manual Officer Name.','error');return;}
-  if(!position){msg('officerMsg','Select or enter the officer position.','error');return;}
-
-  showBusy('Saving Officer...','Updating current officer assignment');
-  try{
-    const payload={token:token,memberId:(memberId || ('MANUAL-' + manualOfficerName.toUpperCase().replace(/[^A-Z0-9]+/g,'-').replace(/^-|-$/g,''))),memberName:memberName,position:position,additionalDesignation:additionalDesignation};
-    const r=editingId
-      ? await callTofaBridge('updateOfficer',Object.assign({},payload,{officerId:editingId}))
-      : await callTofaBridge('saveOfficer',payload);
-    tofaOfficerRows=Array.isArray(r)?r:(r?.officers||[]);
-    renderOfficersList();
-    memberSel.value='';
-    document.getElementById('officerPosition').value='';
-    document.getElementById('officerOtherPosition').value='';
-    document.getElementById('officerAdditionalDesignation').value='';
-    document.getElementById('officerEditingId').value='';
-    const _saveBtn=document.getElementById('officerSaveBtn'); if(_saveBtn)_saveBtn.textContent='💾 SAVE OFFICER';
-    document.getElementById('officerOtherWrap').classList.add('hidden');
-    msg('officerMsg','Officer assignment saved successfully.','ok');
-  var _mn=document.getElementById('tofaOfficerManualName'); if(_mn) _mn.value='';
-  }catch(e){fail(e,'officerMsg');}
-  finally{hideBusy();}
-}
-
-
-function editOfficerAssignment(officerId){
-  const o=(tofaOfficerRows||[]).find(function(x){return String(x.officerId||x.id||'')===String(officerId||'');});
-  if(!o)return;
-
-  const memberSel=document.getElementById('officerMember');
-  const manual=document.getElementById('tofaOfficerManualName');
-  const positionSel=document.getElementById('officerPosition');
-  const other=document.getElementById('officerOtherPosition');
-  const additional=document.getElementById('officerAdditionalDesignation');
-  const editing=document.getElementById('officerEditingId');
-  const saveBtn=document.getElementById('officerSaveBtn');
-
-  const memberId=String(o.memberId||'');
-  const hasMember=memberSel && Array.from(memberSel.options).some(function(opt){return String(opt.value||'')===memberId;});
-  if(memberSel)memberSel.value=hasMember?memberId:'';
-  if(manual)manual.value=hasMember?'':String(o.name||o.memberName||'');
-
-  const primary=String(o.position||o.designation||'').trim().toUpperCase();
-  const standard=['PRESIDENT','VICE PRESIDENT','SECRETARY','ASSISTANT SECRETARY','TREASURER','ASSISTANT TREASURER','AUDITOR','ASSISTANT AUDITOR','PIO','BUSINESS MANAGER','BOARD MEMBER'];
-  if(positionSel)positionSel.value=standard.includes(primary)?primary:'OTHER';
-  if(other)other.value=standard.includes(primary)?'':primary;
-  const wrap=document.getElementById('officerOtherWrap');
-  if(wrap)wrap.classList.toggle('hidden',standard.includes(primary));
-
-  if(additional)additional.value=String(o.additionalDesignation||'');
-  if(editing)editing.value=String(o.officerId||o.id||'');
-  if(saveBtn)saveBtn.textContent='💾 UPDATE OFFICER';
-  msg('officerMsg','Editing '+String(o.name||o.memberName||'')+'.','ok');
-  document.getElementById('officersPanel')?.scrollIntoView({behavior:'smooth',block:'start'});
-}
-
-async function removeOfficerAssignment(officerId){
-  if(!confirm('Remove this officer assignment?\\n\\nThe member record will NOT be deleted.'))return;
-  showBusy('Removing Officer...','Updating officer assignments');
-  try{
-    const r=await callTofaBridge('removeOfficer',{token:token,officerId:officerId});
-    tofaOfficerRows=Array.isArray(r)?r:(r?.officers||[]);
-    renderOfficersList();
-    msg('officerMsg','Officer assignment removed.','ok');
-  }catch(e){fail(e,'officerMsg');}
-  finally{hideBusy();}
-}
-
-function officialDocumentHeader(title,subtitle){
-  const sub=subtitle?'<div class="tofa-doc-subtitle">'+tofaOfficerEsc(subtitle)+'</div>':'';
-  return '<div class="tofa-doc-head">'+
-    '<div class="tofa-doc-logo"><img src="'+(document.querySelector('img[src]') ? document.querySelector('img[src]').src : '')+'" alt="TOFA Logo"></div>'+
-    '<div class="tofa-doc-center">'+
-      '<div class="tofa-doc-name">TUPOL OESTE FARMERS ASSOCIATION</div>'+
-      '<div class="tofa-doc-place">Cabatuan, Iloilo</div>'+
-      '<div class="tofa-doc-system">FINANCIAL MANAGEMENT SYSTEM</div>'+
-    '</div>'+
-  '</div>'+
-  '<div class="tofa-doc-rule"></div>'+
-  '<div class="tofa-doc-title">'+tofaOfficerEsc(title)+'</div>'+sub;
-}
-
-function officerPrintCss(){
-  return `
-    .tofa-doc-head{display:grid;grid-template-columns:75px 1fr 75px;align-items:center;margin-bottom:5px}
-    .tofa-doc-logo img{width:62px;height:62px;object-fit:contain}
-    .tofa-doc-center{text-align:center}
-    .tofa-doc-name{font-size:17px;font-weight:800;letter-spacing:.2px}
-    .tofa-doc-place{font-size:10px;margin-top:2px}
-    .tofa-doc-system{font-size:9px;font-weight:800;letter-spacing:1.3px;margin-top:4px}
-    .tofa-doc-rule{border-top:1px solid #176b3a;margin:6px 0 10px}
-    .tofa-doc-title{text-align:center;font-size:16px;font-weight:800;margin:0 0 3px}
-    .tofa-doc-subtitle{text-align:center;font-size:10px;margin-bottom:12px}
-  `;
-}
-
-function printOfficersList(){
-  if(!tofaOfficerRows.length){alert('No officers assigned.');return;}
-
-  const now=new Date().toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'});
-  const rows=sortOfficersByHierarchy(tofaOfficerRows).map(function(o,i){
-    return '<tr><td>'+(i+1)+'</td><td><b>'+tofaOfficerEsc(o.name||o.memberName||'')+'</b></td><td>'+
-      tofaOfficerEsc((o.position||o.designation||'')+(o.additionalDesignation?' / '+o.additionalDesignation:''))+'</td></tr>';
-  }).join('');
-
-  const area=document.getElementById('officersPrintArea');
-  if(!area){alert('Officers print area is not available.');return;}
-
-  area.innerHTML=officialDocumentHeader('OFFICERS LIST','As of '+now)+
-    '<table><thead><tr><th>No.</th><th>Officer Name</th><th>Position / Designation</th></tr></thead><tbody>'+rows+'</tbody></table>';
-
-  area.classList.remove('hidden');
-  document.body.classList.add('print-officers-list');
-
-  const cleanup=function(){
-    document.body.classList.remove('print-officers-list');
-    area.classList.add('hidden');
-    window.removeEventListener('afterprint',cleanup);
-  };
-
-  window.addEventListener('afterprint',cleanup);
-  window.print();
-  setTimeout(cleanup,1500);
-}
-
-async function getCurrentOfficerMap(){
-  const r=await callTofaBridge('getOfficers',{token:token});
-  const rows=Array.isArray(r)?r:(r?.officers||[]);
-  const map={};
-  rows.forEach(function(o){
-    map[String(o.position||o.designation||'').trim().toUpperCase()]=String(o.name||o.memberName||'').trim();
-  });
-  return map;
-}
-
 /* =========================================================
    PRINT MEMBER LIST
 ========================================================= */
@@ -7370,7 +7112,12 @@ function printMemberList(){
   });
 
   const printBody = `
-    ${officialDocumentHeader('MEMBER LIST','As of '+dateText)}
+    <div class="head">
+      <h1>TUPOL OESTE FARMERS ASSOCIATION</h1>
+      <h2>MEMBER LIST</h2>
+      <p>Barangay Tupol Oeste, Cabatuan, Iloilo</p>
+      <p>As of ${dateText}</p>
+    </div>
     <table>
       <thead>
         <tr><th>No.</th><th>Full Name</th><th>Address / Sitio</th><th>Contact</th><th>Status</th></tr>
@@ -7395,7 +7142,15 @@ function printMemberList(){
     printStyle = document.createElement('style');
     printStyle.id = 'androidMemberListPrintStyle';
     printStyle.textContent = `
-      #androidMemberListPrintArea{display:none}
+      #androidMemberListPrintArea{
+        display:block;
+        position:fixed;
+        left:-100000px;
+        top:0;
+        width:100%;
+        visibility:hidden;
+        pointer-events:none;
+      }
       @media print{
         @page{size:A4 portrait;margin:12mm}
         body.print-member-list-android *{visibility:hidden !important}
@@ -7403,6 +7158,8 @@ function printMemberList(){
         body.print-member-list-android #androidMemberListPrintArea *{visibility:visible !important}
         body.print-member-list-android #androidMemberListPrintArea{
           display:block !important;
+          visibility:visible !important;
+          pointer-events:auto !important;
           position:absolute;
           left:0;
           top:0;
@@ -7413,15 +7170,6 @@ function printMemberList(){
           font-size:11px;
         }
         #androidMemberListPrintArea .head{text-align:center;margin-bottom:12px}
-        #androidMemberListPrintArea .tofa-doc-head{display:grid;grid-template-columns:75px 1fr 75px;align-items:center;margin-bottom:5px}
-        #androidMemberListPrintArea .tofa-doc-logo img{width:62px;height:62px;object-fit:contain}
-        #androidMemberListPrintArea .tofa-doc-center{text-align:center}
-        #androidMemberListPrintArea .tofa-doc-name{font-size:17px;font-weight:800}
-        #androidMemberListPrintArea .tofa-doc-place{font-size:10px;margin-top:2px}
-        #androidMemberListPrintArea .tofa-doc-system{font-size:9px;font-weight:800;letter-spacing:1.3px;margin-top:4px}
-        #androidMemberListPrintArea .tofa-doc-rule{border-top:1px solid #176b3a;margin:6px 0 10px}
-        #androidMemberListPrintArea .tofa-doc-title{text-align:center;font-size:16px;font-weight:800;margin-bottom:3px}
-        #androidMemberListPrintArea .tofa-doc-subtitle{text-align:center;font-size:10px;margin-bottom:12px}
         #androidMemberListPrintArea .head h1{font-size:18px;margin:0 0 3px}
         #androidMemberListPrintArea .head h2{font-size:15px;margin:0 0 3px}
         #androidMemberListPrintArea .head p{margin:2px 0}
@@ -7438,21 +7186,17 @@ function printMemberList(){
       }`;
     document.head.appendChild(printStyle);
 
+    /*
+     * Keep this print mode alive for the whole Android print flow.
+     * Android can request another layout after printer selection;
+     * removing the mode on a timer can produce a blank page.
+     * The next print action explicitly switches ownership.
+     */
+    document.body.classList.remove('tofa-stable-print');
     document.body.classList.add('print-member-list-android');
 
     setTimeout(function(){
       window.AndroidPrint.print();
-
-      /*
-       * IMPORTANT:
-       * Remove Member List print mode after the Android print job
-       * has been created. This prevents later reports such as
-       * Monthly Report, Annual Summary and Uncollected Amount
-       * from being forced to print the Member List.
-       */
-      setTimeout(function(){
-        document.body.classList.remove('print-member-list-android');
-      },1500);
     },150);
 
     return;
@@ -7476,15 +7220,6 @@ function printMemberList(){
   *{box-sizing:border-box}
   body{font-family:Arial,sans-serif;color:#111;margin:0;font-size:11px}
   .head{text-align:center;margin-bottom:12px}
-  .tofa-doc-head{display:grid;grid-template-columns:75px 1fr 75px;align-items:center;margin-bottom:5px}
-  .tofa-doc-logo img{width:62px;height:62px;object-fit:contain}
-  .tofa-doc-center{text-align:center}
-  .tofa-doc-name{font-size:17px;font-weight:800}
-  .tofa-doc-place{font-size:10px;margin-top:2px}
-  .tofa-doc-system{font-size:9px;font-weight:800;letter-spacing:1.3px;margin-top:4px}
-  .tofa-doc-rule{border-top:1px solid #176b3a;margin:6px 0 10px}
-  .tofa-doc-title{text-align:center;font-size:16px;font-weight:800;margin-bottom:3px}
-  .tofa-doc-subtitle{text-align:center;font-size:10px;margin-bottom:12px}
   .head h1{font-size:18px;margin:0 0 3px}
   .head h2{font-size:15px;margin:0 0 3px}
   .head p{margin:2px 0}
@@ -7805,13 +7540,252 @@ async function openOutstandingList(){
 /* =========================================================
    PRINT OUTSTANDING BALANCES
 ========================================================= */
-function printOutstandingList(){
-  const panel = document.getElementById('outstandingPanel');
-  if(!panel || panel.classList.contains('hidden')){
+
+/* =========================================================
+   TOFA-FMS — STABLE REPORT PRINT ENGINE
+========================================================= */
+
+function tofaStablePrintClone(
+  sourceId,
+  options
+){
+
+  const source =
+    document.getElementById(
+      sourceId
+    );
+
+  const area =
+    document.getElementById(
+      'tofaStablePrintArea'
+    );
+
+  if(
+    !source ||
+    !area
+  ){
+
+    alert(
+      'The report is not available for printing.'
+    );
+
+    return false;
+  }
+
+
+  const opts =
+    options || {};
+
+
+  /*
+   * Only one print mode may own the Android print layout at a time.
+   */
+  document.body.classList.remove(
+    'print-member-list-android'
+  );
+
+
+  /*
+   * Copy the fully-rendered report now.
+   * This copy stays in the DOM while Android changes printers.
+   */
+  const clone =
+    source.cloneNode(
+      true
+    );
+
+
+  clone.removeAttribute(
+    'id'
+  );
+
+  clone.classList.remove(
+    'hidden'
+  );
+
+
+  clone
+    .querySelectorAll(
+      '.tofa-report-only-actions,' +
+      '.payment-type-no-print,' +
+      '.ptr-report-no-print,' +
+      '.attendance-no-print,' +
+      '#outstandingActions,' +
+      'button,' +
+      'input,' +
+      'select,' +
+      'textarea'
+    )
+    .forEach(
+      function(el){
+        el.remove();
+      }
+    );
+
+
+  area.innerHTML =
+    '';
+
+
+  const wrapper =
+    document.createElement(
+      'div'
+    );
+
+
+  wrapper.className =
+    'tofa-stable-print-document';
+
+
+  if(opts.className){
+
+    String(
+      opts.className
+    )
+      .split(/\s+/)
+      .filter(Boolean)
+      .forEach(
+        function(className){
+
+          wrapper
+            .classList
+            .add(
+              className
+            );
+        }
+      );
+  }
+
+
+  wrapper.appendChild(
+    clone
+  );
+
+
+  area.appendChild(
+    wrapper
+  );
+
+
+  area.setAttribute(
+    'aria-hidden',
+    'false'
+  );
+
+
+  /*
+   * IMPORTANT:
+   * Do not auto-remove the print mode.
+   * Android can regenerate preview after printer selection.
+   */
+  document
+    .body
+    .classList
+    .add(
+      'tofa-stable-print'
+    );
+
+
+  return true;
+}
+
+
+function tofaStartStablePrint(
+  sourceId,
+  options
+){
+
+  if(
+    !tofaStablePrintClone(
+      sourceId,
+      options
+    )
+  ){
     return;
   }
 
-  window.print();
+
+  /*
+   * Allow WebView to finish layout before creating print job.
+   */
+  setTimeout(
+    function(){
+
+      if(
+        window.AndroidPrint &&
+        typeof window.AndroidPrint.print === 'function'
+      ){
+
+        window.AndroidPrint.print();
+
+      }else{
+
+        window.print();
+      }
+
+    },
+    500
+  );
+}
+
+
+function printFinancialReportStable(){
+
+  const output =
+    document.getElementById(
+      'reportOutput'
+    );
+
+
+  if(
+    !output ||
+    output.classList.contains(
+      'hidden'
+    ) ||
+    !output.innerHTML.trim()
+  ){
+
+    alert(
+      'Please generate the Financial Report first.'
+    );
+
+    return;
+  }
+
+
+  tofaStartStablePrint(
+    'reportOutput',
+    {
+      className:
+        'financial-report-print-document'
+    }
+  );
+}
+
+
+function printOutstandingList(){
+
+  const panel =
+    document.getElementById(
+      'outstandingPanel'
+    );
+
+  if(
+    !panel ||
+    panel.classList.contains(
+      'hidden'
+    )
+  ){
+    return;
+  }
+
+  tofaStartStablePrint(
+    'outstandingPanel',
+    {
+      className:
+        'outstanding-print-document'
+    }
+  );
 }
 
 /* =========================================================
@@ -8020,23 +7994,13 @@ async function generateOnlineFinancialReport(){
   );
 
   try{
-    const results=await Promise.all([
-      callTofaBridge('getFinancialReport',{
-        token:token,
-        year:year,
-        fromMonth:fromMonth,
-        toMonth:toMonth,
-        reportType:reportType
-      }),
-      getCurrentOfficerMap()
-    ]);
-    const r=results[0];
-    const officerMap=results[1]||{};
-
-    // Keep the existing report/signature layout. Change NAMES only.
-    r.signaturePreparedBy=officerMap.TREASURER||'';
-    r.signatureAuditedBy=officerMap.AUDITOR||'';
-    r.signatureApprovedBy=officerMap.PRESIDENT||'';
+    const r=await callTofaBridge('getFinancialReport',{
+      token:token,
+      year:year,
+      fromMonth:fromMonth,
+      toMonth:toMonth,
+      reportType:reportType
+    });
 
     renderFinancialReport(r);
     msg('reportMsg','Report generated successfully.','ok');
@@ -9452,11 +9416,14 @@ async function loadPTRReconciliationReport(){
 }
 
 function printPTRReconciliationReport(){
-  document.body.classList.add('print-ptr-report');
-  const cleanup=()=>document.body.classList.remove('print-ptr-report');
-  window.addEventListener('afterprint',cleanup,{once:true});
-  window.print();
-  setTimeout(cleanup,1200);
+
+  tofaStartStablePrint(
+    'ptrReportPrintArea',
+    {
+      className:
+        'ptr-report-print-document'
+    }
+  );
 }
 
 function ptrUnremittedDateDisplay(v){
@@ -10505,14 +10472,34 @@ async function generatePaymentTypeReport(){
 }
 
 function printPaymentTypeReport(){
-  document.body.classList.add('print-payment-type');
-  const cleanup = () => {
-    document.body.classList.remove('print-payment-type');
-    window.removeEventListener('afterprint',cleanup);
-  };
-  window.addEventListener('afterprint',cleanup);
-  window.print();
-  setTimeout(cleanup,1000);
+
+  const output =
+    document.getElementById(
+      'paymentTypeReportOutput'
+    );
+
+  if(
+    !output ||
+    output.classList.contains(
+      'hidden'
+    )
+  ){
+
+    alert(
+      'Please generate the Payment Type Report first.'
+    );
+
+    return;
+  }
+
+
+  tofaStartStablePrint(
+    'paymentTypePrintArea',
+    {
+      className:
+        'payment-type-print-document'
+    }
+  );
 }
 
 
@@ -11456,9 +11443,14 @@ async function loadAttendanceSummary(){
 }
 
 function printAttendanceSummary(){
-  document.body.classList.add('print-attendance-summary');
-  const cleanup=function(){document.body.classList.remove('print-attendance-summary');window.removeEventListener('afterprint',cleanup);};
-  window.addEventListener('afterprint',cleanup);window.print();setTimeout(cleanup,1500);
+
+  tofaStartStablePrint(
+    'attendanceSummaryPrintArea',
+    {
+      className:
+        'attendance-summary-print-document'
+    }
+  );
 }
 
 async function loadAnnualAttendanceSummary(){
@@ -11480,9 +11472,14 @@ async function loadAnnualAttendanceSummary(){
 }
 
 function printAnnualAttendanceSummary(){
-  document.body.classList.add('print-annual-attendance');
-  const cleanup=function(){document.body.classList.remove('print-annual-attendance');window.removeEventListener('afterprint',cleanup);};
-  window.addEventListener('afterprint',cleanup);window.print();setTimeout(cleanup,1500);
+
+  tofaStartStablePrint(
+    'annualAttendancePrintArea',
+    {
+      className:
+        'annual-attendance-print-document'
+    }
+  );
 }
 
 
@@ -11506,6 +11503,15 @@ function printAnnualAttendanceSummary(){
 })();
 
 </script>
+
+
+<!-- =======================================================
+     STABLE ANDROID PRINT DOCUMENT
+======================================================= -->
+<div
+  id="tofaStablePrintArea"
+  aria-hidden="true">
+</div>
 
 </body>
 </html>
