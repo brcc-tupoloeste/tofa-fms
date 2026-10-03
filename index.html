@@ -1986,6 +1986,46 @@ body{
 }
 </style>
 
+
+<style>
+/* TOFA ANDROID WEBVIEW WHITE PRINT MODE v3 */
+html.tofa-android-print-white,
+html.tofa-android-print-white body,
+body.tofa-stable-print,
+body.print-member-list-android {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+}
+
+html.tofa-android-print-white body::before,
+html.tofa-android-print-white body::after,
+body.tofa-stable-print::before,
+body.tofa-stable-print::after,
+body.print-member-list-android::before,
+body.print-member-list-android::after {
+  content: none !important;
+  display: none !important;
+  background: none !important;
+  background-image: none !important;
+}
+
+body.tofa-stable-print #tofaStablePrintArea,
+body.tofa-stable-print #tofaStablePrintArea > .tofa-stable-print-document,
+body.tofa-stable-print #tofaStablePrintArea > .tofa-stable-print-document > * {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+body.print-member-list-android #androidMemberListPrintArea {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+}
+</style>
+
 </head>
 
 
@@ -7233,6 +7273,7 @@ function printMemberList(){
      * The next print action explicitly switches ownership.
      */
     document.body.classList.remove('tofa-stable-print');
+    document.documentElement.classList.add('tofa-android-print-white');
     document.body.classList.add('print-member-list-android');
 
     setTimeout(function(){
@@ -7624,6 +7665,10 @@ function tofaStablePrintClone(
     'print-member-list-android'
   );
 
+  document.documentElement.classList.add(
+    'tofa-android-print-white'
+  );
+
 
   /*
    * Copy the fully-rendered report now.
@@ -7718,6 +7763,13 @@ function tofaStablePrintClone(
    * Do not auto-remove the print mode.
    * Android can regenerate preview after printer selection.
    */
+  document
+    .documentElement
+    .classList
+    .add(
+      'tofa-android-print-white'
+    );
+
   document
     .body
     .classList
