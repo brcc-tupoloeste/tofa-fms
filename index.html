@@ -1946,6 +1946,46 @@ body{
 
 </style>
 
+
+<style>
+/* TOFA GLOBAL WHITE PAPER PRINT FIX v2
+   Main document only. Keeps report headers/table styling,
+   while preventing the app's green page background from
+   printing in unused/blank paper areas. */
+@media print {
+  html,
+  body {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+  }
+
+  body::before,
+  body::after {
+    content: none !important;
+    display: none !important;
+    background: none !important;
+  }
+
+  #tofaStablePrintArea,
+  #androidMemberListPrintArea {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+    box-shadow: none !important;
+  }
+
+  #tofaStablePrintArea::before,
+  #tofaStablePrintArea::after,
+  #androidMemberListPrintArea::before,
+  #androidMemberListPrintArea::after {
+    content: none !important;
+    display: none !important;
+    background: none !important;
+  }
+}
+</style>
+
 </head>
 
 
