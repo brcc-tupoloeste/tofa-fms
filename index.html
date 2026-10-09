@@ -11211,69 +11211,160 @@ function firstFinancialFailureMessage(){
   );
 }
 
+/* =========================================================
+   TOFA FINANCIAL CACHE
+   Android SQLite + Browser localStorage fallback
+   ========================================================= */
 
-function saveFinancialCache(
-  key,
-  value
-){
+function saveFinancialCache(key, value){
 
-  if(
-    !hasAndroidOfflineFinancial() ||
-    typeof window.AndroidOfflineFinancial.saveCache !== 'function'
-  ){
-    return false;
-  }
+  const cacheKey =
+    'tofa_financial_cache_' +
+    String(key || '');
 
+  let saved = false;
+
+  /* Android native cache */
   try{
 
-    return window.AndroidOfflineFinancial.saveCache(
-      String(key||''),
-      JSON.stringify(value)
-    ) === true;
+    if(
+      hasAndroidOfflineFinancial() &&
+      typeof window.AndroidOfflineFinancial.saveCache === 'function'
+    ){
+
+      const ok =
+        window.AndroidOfflineFinancial.saveCache(
+          String(key || ''),
+          JSON.stringify(value)
+        );
+
+      if(ok === true){
+        saved = true;
+      }
+    }
 
   }catch(e){
 
     console.warn(
-      '[TOFA OFFLINE CACHE] save failed',
+      '[TOFA CACHE] Android save failed',
       key,
       e
     );
-
-    return false;
   }
+
+
+  /* Browser / Cloudflare / GitHub cache */
+  try{
+
+    localStorage.setItem(
+      cacheKey,
+      JSON.stringify({
+        savedAt: Date.now(),
+        data: value
+      })
+    );
+
+    saved = true;
+
+  }catch(e){
+
+    console.warn(
+      '[TOFA CACHE] Browser save failed',
+      key,
+      e
+    );
+  }
+
+
+  return saved;
 }
 
 
-function getFinancialCache(
-  key
-){
+function getFinancialCache(key){
 
-  if(
-    !hasAndroidOfflineFinancial() ||
-    typeof window.AndroidOfflineFinancial.getCache !== 'function'
-  ){
-    return null;
+  const cacheKey =
+    'tofa_financial_cache_' +
+    String(key || '');
+
+
+  /* =====================================================
+     Android native cache first
+     ===================================================== */
+  try{
+
+    if(
+      hasAndroidOfflineFinancial() &&
+      typeof window.AndroidOfflineFinancial.getCache === 'function'
+    ){
+
+      const raw =
+        window.AndroidOfflineFinancial.getCache(
+          String(key || '')
+        );
+
+      if(raw){
+
+        const parsed =
+          JSON.parse(
+            String(raw)
+          );
+
+        if(parsed){
+          return parsed;
+        }
+      }
+    }
+
+  }catch(e){
+
+    console.warn(
+      '[TOFA CACHE] Android read failed',
+      key,
+      e
+    );
   }
 
+
+  /* =====================================================
+     Browser localStorage fallback
+     ===================================================== */
   try{
 
     const raw =
-      window.AndroidOfflineFinancial.getCache(
-        String(key||'')
+      localStorage.getItem(
+        cacheKey
       );
 
     if(!raw){
       return null;
     }
 
-    return JSON.parse(
-      String(raw)
-    );
+    const parsed =
+      JSON.parse(raw);
+
+    /*
+     * New cache format
+     */
+    if(
+      parsed &&
+      typeof parsed === 'object' &&
+      Object.prototype.hasOwnProperty.call(
+        parsed,
+        'data'
+      )
+    ){
+      return parsed.data;
+    }
+
+    /*
+     * Compatibility with older plain JSON cache
+     */
+    return parsed;
 
   }catch(e){
 
     console.warn(
-      '[TOFA OFFLINE CACHE] read failed',
+      '[TOFA CACHE] Browser read failed',
       key,
       e
     );
