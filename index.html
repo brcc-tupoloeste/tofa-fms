@@ -7818,12 +7818,33 @@ async function login(){
      */
     /* TOFA ONLINE STARTUP SPEED OPTIMIZATION v1
        Give Login + Dashboard priority before the heavy background preload. */
-    setTimeout(
-      function(){
-        tofaRunFullBackgroundSync();
-      },
-      3000
-    );
+setTimeout(
+  function(){
+
+    /*
+     * Android:
+     * retain existing full offline synchronization.
+     */
+    if(
+      typeof hasAndroidOfflineFinancial === 'function' &&
+      hasAndroidOfflineFinancial()
+    ){
+
+      tofaRunFullBackgroundSync();
+
+      return;
+    }
+
+
+    /*
+     * Browser / GitHub / Cloudflare:
+     * warm menu caches without blocking Dashboard.
+     */
+    tofaWarmBrowserMenuCaches();
+
+  },
+  3000
+);
 
 
     setTimeout(
@@ -8427,15 +8448,44 @@ function openSelectedMemberFromDropdown(){
 ========================================================= */
 
 function getLocalMemberRows(){
-  if(hasAndroidMemberCache()){
-    return loadAndroidMemberCache();
+if(
+  hasAndroidMemberCache()
+){
+
+  cachedRows =
+    loadAndroidMemberCache();
+
+}else{
+
+  const savedMemberMasterlist =
+    getFinancialCache(
+      'member_masterlist'
+    );
+
+
+  if(
+    Array.isArray(
+      savedMemberMasterlist
+    ) &&
+    savedMemberMasterlist.length
+  ){
+
+    cachedRows =
+      savedMemberMasterlist.slice();
+
+    tofaMemberCacheMemory =
+      savedMemberMasterlist.slice();
+
+  }else if(
+    Array.isArray(
+      tofaMemberCacheMemory
+    )
+  ){
+
+    cachedRows =
+      tofaMemberCacheMemory.slice();
   }
-
-  return Array.isArray(tofaMemberCacheMemory)
-    ? tofaMemberCacheMemory.slice()
-    : [];
 }
-
 function searchLocalMemberRows(query){
   const q=String(query||'')
     .trim()
@@ -22190,6 +22240,586 @@ function printAnnualAttendanceSummary(){
   else bindAttendanceEntryReset();
 })();
 
+  /* =========================================================
+   TOFA BROWSER AUTO MENU CACHE v1
+   ---------------------------------------------------------
+   Purpose:
+   - Preload/cache menu data after login
+   - User does NOT need to open each menu first
+   - No individual member-profile bulk download
+   - No blocking spinner
+========================================================= */
+
+let tofaBrowserMenuWarmupRunning = false;
+let tofaBrowserMenuWarmupLastRun = 0;
+
+
+function tofaMenuWarmupDelay(ms){
+  return new Promise(function(resolve){
+    setTimeout(resolve, ms);
+  });
+}
+
+
+async function tofaWarmBrowserMenuCaches(){
+
+  if(tofaBrowserMenuWarmupRunning){
+    return;
+  }
+
+
+  if(
+    !token ||
+    token === 'OFFLINE_LOCAL_SESSION' ||
+    tofaOfflineMode ||
+    navigator.onLine === false
+  ){
+    return;
+  }
+
+
+  /*
+   * Prevent duplicate warm-up within 1 minute.
+   */
+  const now = Date.now();
+
+  if(
+    tofaBrowserMenuWarmupLastRun &&
+    (now - tofaBrowserMenuWarmupLastRun) < 60000
+  ){
+    return;
+  }
+
+
+  tofaBrowserMenuWarmupRunning = true;
+  tofaBrowserMenuWarmupLastRun = now;
+
+
+  console.log(
+    '[TOFA MENU CACHE] START'
+  );
+
+
+  const warm =
+    async function(
+      label,
+      action,
+      payload,
+      dedicatedCacheKey,
+      normalizer
+    ){
+
+      try{
+
+        console.log(
+          '[TOFA MENU CACHE]',
+          label
+        );
+
+
+        const result =
+          await tofaFullSyncNetworkRead(
+            action,
+            payload || {
+              token:token
+            }
+          );
+
+
+        let value =
+          result;
+
+
+        if(
+          typeof normalizer === 'function'
+        ){
+
+          value =
+            normalizer(
+              result
+            );
+        }
+
+
+        if(
+          dedicatedCacheKey &&
+          typeof saveFinancialCache === 'function'
+        ){
+
+          saveFinancialCache(
+            dedicatedCacheKey,
+            value
+          );
+        }
+
+
+        console.log(
+          '[TOFA MENU CACHE] OK',
+          label
+        );
+
+
+        /*
+         * Small pause before next Apps Script request.
+         */
+        await tofaMenuWarmupDelay(
+          250
+        );
+
+
+        return value;
+
+
+      }catch(e){
+
+        console.warn(
+          '[TOFA MENU CACHE] FAILED',
+          label,
+          e
+        );
+
+
+        /*
+         * Continue with the next module.
+         */
+        await tofaMenuWarmupDelay(
+          400
+        );
+
+
+        return null;
+      }
+    };
+
+
+  try{
+
+    /* =====================================================
+       1. ADD FUNDS HISTORY
+    ===================================================== */
+
+    await warm(
+      'Add Funds',
+      'getFundReceiptHistory',
+      {
+        token:token
+      },
+      'fund_history',
+      function(r){
+
+        return typeof normalizeHistoryRows === 'function'
+          ? normalizeHistoryRows(r)
+          : (
+              Array.isArray(r)
+                ? r
+                : []
+            );
+      }
+    );
+
+
+
+    /* =====================================================
+       2. EXPENSE HISTORY
+    ===================================================== */
+
+    await warm(
+      'Expenses',
+      'getExpenseHistory',
+      {
+        token:token
+      },
+      'expense_history',
+      function(r){
+
+        return typeof normalizeHistoryRows === 'function'
+          ? normalizeHistoryRows(r)
+          : (
+              Array.isArray(r)
+                ? r
+                : []
+            );
+      }
+    );
+
+
+
+    /* =====================================================
+       3. BANK HISTORY
+    ===================================================== */
+
+    await warm(
+      'Bank',
+      'getBankHistory',
+      {
+        token:token
+      },
+      'bank_history',
+      function(r){
+
+        return typeof normalizeHistoryRows === 'function'
+          ? normalizeHistoryRows(r)
+          : (
+              Array.isArray(r)
+                ? r
+                : []
+            );
+      }
+    );
+
+
+
+    /* =====================================================
+       4. OUTSTANDING / UNCOLLECTED
+    ===================================================== */
+
+    const outstanding =
+      await warm(
+        'Outstanding Members',
+        'getOutstandingMembers',
+        {
+          token:token
+        },
+        'outstanding_members',
+        function(r){
+
+          return Array.isArray(r)
+            ? r
+            : [];
+        }
+      );
+
+
+    if(
+      Array.isArray(outstanding)
+    ){
+
+      try{
+
+        const total =
+          outstanding.reduce(
+            function(sum,row){
+
+              return (
+                sum +
+                Number(
+                  row.totalUncollected ||
+                  0
+                )
+              );
+            },
+            0
+          );
+
+
+        localStorage.setItem(
+          'tofa_dashboard_uncollected_amount',
+          String(total)
+        );
+
+      }catch(_){}
+    }
+
+
+
+    /* =====================================================
+       5. MEMBER MASTERLIST
+       -----------------------------------------------------
+       Masterlist only.
+       Individual profiles remain cache-on-open.
+    ===================================================== */
+
+    const memberResponse =
+      await warm(
+        'Member Masterlist',
+        'getMemberList',
+        {
+          token:token
+        },
+        null
+      );
+
+
+    if(memberResponse){
+
+      let members =
+        typeof normalizeMemberListResponse === 'function'
+          ? normalizeMemberListResponse(
+              memberResponse
+            )
+          : (
+              Array.isArray(memberResponse)
+                ? memberResponse
+                : (
+                    memberResponse &&
+                    Array.isArray(
+                      memberResponse.members
+                    )
+                      ? memberResponse.members
+                      : []
+                  )
+            );
+
+
+      if(Array.isArray(members)){
+
+        /*
+         * Browser current-session cache.
+         */
+        if(
+          typeof tofaMemberCacheMemory !==
+          'undefined'
+        ){
+
+          tofaMemberCacheMemory =
+            members.slice();
+        }
+
+
+        /*
+         * Browser persistent cache +
+         * Android financial cache fallback.
+         */
+        saveFinancialCache(
+          'member_masterlist',
+          members
+        );
+
+
+        /*
+         * Native Android member DB remains supported.
+         */
+        if(
+          typeof saveAndroidMemberCache ===
+          'function'
+        ){
+
+          try{
+            saveAndroidMemberCache(
+              members
+            );
+          }catch(_){}
+        }
+      }
+    }
+
+
+
+    /* =====================================================
+       6. ATTENDANCE HISTORY
+    ===================================================== */
+
+    await warm(
+      'Attendance History',
+      'getAttendanceHistory',
+      {
+        token:token
+      },
+      'attendance_history',
+      function(r){
+
+        return Array.isArray(r)
+          ? r
+          : [];
+      }
+    );
+
+
+
+    /* =====================================================
+       7. ATTENDANCE SUMMARY
+    ===================================================== */
+
+    await warm(
+      'Attendance Summary',
+      'getAttendanceSummary',
+      {
+        token:token
+      },
+      null
+    );
+
+
+    const currentYear =
+      new Date().getFullYear();
+
+
+    await warm(
+      'Annual Attendance',
+      'getAnnualAttendanceSummary',
+      {
+        token:token,
+        year:currentYear
+      },
+      null
+    );
+
+
+
+    /* =====================================================
+       8. PREVIOUS TREASURER
+    ===================================================== */
+
+    await warm(
+      'Previous Treasurer Summary',
+      'getPreviousTreasurerReconciliationReport',
+      {
+        token:token
+      },
+      null
+    );
+
+
+    await warm(
+      'Previous Treasurer Expenses',
+      'getPreviousTreasurerExpenseState',
+      {
+        token:token
+      },
+      'ptr_expense_state'
+    );
+
+
+    await warm(
+      'Previous Treasurer Beginning Funds',
+      'getPreviousTreasurerBeginningFunds',
+      {
+        token:token
+      },
+      null
+    );
+
+
+    await warm(
+      'Previous Treasurer Passbook',
+      'getPreviousTreasurerPassbook',
+      {
+        token:token
+      },
+      null
+    );
+
+
+    await warm(
+      'Previous Treasurer Turnover',
+      'getPreviousTreasurerTurnover',
+      {
+        token:token
+      },
+      null
+    );
+
+
+    await warm(
+      'Previous Treasurer Unremitted',
+      'getPreviousTreasurerUnremitted',
+      {
+        token:token
+      },
+      null
+    );
+
+
+
+    /* =====================================================
+       9. CURRENT MONTH FINANCIAL REPORT
+    ===================================================== */
+
+    const currentMonth =
+      new Date().getMonth() + 1;
+
+
+    const monthlyReport =
+      await warm(
+        'Current Monthly Financial Report',
+        'getFinancialReport',
+        {
+          token:token,
+          year:currentYear,
+          fromMonth:currentMonth,
+          toMonth:currentMonth,
+          reportType:'monthly'
+        },
+        null
+      );
+
+
+    if(monthlyReport){
+
+      saveFinancialCache(
+        'financial_report:monthly:' +
+          currentYear + ':' +
+          currentMonth + ':' +
+          currentMonth,
+        monthlyReport
+      );
+    }
+
+
+
+    /* =====================================================
+       10. CURRENT YEAR FINANCIAL REPORT
+    ===================================================== */
+
+    const annualReport =
+      await warm(
+        'Current Annual Financial Report',
+        'getFinancialReport',
+        {
+          token:token,
+          year:currentYear,
+          fromMonth:1,
+          toMonth:12,
+          reportType:'annual'
+        },
+        null
+      );
+
+
+    if(annualReport){
+
+      saveFinancialCache(
+        'financial_report:annual:' +
+          currentYear +
+          ':1:12',
+        annualReport
+      );
+    }
+
+
+
+    /* =====================================================
+       11. TEXT ANNOUNCEMENT CONTACTS
+    ===================================================== */
+
+    await warm(
+      'Announcement Contacts',
+      'getAnnouncementMembers',
+      {
+        token:token
+      },
+      null
+    );
+
+
+    /*
+     * Officers and Payment Types are intentionally
+     * not pre-cached here.
+     */
+
+
+    console.log(
+      '[TOFA MENU CACHE] COMPLETE'
+    );
+
+
+  }finally{
+
+    tofaBrowserMenuWarmupRunning =
+      false;
+  }
+}
+  
 </script>
 
 
