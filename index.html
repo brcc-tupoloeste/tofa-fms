@@ -549,29 +549,10 @@ td{
 .dashboard-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
 .dashboard-title{font-size:16px;font-weight:800;color:#0f172a}
 .dashboard-period{font-size:11px;color:#64748b;text-align:right}
-  .dashboard-head-right{
-  display:flex;
-  flex-direction:column;
-  align-items:flex-end;
-  gap:2px;
-}
-
-.dashboard-update-status{
-  font-size:10px;
-  line-height:1.2;
-  font-weight:700;
-  color:#64748b;
-  text-align:right;
-  white-space:nowrap;
-}
-
-.dashboard-update-status.is-ok{
-  color:#166534;
-}
-
-.dashboard-update-status.is-warn{
-  color:#92400e;
-}
+.dashboard-head-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.dashboard-update-status{font-size:10px;line-height:1.2;font-weight:700;color:#64748b;text-align:right;white-space:nowrap}
+.dashboard-update-status.is-ok{color:#166534}
+.dashboard-update-status.is-warn{color:#92400e}
 .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:10px}
 .stat{
   border:1px solid #e5e7eb;
@@ -2673,6 +2654,7 @@ body.print-member-list-android #androidMemberListPrintArea {
 
 
 <!-- TOFA STATIC ASSET SPEED OPTIMIZATION v1 -->
+<!-- TOFA CLOUDFLARE AUTO MENU CACHE FINAL v1 -->
 </head>
 
 
@@ -2901,22 +2883,14 @@ body.print-member-list-android #androidMemberListPrintArea {
      DASHBOARD
 ======================================================= -->
 <div id="dashboardView" class="card dashboard">
-<div class="dashboard-head">
-  <div class="dashboard-title">Financial Overview</div>
-
-  <div class="dashboard-head-right">
-    <div
-      id="dashboardUpdateStatus"
-      class="dashboard-update-status hidden">
-    </div>
-
-    <div
-      id="dashboardPeriod"
-      class="dashboard-period">
-      Loading...
+  <div class="dashboard-head">
+    <div class="dashboard-title">Financial Overview</div>
+    <div class="dashboard-head-right">
+      <div id="dashboardUpdateStatus" class="dashboard-update-status hidden"></div>
+      <div id="dashboardPeriod" class="dashboard-period">Loading...</div>
     </div>
   </div>
-</div>
+
   <div class="stats">
     <div class="stat">
       <div class="stat-label">Association Balance</div>
@@ -6952,11 +6926,9 @@ async function tofaRunFullBackgroundSync(){
     return;
   }
 
-  /*
-   * Avoid immediately launching another complete preload when
-   * login callbacks happen more than once in a short interval.
-   */
+
   const now = Date.now();
+
   if(
     tofaFullAutoSyncLastRun &&
     (now - tofaFullAutoSyncLastRun) < 30000
@@ -6964,177 +6936,320 @@ async function tofaRunFullBackgroundSync(){
     return;
   }
 
+
   tofaFullAutoSyncRunning = true;
   tofaFullAutoSyncLastRun = now;
+
 
   let completed = 0;
   let failed = 0;
   let planned = 0;
 
-  const updateProgress = function(label){
-    const total = Math.max(planned, completed + failed);
 
-    tofaFullSyncSetMeta(
-      'Last successful sync: ' +
-      (
-        localStorage.getItem(
-          TOFA_FULL_SYNC_LAST_KEY
-        )
-          ? tofaFormatSyncDateTime(
-              localStorage.getItem(
-                TOFA_FULL_SYNC_LAST_KEY
+  const pause =
+    function(ms){
+      return new Promise(
+        function(resolve){
+          setTimeout(resolve, ms);
+        }
+      );
+    };
+
+
+  const updateProgress =
+    function(label){
+
+      const total =
+        Math.max(
+          planned,
+          completed + failed
+        );
+
+
+      tofaFullSyncSetMeta(
+        'Last successful sync: ' +
+        (
+          localStorage.getItem(
+            TOFA_FULL_SYNC_LAST_KEY
+          )
+            ? tofaFormatSyncDateTime(
+                localStorage.getItem(
+                  TOFA_FULL_SYNC_LAST_KEY
+                )
               )
-            )
-          : '—'
-      )
-    );
+            : '—'
+        )
+      );
 
-    tofaRenderFullDataSync(
-      'syncing',
-      completed,
-      total,
-      failed,
-      label
-    );
 
-    refreshUnifiedSyncStatus();
-  };
+      tofaRenderFullDataSync(
+        'syncing',
+        completed,
+        total,
+        failed,
+        label
+      );
 
-  const one = async function(label, fn){
-    planned++;
-    updateProgress(label);
 
-    const failureKey = 'dataset:' + String(label || '');
+      refreshUnifiedSyncStatus();
+    };
 
-    try{
-      const value = await fn();
-      completed++;
-      tofaFullSyncClearFailure(failureKey);
+
+  const one =
+    async function(
+      label,
+      fn
+    ){
+
+      planned++;
       updateProgress(label);
-      return value;
-    }catch(e){
-      failed++;
-      tofaFullSyncRememberFailure(
-        failureKey,
-        label,
-        fn
-      );
-      updateProgress(label + ' failed');
-      console.warn(
-        '[TOFA FULL SYNC] FAILED',
-        label,
-        e
-      );
-      return null;
-    }
-  };
+
+
+      const failureKey =
+        'dataset:' +
+        String(label || '');
+
+
+      try{
+
+        const value =
+          await fn();
+
+
+        completed++;
+
+
+        tofaFullSyncClearFailure(
+          failureKey
+        );
+
+
+        updateProgress(label);
+
+
+        /*
+         * Stagger requests so Apps Script is not flooded.
+         */
+        await pause(250);
+
+
+        return value;
+
+      }catch(e){
+
+        failed++;
+
+
+        tofaFullSyncRememberFailure(
+          failureKey,
+          label,
+          fn
+        );
+
+
+        updateProgress(
+          label + ' failed'
+        );
+
+
+        console.warn(
+          '[TOFA BACKGROUND CACHE] FAILED',
+          label,
+          e
+        );
+
+
+        await pause(400);
+
+
+        return null;
+      }
+    };
+
 
   try{
 
+    /* =====================================================
+       DASHBOARD GETS NETWORK PRIORITY
+       -----------------------------------------------------
+       Cached Dashboard is already visible. If its silent live
+       refresh is still running, wait before warming menu data.
+    ===================================================== */
+    let dashboardWaitLoops = 0;
+
+
+    while(
+      typeof dashboardLoading !== 'undefined' &&
+      dashboardLoading === true &&
+      dashboardWaitLoops < 40
+    ){
+
+      await pause(500);
+      dashboardWaitLoops++;
+    }
+
+
     tofaFullSyncSetMeta(
-      'Full sync: preparing offline data...'
+      'Background cache: preparing menu data...'
     );
 
-    /*
-     * =====================================================
-     * PRIORITY 1 — DASHBOARD
-     * =====================================================
-     * loadDashboard() already paints cache-first and then
-     * refreshes live. Run silently to guarantee the snapshot.
-     */
+
+    /* =====================================================
+       1 — ADD FUNDS HISTORY
+    ===================================================== */
     await one(
-      'Dashboard',
-      async function(){
-        await loadDashboard({silent:true});
-        return true;
-      }
-    );
-
-
-    /*
-     * =====================================================
-     * PRIORITY 2 — CORE FINANCIAL HISTORY
-     * =====================================================
-     */
-    const fundHistory = await one(
       'Add Funds',
       async function(){
-        const r = await tofaFullSyncNetworkRead(
-          'getFundReceiptHistory',
-          {token:token}
+
+        const r =
+          await tofaFullSyncNetworkRead(
+            'getFundReceiptHistory',
+            {token:token}
+          );
+
+
+        const rows =
+          normalizeHistoryRows(r);
+
+
+        saveFinancialCache(
+          'fund_history',
+          rows
         );
-        const rows = normalizeHistoryRows(r);
-        saveFinancialCache('fund_history', rows);
+
+
         return rows;
       }
     );
 
+
+    /* =====================================================
+       2 — EXPENSE HISTORY
+    ===================================================== */
     await one(
       'Expenses',
       async function(){
-        const r = await tofaFullSyncNetworkRead(
-          'getExpenseHistory',
-          {token:token}
+
+        const r =
+          await tofaFullSyncNetworkRead(
+            'getExpenseHistory',
+            {token:token}
+          );
+
+
+        const rows =
+          normalizeHistoryRows(r);
+
+
+        saveFinancialCache(
+          'expense_history',
+          rows
         );
-        const rows = normalizeHistoryRows(r);
-        saveFinancialCache('expense_history', rows);
+
+
         return rows;
       }
     );
 
+
+    /* =====================================================
+       3 — BANK HISTORY
+    ===================================================== */
     await one(
       'Bank',
       async function(){
-        const r = await tofaFullSyncNetworkRead(
-          'getBankHistory',
-          {token:token}
+
+        const r =
+          await tofaFullSyncNetworkRead(
+            'getBankHistory',
+            {token:token}
+          );
+
+
+        const rows =
+          normalizeHistoryRows(r);
+
+
+        saveFinancialCache(
+          'bank_history',
+          rows
         );
-        const rows = normalizeHistoryRows(r);
-        saveFinancialCache('bank_history', rows);
+
+
         return rows;
       }
     );
 
+
+    /* =====================================================
+       4 — OUTSTANDING / UNCOLLECTED
+    ===================================================== */
     await one(
       'Outstanding balances',
       async function(){
-        const r = await tofaFullSyncNetworkRead(
-          'getOutstandingMembers',
-          {token:token}
+
+        const r =
+          await tofaFullSyncNetworkRead(
+            'getOutstandingMembers',
+            {token:token}
+          );
+
+
+        const rows =
+          Array.isArray(r)
+            ? r
+            : [];
+
+
+        saveFinancialCache(
+          'outstanding_members',
+          rows
         );
-        const rows = Array.isArray(r) ? r : [];
-        saveFinancialCache('outstanding_members', rows);
+
 
         try{
-          const total = rows.reduce(
-            function(sum,row){
-              return sum + Number(row.totalUncollected || 0);
-            },
-            0
-          );
+
+          const total =
+            rows.reduce(
+              function(sum,row){
+                return (
+                  sum +
+                  Number(
+                    row.totalUncollected || 0
+                  )
+                );
+              },
+              0
+            );
+
+
           localStorage.setItem(
             'tofa_dashboard_uncollected_amount',
             String(total)
           );
+
+
+          if(typeof set === 'function'){
+            set(
+              'statUncollected',
+              money(total)
+            );
+          }
+
         }catch(_){}
+
 
         return rows;
       }
     );
 
 
-    /*
-     * =====================================================
-     * TOFA MANUAL MEMBER PROFILE CACHE MODE v1
-     * PRIORITY 3 — MEMBER MASTERLIST ONLY
-     * =====================================================
-     *
-     * Stable behavior:
-     * - Cache only the lightweight member masterlist.
-     * - Individual member profiles remain manual-cache only.
-     * - Open a member profile while ONLINE to save it for OFFLINE use.
-     */
-
+    /* =====================================================
+       5 — MEMBER MASTERLIST ONLY
+       -----------------------------------------------------
+       Individual member profiles and obligations remain
+       cache-on-open so Apps Script is not flooded.
+    ===================================================== */
     await one(
       'Member masterlist',
       async function(){
@@ -7142,10 +7257,9 @@ async function tofaRunFullBackgroundSync(){
         const response =
           await tofaFullSyncNetworkRead(
             'getMemberList',
-            {
-              token:token
-            }
+            {token:token}
           );
+
 
         let members =
           typeof normalizeMemberListResponse === 'function'
@@ -7166,9 +7280,33 @@ async function tofaRunFullBackgroundSync(){
                     )
               );
 
+
         if(!Array.isArray(members)){
           members = [];
         }
+
+
+        if(
+          typeof tofaMemberCacheMemory !== 'undefined'
+        ){
+          tofaMemberCacheMemory =
+            members.slice();
+        }
+
+
+        saveFinancialCache(
+          'member_masterlist',
+          members
+        );
+
+
+        try{
+          localStorage.setItem(
+            'tofa_member_masterlist_cached_at',
+            String(Date.now())
+          );
+        }catch(_){}
+
 
         if(
           typeof saveAndroidMemberCache === 'function'
@@ -7183,16 +7321,15 @@ async function tofaRunFullBackgroundSync(){
           }
         }
 
+
         return members;
       }
     );
 
 
-/*
-     * =====================================================
-     * PRIORITY 4 — ATTENDANCE
-     * =====================================================
-     */
+    /* =====================================================
+       6 — ATTENDANCE
+    ===================================================== */
     await one(
       'Attendance members',
       async function(){
@@ -7203,21 +7340,34 @@ async function tofaRunFullBackgroundSync(){
       }
     );
 
+
     await one(
       'Attendance history',
       async function(){
-        const r = await tofaFullSyncNetworkRead(
-          'getAttendanceHistory',
-          {token:token}
-        );
-        const rows = Array.isArray(r) ? r : [];
+
+        const r =
+          await tofaFullSyncNetworkRead(
+            'getAttendanceHistory',
+            {token:token}
+          );
+
+
+        const rows =
+          Array.isArray(r)
+            ? r
+            : [];
+
+
         saveFinancialCache(
           'attendance_history',
           rows
         );
+
+
         return rows;
       }
     );
+
 
     await one(
       'Attendance summary',
@@ -7229,8 +7379,10 @@ async function tofaRunFullBackgroundSync(){
       }
     );
 
+
     const currentYear =
       new Date().getFullYear();
+
 
     await one(
       'Annual attendance',
@@ -7246,11 +7398,9 @@ async function tofaRunFullBackgroundSync(){
     );
 
 
-    /*
-     * =====================================================
-     * PRIORITY 5 — PREVIOUS TREASURER
-     * =====================================================
-     */
+    /* =====================================================
+       7 — PREVIOUS TREASURER
+    ===================================================== */
     const ptrActions = [
       'getPreviousTreasurerReconciliationReport',
       'getPreviousTreasurerExpenseState',
@@ -7260,17 +7410,20 @@ async function tofaRunFullBackgroundSync(){
       'getPreviousTreasurerUnremitted'
     ];
 
+
     for(const action of ptrActions){
 
-      const result = await one(
-        action,
-        async function(){
-          return await tofaFullSyncNetworkRead(
-            action,
-            {token:token}
-          );
-        }
-      );
+      const result =
+        await one(
+          action,
+          async function(){
+            return await tofaFullSyncNetworkRead(
+              action,
+              {token:token}
+            );
+          }
+        );
+
 
       if(
         action === 'getPreviousTreasurerExpenseState' &&
@@ -7284,13 +7437,12 @@ async function tofaRunFullBackgroundSync(){
     }
 
 
-    /*
-     * =====================================================
-     * PRIORITY 6 — CURRENT MONTH + CURRENT YEAR REPORTS
-     * =====================================================
-     */
+    /* =====================================================
+       8 — CURRENT MONTH FINANCIAL REPORT
+    ===================================================== */
     const month =
       new Date().getMonth() + 1;
+
 
     await one(
       'Current monthly financial report',
@@ -7304,24 +7456,31 @@ async function tofaRunFullBackgroundSync(){
           reportType:'monthly'
         };
 
+
         const r =
           await tofaFullSyncNetworkRead(
             'getFinancialReport',
             payload
           );
 
+
         saveFinancialCache(
           'financial_report:monthly:' +
-          currentYear + ':' +
-          month + ':' +
-          month,
+            currentYear + ':' +
+            month + ':' +
+            month,
           r
         );
+
 
         return r;
       }
     );
 
+
+    /* =====================================================
+       9 — CURRENT YEAR FINANCIAL REPORT
+    ===================================================== */
     await one(
       'Annual financial report',
       async function(){
@@ -7334,28 +7493,30 @@ async function tofaRunFullBackgroundSync(){
           reportType:'annual'
         };
 
+
         const r =
           await tofaFullSyncNetworkRead(
             'getFinancialReport',
             payload
           );
 
+
         saveFinancialCache(
           'financial_report:annual:' +
-          currentYear + ':1:12',
+            currentYear +
+            ':1:12',
           r
         );
+
 
         return r;
       }
     );
 
 
-    /*
-     * =====================================================
-     * PRIORITY 7 — ANNOUNCEMENT / OFFICERS / PAYMENT TYPES
-     * =====================================================
-     */
+    /* =====================================================
+       10 — ANNOUNCEMENT CONTACTS
+    ===================================================== */
     await one(
       'Announcement contacts',
       async function(){
@@ -7366,153 +7527,40 @@ async function tofaRunFullBackgroundSync(){
       }
     );
 
-    await one(
-      'Officers',
-      async function(){
-        return await tofaFullSyncNetworkRead(
-          'getOfficers',
-          {token:token}
-        );
-      }
-    );
-
-    let paymentTypes = [];
-
-    await one(
-      'Payment types',
-      async function(){
-
-        const r =
-          await tofaFullSyncNetworkRead(
-            'getPaymentTypes',
-            {token:token}
-          );
-
-        const raw =
-          Array.isArray(r)
-            ? r
-            : (
-                r &&
-                (
-                  r.paymentTypes ||
-                  r.types
-                )
-              ) ||
-              [];
-
-        paymentTypes =
-          raw
-            .map(function(x){
-              return typeof x === 'string'
-                ? x
-                : (
-                    x.type ||
-                    x.transactionType ||
-                    ''
-                  );
-            })
-            .map(function(x){
-              return String(x || '').trim();
-            })
-            .filter(Boolean)
-            .filter(function(x,i,a){
-              return a.indexOf(x) === i;
-            });
-
-        return paymentTypes;
-      }
-    );
-
-    if(paymentTypes.length){
-
-      planned += paymentTypes.length;
-      updateProgress('Payment type reports');
-
-      await tofaFullSyncRunPool(
-        paymentTypes,
-        async function(type){
-
-          try{
-            await tofaFullSyncNetworkRead(
-              'getPaymentTypeReport',
-              {
-                token:token,
-                paymentType:type
-              }
-            );
-            completed++;
-
-            tofaFullSyncClearFailure(
-              'payment-type-report:' + type
-            );
-
-          }catch(e){
-            failed++;
-
-            tofaFullSyncRememberFailure(
-              'payment-type-report:' + type,
-              'Payment Type Report — ' + type,
-              async function(){
-                return await tofaFullSyncNetworkRead(
-                  'getPaymentTypeReport',
-                  {
-                    token:token,
-                    paymentType:type
-                  }
-                );
-              }
-            );
-
-            console.warn(
-              '[TOFA FULL SYNC] Payment type report failed',
-              type,
-              e
-            );
-          }
-
-          updateProgress(
-            'Payment type reports'
-          );
-        },
-        2
-      );
-    }
-
 
     /*
-     * One final dashboard refresh ensures the visible cards use
-     * the newest synchronized balances.
+     * Officers and Payment Types remain live-only.
+     * They are intentionally not warmed in the background.
      */
-    try{
-      await loadDashboard({silent:true});
-    }catch(_){}
 
-    if(
-      completed > 0
-    ){
+
+    if(completed > 0){
       setLastSuccessfulSyncNow();
     }
 
+
     refreshUnifiedSyncStatus();
+
 
     tofaFullSyncSetMeta(
       failed
         ? (
-            'Full sync completed: ' +
+            'Background cache completed: ' +
             completed +
             ' synchronized • ' +
             failed +
-            ' failed. Failed items will retry on the next online login.'
+            ' failed.'
           )
         : (
-            'Full sync completed: ' +
+            'Background cache completed: ' +
             completed +
             ' data set(s) synchronized.'
           )
     );
 
+
     console.log(
-      '[TOFA FULL SYNC] COMPLETE',
+      '[TOFA BACKGROUND CACHE] COMPLETE',
       {
         completed:completed,
         failed:failed
@@ -7522,12 +7570,13 @@ async function tofaRunFullBackgroundSync(){
   }catch(e){
 
     console.error(
-      '[TOFA FULL SYNC] FATAL',
+      '[TOFA BACKGROUND CACHE] FATAL',
       e
     );
 
+
     tofaFullSyncSetMeta(
-      'Full sync interrupted. Cached data already downloaded remains available.'
+      'Background cache interrupted. Existing cached data remains available.'
     );
 
   }finally{
@@ -7818,33 +7867,12 @@ async function login(){
      */
     /* TOFA ONLINE STARTUP SPEED OPTIMIZATION v1
        Give Login + Dashboard priority before the heavy background preload. */
-setTimeout(
-  function(){
-
-    /*
-     * Android:
-     * retain existing full offline synchronization.
-     */
-    if(
-      typeof hasAndroidOfflineFinancial === 'function' &&
-      hasAndroidOfflineFinancial()
-    ){
-
-      tofaRunFullBackgroundSync();
-
-      return;
-    }
-
-
-    /*
-     * Browser / GitHub / Cloudflare:
-     * warm menu caches without blocking Dashboard.
-     */
-    tofaWarmBrowserMenuCaches();
-
-  },
-  3000
-);
+    setTimeout(
+      function(){
+        tofaRunFullBackgroundSync();
+      },
+      3000
+    );
 
 
     setTimeout(
@@ -8448,44 +8476,15 @@ function openSelectedMemberFromDropdown(){
 ========================================================= */
 
 function getLocalMemberRows(){
-if(
-  hasAndroidMemberCache()
-){
-
-  cachedRows =
-    loadAndroidMemberCache();
-
-}else{
-
-  const savedMemberMasterlist =
-    getFinancialCache(
-      'member_masterlist'
-    );
-
-
-  if(
-    Array.isArray(
-      savedMemberMasterlist
-    ) &&
-    savedMemberMasterlist.length
-  ){
-
-    cachedRows =
-      savedMemberMasterlist.slice();
-
-    tofaMemberCacheMemory =
-      savedMemberMasterlist.slice();
-
-  }else if(
-    Array.isArray(
-      tofaMemberCacheMemory
-    )
-  ){
-
-    cachedRows =
-      tofaMemberCacheMemory.slice();
+  if(hasAndroidMemberCache()){
+    return loadAndroidMemberCache();
   }
+
+  return Array.isArray(tofaMemberCacheMemory)
+    ? tofaMemberCacheMemory.slice()
+    : [];
 }
+
 function searchLocalMemberRows(query){
   const q=String(query||'')
     .trim()
@@ -11295,12 +11294,11 @@ function firstFinancialFailureMessage(){
   );
 }
 
-/* =========================================================
-   TOFA FINANCIAL CACHE
-   Android SQLite + Browser localStorage fallback
-   ========================================================= */
 
-function saveFinancialCache(key, value){
+function saveFinancialCache(
+  key,
+  value
+){
 
   const cacheKey =
     'tofa_financial_cache_' +
@@ -11308,7 +11306,10 @@ function saveFinancialCache(key, value){
 
   let saved = false;
 
-  /* Android native cache */
+
+  /* =====================================================
+     ANDROID NATIVE CACHE
+     ===================================================== */
   try{
 
     if(
@@ -11337,7 +11338,9 @@ function saveFinancialCache(key, value){
   }
 
 
-  /* Browser / Cloudflare / GitHub cache */
+  /* =====================================================
+     BROWSER / GITHUB / CLOUDFLARE CACHE
+     ===================================================== */
   try{
 
     localStorage.setItem(
@@ -11364,7 +11367,9 @@ function saveFinancialCache(key, value){
 }
 
 
-function getFinancialCache(key){
+function getFinancialCache(
+  key
+){
 
   const cacheKey =
     'tofa_financial_cache_' +
@@ -11372,7 +11377,7 @@ function getFinancialCache(key){
 
 
   /* =====================================================
-     Android native cache first
+     ANDROID NATIVE CACHE FIRST
      ===================================================== */
   try{
 
@@ -11410,7 +11415,7 @@ function getFinancialCache(key){
 
 
   /* =====================================================
-     Browser localStorage fallback
+     BROWSER LOCALSTORAGE FALLBACK
      ===================================================== */
   try{
 
@@ -11423,12 +11428,12 @@ function getFinancialCache(key){
       return null;
     }
 
+
     const parsed =
       JSON.parse(raw);
 
-    /*
-     * New cache format
-     */
+
+    /* New cache wrapper format. */
     if(
       parsed &&
       typeof parsed === 'object' &&
@@ -11440,9 +11445,8 @@ function getFinancialCache(key){
       return parsed.data;
     }
 
-    /*
-     * Compatibility with older plain JSON cache
-     */
+
+    /* Compatibility with older plain JSON cache. */
     return parsed;
 
   }catch(e){
@@ -14052,12 +14056,7 @@ function clearSearchAndPayment(){
 let dashboardLoading = false;
 let dashboardUpdateStatusTimer = null;
 
-
-function setDashboardUpdateStatus(
-  text,
-  state,
-  autoClearMs
-){
+function setDashboardUpdateStatus(text,state,autoClearMs){
 
   const el =
     document.getElementById(
@@ -14068,75 +14067,43 @@ function setDashboardUpdateStatus(
     return;
   }
 
-
   if(dashboardUpdateStatusTimer){
-
     clearTimeout(
       dashboardUpdateStatusTimer
     );
-
-    dashboardUpdateStatusTimer =
-      null;
+    dashboardUpdateStatusTimer = null;
   }
-
 
   el.classList.remove(
     'is-ok',
     'is-warn'
   );
 
-
   if(!text){
-
     el.textContent = '';
-
-    el.classList.add(
-      'hidden'
-    );
-
+    el.classList.add('hidden');
     return;
   }
 
-
-  el.textContent =
-    text;
-
-  el.classList.remove(
-    'hidden'
-  );
-
+  el.textContent = text;
+  el.classList.remove('hidden');
 
   if(state === 'ok'){
-
-    el.classList.add(
-      'is-ok'
-    );
-
+    el.classList.add('is-ok');
   }else if(state === 'warn'){
-
-    el.classList.add(
-      'is-warn'
-    );
+    el.classList.add('is-warn');
   }
 
-
   if(autoClearMs){
-
     dashboardUpdateStatusTimer =
       setTimeout(
         function(){
-
-          setDashboardUpdateStatus(
-            ''
-          );
-
+          setDashboardUpdateStatus('');
         },
         autoClearMs
       );
   }
 }
-
-
 
 async function loadDashboard(options){
 
@@ -14155,8 +14122,8 @@ async function loadDashboard(options){
 
   /* =======================================================
      CACHE-FIRST DASHBOARD
-     ======================================================= */
-
+     Paint cached values immediately, then refresh quietly.
+  ======================================================= */
   const cachedDashboard =
     getFinancialCache(
       'dashboard_summary'
@@ -14166,14 +14133,12 @@ async function loadDashboard(options){
   let cachedUncollectedAmount =
     null;
 
-
   try{
 
     const rawUncollected =
       localStorage.getItem(
         'tofa_dashboard_uncollected_amount'
       );
-
 
     if(
       rawUncollected !== null &&
@@ -14185,13 +14150,11 @@ async function loadDashboard(options){
           rawUncollected
         );
 
-
       if(
         Number.isFinite(
           parsedUncollected
         )
       ){
-
         cachedUncollectedAmount =
           parsedUncollected;
       }
@@ -14199,11 +14162,6 @@ async function loadDashboard(options){
 
   }catch(_){}
 
-
-
-  /* =======================================================
-     DISPLAY CACHE IMMEDIATELY
-     ======================================================= */
 
   if(cachedDashboard){
 
@@ -14214,14 +14172,12 @@ async function loadDashboard(options){
       )
     );
 
-
     set(
       'statBank',
       money(
         cachedDashboard.bankBalance
       )
     );
-
 
     set(
       'statCash',
@@ -14230,7 +14186,6 @@ async function loadDashboard(options){
       )
     );
 
-
     set(
       'statCurrent',
       money(
@@ -14238,14 +14193,12 @@ async function loadDashboard(options){
       )
     );
 
-
     set(
       'statPrevious',
       money(
         cachedDashboard.previousMonthCollections
       )
     );
-
 
     set(
       'statUncollected',
@@ -14255,7 +14208,6 @@ async function loadDashboard(options){
           : cachedDashboard.uncollectedAmount
       )
     );
-
 
     set(
       'dashboardPeriod',
@@ -14273,47 +14225,21 @@ async function loadDashboard(options){
   }else if(!silent){
 
     /*
-     * First load only.
-     * Do not block the entire application.
+     * First browser/device load only.
+     * Do not block the whole screen while waiting for Apps Script.
      */
-
-    set(
-      'statAssociation',
-      '—'
-    );
-
-    set(
-      'statBank',
-      '—'
-    );
-
-    set(
-      'statCash',
-      '—'
-    );
-
-    set(
-      'statCurrent',
-      '—'
-    );
-
-    set(
-      'statPrevious',
-      '—'
-    );
-
-    set(
-      'statUncollected',
-      '—'
-    );
+    set('statAssociation','—');
+    set('statBank','—');
+    set('statCash','—');
+    set('statCurrent','—');
+    set('statPrevious','—');
+    set('statUncollected','—');
   }
-
 
 
   /* =======================================================
      OFFLINE MODE
-     ======================================================= */
-
+  ======================================================= */
   if(
     tofaOfflineMode ||
     navigator.onLine === false ||
@@ -14325,7 +14251,6 @@ async function loadDashboard(options){
       if(
         cachedUncollectedAmount !== null
       ){
-
         set(
           'statUncollected',
           money(
@@ -14334,7 +14259,6 @@ async function loadDashboard(options){
         );
       }
 
-
       msg(
         'dashboardMsg',
         'OFFLINE MODE • No dashboard snapshot has been synchronized yet.',
@@ -14342,9 +14266,7 @@ async function loadDashboard(options){
       );
     }
 
-
     if(!silent){
-
       setDashboardUpdateStatus(
         'Saved data',
         'warn',
@@ -14352,18 +14274,15 @@ async function loadDashboard(options){
       );
     }
 
-
     refreshUnifiedSyncStatus();
 
     return;
   }
 
 
-
   /* =======================================================
-     PREVENT DUPLICATE REQUEST
-     ======================================================= */
-
+     ONLINE BACKGROUND REFRESH
+  ======================================================= */
   if(dashboardLoading){
 
     console.log(
@@ -14378,20 +14297,17 @@ async function loadDashboard(options){
     true;
 
 
-
-  /* =======================================================
-     SMALL NON-BLOCKING STATUS
-     ======================================================= */
-
+  /*
+   * No full-screen Loading Dashboard overlay here.
+   * Cached cards remain usable while Apps Script refreshes.
+   */
   if(!silent){
-
     setDashboardUpdateStatus(
       cachedDashboard
         ? '↻ Updating…'
         : '↻ Loading latest figures…'
     );
   }
-
 
 
   try{
@@ -14405,11 +14321,6 @@ async function loadDashboard(options){
         3
       );
 
-
-
-    /* =====================================================
-       SAVE NEW DASHBOARD CACHE
-       ===================================================== */
 
     saveFinancialCache(
       'dashboard_summary',
@@ -14438,18 +14349,12 @@ async function loadDashboard(options){
     }catch(_){}
 
 
-
-    /* =====================================================
-       UPDATE LIVE VALUES
-       ===================================================== */
-
     set(
       'statAssociation',
       money(
         d.associationBalance
       )
     );
-
 
     set(
       'statBank',
@@ -14458,14 +14363,12 @@ async function loadDashboard(options){
       )
     );
 
-
     set(
       'statCash',
       money(
         d.cashOnHand
       )
     );
-
 
     set(
       'statCurrent',
@@ -14474,7 +14377,6 @@ async function loadDashboard(options){
       )
     );
 
-
     set(
       'statPrevious',
       money(
@@ -14482,14 +14384,12 @@ async function loadDashboard(options){
       )
     );
 
-
     set(
       'statUncollected',
       money(
         d.uncollectedAmount
       )
     );
-
 
     set(
       'dashboardPeriod',
@@ -14513,7 +14413,6 @@ async function loadDashboard(options){
 
 
     if(!silent){
-
       setDashboardUpdateStatus(
         '✓ Updated',
         'ok',
@@ -14540,10 +14439,7 @@ async function loadDashboard(options){
       e.message === 'SESSION_EXPIRED'
     ){
 
-      setDashboardUpdateStatus(
-        ''
-      );
-
+      setDashboardUpdateStatus('');
 
       fail(
         e,
@@ -14554,22 +14450,15 @@ async function loadDashboard(options){
     }
 
 
-
-    /*
-     * Keep cached values when server refresh fails.
-     */
-
     if(cachedDashboard){
 
       if(!silent){
-
         setDashboardUpdateStatus(
           'Using saved values',
           'warn',
           3000
         );
       }
-
 
       console.log(
         '[TOFA DASHBOARD] Keeping cached values'
@@ -14581,10 +14470,7 @@ async function loadDashboard(options){
 
     if(!silent){
 
-      setDashboardUpdateStatus(
-        ''
-      );
-
+      setDashboardUpdateStatus('');
 
       fail(
         e,
@@ -14598,11 +14484,9 @@ async function loadDashboard(options){
     dashboardLoading =
       false;
 
-
     refreshUnifiedSyncStatus();
   }
 }
-
 /* =========================================================
    ADD MEMBER
 ========================================================= */
@@ -15743,50 +15627,148 @@ async function fetchMemberListFromServer(){
 }
 
 async function openMemberList(){
-  const requestId=++memberListRequestSeq;
+
+  const requestId =
+    ++memberListRequestSeq;
+
 
   hideAppPanels();
-  document.getElementById('memberListPanel').classList.remove('hidden');
-  document.getElementById('searchTopBar').classList.remove('hidden');
 
-  const body=document.getElementById('memberListBody');
-  const note=document.getElementById('memberListNote');
 
-  /*
-   * =======================================================
-   * 1) LOCAL-FIRST
-   * =======================================================
-   * Android reads SQLite immediately.
-   * Browser/GitHub fallback keeps an in-memory copy only.
-   */
-  let cachedRows=[];
+  document
+    .getElementById('memberListPanel')
+    .classList
+    .remove('hidden');
+
+
+  document
+    .getElementById('searchTopBar')
+    .classList
+    .remove('hidden');
+
+
+  const body =
+    document.getElementById(
+      'memberListBody'
+    );
+
+
+  const note =
+    document.getElementById(
+      'memberListNote'
+    );
+
+
+  /* =======================================================
+     LOCAL-FIRST MEMBER LIST
+     -------------------------------------------------------
+     Android   -> SQLite member cache
+     Browser   -> localStorage member_masterlist
+     Fallback  -> current-session memory
+  ======================================================= */
+  let cachedRows = [];
+
 
   if(hasAndroidMemberCache()){
-    cachedRows=loadAndroidMemberCache();
-  }else if(Array.isArray(tofaMemberCacheMemory)){
-    cachedRows=tofaMemberCacheMemory.slice();
-  }
 
-  if(cachedRows.length){
-    renderMemberListRows(cachedRows);
-
-    const lastSyncText=
-      formatMemberCacheSyncTime(
-        memberCacheLastSyncedAt()
-      );
-
-    note.textContent=
-      cachedRows.length+
-      ' member record(s) • Local'+
-      (lastSyncText?' • Last sync: '+lastSyncText:'');
+    cachedRows =
+      loadAndroidMemberCache();
 
   }else{
-    body.innerHTML=
-      '<tr><td colspan="6">Loading members...</td></tr>';
-    note.textContent='Loading members...';
+
+    const savedRows =
+      getFinancialCache(
+        'member_masterlist'
+      );
+
+
+    if(
+      Array.isArray(savedRows) &&
+      savedRows.length
+    ){
+
+      cachedRows =
+        savedRows.slice();
+
+
+      tofaMemberCacheMemory =
+        savedRows.slice();
+
+    }else if(
+      Array.isArray(
+        tofaMemberCacheMemory
+      )
+    ){
+
+      cachedRows =
+        tofaMemberCacheMemory.slice();
+    }
   }
 
-  const online=androidMemberCacheOnline();
+
+  /* =======================================================
+     DISPLAY CACHE IMMEDIATELY
+  ======================================================= */
+  if(cachedRows.length){
+
+    renderMemberListRows(
+      cachedRows
+    );
+
+
+    let lastSyncText = '';
+
+
+    if(hasAndroidMemberCache()){
+
+      lastSyncText =
+        formatMemberCacheSyncTime(
+          memberCacheLastSyncedAt()
+        );
+
+    }else{
+
+      try{
+
+        lastSyncText =
+          formatMemberCacheSyncTime(
+            Number(
+              localStorage.getItem(
+                'tofa_member_masterlist_cached_at'
+              ) || 0
+            )
+          );
+
+      }catch(_){
+        lastSyncText = '';
+      }
+    }
+
+
+    note.textContent =
+      cachedRows.length +
+      ' member record(s) • Local' +
+      (
+        lastSyncText
+          ? ' • Last sync: ' +
+            lastSyncText
+          : ''
+      );
+
+  }else{
+
+    body.innerHTML =
+      '<tr><td colspan="6">Loading members...</td></tr>';
+
+
+    note.textContent =
+      'Loading members...';
+  }
+
+
+  const online =
+    androidMemberCacheOnline();
+
 
   console.log(
     '[TOFA MEMBER LIST] LOCAL READY',
@@ -15797,87 +15779,119 @@ async function openMemberList(){
     }
   );
 
-  /*
-   * No internet:
-   * keep the local list and stop here.
-   */
+
   if(!online){
+
     if(cachedRows.length){
-      note.textContent=
-        cachedRows.length+
+
+      note.textContent =
+        cachedRows.length +
         ' member record(s) • OFFLINE';
+
     }else{
-      note.textContent='OFFLINE';
-      body.innerHTML=
+
+      note.textContent =
+        'OFFLINE';
+
+
+      body.innerHTML =
         '<tr><td colspan="6">No local member cache yet. Connect to the internet once to download the member masterlist.</td></tr>';
     }
 
+
     return;
   }
 
-  /*
-   * No session token:
-   * local list remains visible.
-   */
+
   if(!token){
+
     if(cachedRows.length){
-      note.textContent=
-        cachedRows.length+
+
+      note.textContent =
+        cachedRows.length +
         ' member record(s) • Local copy • Login required to sync';
+
+
       return;
     }
 
-    body.innerHTML=
+
+    body.innerHTML =
       '<tr><td colspan="6">Please login to download the member masterlist.</td></tr>';
-    note.textContent='';
+
+
+    note.textContent = '';
+
+
     return;
   }
 
-  /*
-   * =======================================================
-   * 2) ONLINE REFRESH
-   * =======================================================
-   * Keep cached rows visible while refreshing.
-   */
+
+  /* =======================================================
+     ONLINE REFRESH
+     -------------------------------------------------------
+     Cached rows remain visible while the latest copy loads.
+  ======================================================= */
   if(!cachedRows.length){
+
     showBusy(
       'Loading Member List...',
       'Downloading member masterlist'
     );
+
   }else{
-    note.textContent=
-      cachedRows.length+
-      ' member record(s) • Syncing...';
+
+    note.textContent =
+      cachedRows.length +
+      ' member record(s) • Updating...';
   }
 
+
   try{
+
     let response;
     let rows;
 
-    try{
-      response=await fetchMemberListFromServer();
-      rows=normalizeMemberListResponse(response);
 
-      if(rows===null){
-        throw new Error('INVALID_MEMBER_LIST_RESPONSE');
+    try{
+
+      response =
+        await fetchMemberListFromServer();
+
+
+      rows =
+        normalizeMemberListResponse(
+          response
+        );
+
+
+      if(rows === null){
+        throw new Error(
+          'INVALID_MEMBER_LIST_RESPONSE'
+        );
       }
 
     }catch(firstError){
 
       if(
         firstError &&
-        firstError.message==='SESSION_EXPIRED'
+        firstError.message === 'SESSION_EXPIRED'
       ){
         throw firstError;
       }
 
-      const message=String(
-        firstError && firstError.message
-          ? firstError.message
-          : firstError || ''
-      ).toLowerCase();
 
-      const temporary=
+      const message =
+        String(
+          firstError &&
+          firstError.message
+            ? firstError.message
+            : firstError || ''
+        )
+        .toLowerCase();
+
+
+      const temporary =
         message.includes('timed out') ||
         message.includes('failed to fetch') ||
         message.includes('networkerror') ||
@@ -15891,43 +15905,85 @@ async function openMemberList(){
         message.includes('http 503') ||
         message.includes('http 504');
 
+
       if(!temporary){
         throw firstError;
       }
+
 
       console.warn(
         '[TOFA MEMBER LIST] SERVER RETRY',
         firstError
       );
 
-      await new Promise(function(resolve){
-        setTimeout(resolve,1200);
-      });
 
-      response=await fetchMemberListFromServer();
-      rows=normalizeMemberListResponse(response);
+      await new Promise(
+        function(resolve){
+          setTimeout(resolve,1200);
+        }
+      );
 
-      if(rows===null){
-        throw new Error('INVALID_MEMBER_LIST_RESPONSE');
+
+      response =
+        await fetchMemberListFromServer();
+
+
+      rows =
+        normalizeMemberListResponse(
+          response
+        );
+
+
+      if(rows === null){
+        throw new Error(
+          'INVALID_MEMBER_LIST_RESPONSE'
+        );
       }
     }
 
-    if(requestId!==memberListRequestSeq){
+
+    if(
+      requestId !==
+      memberListRequestSeq
+    ){
       return;
     }
 
-    /*
-     * Complete valid server masterlist:
-     * replace local master cache.
-     */
-    tofaMemberCacheMemory=rows.slice();
-    saveAndroidMemberCache(rows);
+
+    tofaMemberCacheMemory =
+      rows.slice();
+
+
+    saveFinancialCache(
+      'member_masterlist',
+      rows
+    );
+
+
+    try{
+      localStorage.setItem(
+        'tofa_member_masterlist_cached_at',
+        String(Date.now())
+      );
+    }catch(_){}
+
+
+    if(
+      typeof saveAndroidMemberCache === 'function'
+    ){
+      try{
+        saveAndroidMemberCache(rows);
+      }catch(_){}
+    }
+
 
     renderMemberListRows(rows);
 
-    note.textContent=
-      rows.length+
+
+    note.textContent =
+      rows.length +
       ' member record(s) • SYNCED';
+
 
     console.log(
       '[TOFA MEMBER LIST] SERVER SYNC SUCCESS',
@@ -15939,52 +15995,67 @@ async function openMemberList(){
 
   }catch(e){
 
-    if(requestId!==memberListRequestSeq){
+    if(
+      requestId !==
+      memberListRequestSeq
+    ){
       return;
     }
+
 
     console.error(
       '[TOFA MEMBER LIST] SERVER SYNC FAILED',
       e
     );
 
-    /*
-     * IMPORTANT:
-     * Never erase a good local masterlist because the server/session failed.
-     */
+
     if(cachedRows.length){
 
-      renderMemberListRows(cachedRows);
+      renderMemberListRows(
+        cachedRows
+      );
+
 
       if(
         e &&
-        e.message==='SESSION_EXPIRED'
+        e.message === 'SESSION_EXPIRED'
       ){
-        note.textContent=
-          cachedRows.length+
+
+        note.textContent =
+          cachedRows.length +
           ' member record(s) • Local copy • Session expired — login again to sync';
+
       }else{
-        note.textContent=
-          cachedRows.length+
+
+        note.textContent =
+          cachedRows.length +
           ' member record(s) • Local copy • Sync unavailable';
       }
 
+
       return;
     }
 
-    note.textContent='';
+
+    note.textContent = '';
+
 
     if(
       e &&
-      e.message==='SESSION_EXPIRED'
+      e.message === 'SESSION_EXPIRED'
     ){
-      body.innerHTML=
+
+      body.innerHTML =
         '<tr><td colspan="6">Session expired. Please login again to download members.</td></tr>';
+
+
       return;
     }
 
-    body.innerHTML=
+
+    body.innerHTML =
       '<tr><td colspan="6">Unable to download members and no local cache is available yet.</td></tr>';
+
 
     msg(
       'dashboardMsg',
@@ -15995,9 +16066,11 @@ async function openMemberList(){
     );
 
   }finally{
+
     hideBusy();
   }
 }
+
 
 /* =========================================================
    OUTSTANDING MEMBERS
@@ -22240,586 +22313,6 @@ function printAnnualAttendanceSummary(){
   else bindAttendanceEntryReset();
 })();
 
-  /* =========================================================
-   TOFA BROWSER AUTO MENU CACHE v1
-   ---------------------------------------------------------
-   Purpose:
-   - Preload/cache menu data after login
-   - User does NOT need to open each menu first
-   - No individual member-profile bulk download
-   - No blocking spinner
-========================================================= */
-
-let tofaBrowserMenuWarmupRunning = false;
-let tofaBrowserMenuWarmupLastRun = 0;
-
-
-function tofaMenuWarmupDelay(ms){
-  return new Promise(function(resolve){
-    setTimeout(resolve, ms);
-  });
-}
-
-
-async function tofaWarmBrowserMenuCaches(){
-
-  if(tofaBrowserMenuWarmupRunning){
-    return;
-  }
-
-
-  if(
-    !token ||
-    token === 'OFFLINE_LOCAL_SESSION' ||
-    tofaOfflineMode ||
-    navigator.onLine === false
-  ){
-    return;
-  }
-
-
-  /*
-   * Prevent duplicate warm-up within 1 minute.
-   */
-  const now = Date.now();
-
-  if(
-    tofaBrowserMenuWarmupLastRun &&
-    (now - tofaBrowserMenuWarmupLastRun) < 60000
-  ){
-    return;
-  }
-
-
-  tofaBrowserMenuWarmupRunning = true;
-  tofaBrowserMenuWarmupLastRun = now;
-
-
-  console.log(
-    '[TOFA MENU CACHE] START'
-  );
-
-
-  const warm =
-    async function(
-      label,
-      action,
-      payload,
-      dedicatedCacheKey,
-      normalizer
-    ){
-
-      try{
-
-        console.log(
-          '[TOFA MENU CACHE]',
-          label
-        );
-
-
-        const result =
-          await tofaFullSyncNetworkRead(
-            action,
-            payload || {
-              token:token
-            }
-          );
-
-
-        let value =
-          result;
-
-
-        if(
-          typeof normalizer === 'function'
-        ){
-
-          value =
-            normalizer(
-              result
-            );
-        }
-
-
-        if(
-          dedicatedCacheKey &&
-          typeof saveFinancialCache === 'function'
-        ){
-
-          saveFinancialCache(
-            dedicatedCacheKey,
-            value
-          );
-        }
-
-
-        console.log(
-          '[TOFA MENU CACHE] OK',
-          label
-        );
-
-
-        /*
-         * Small pause before next Apps Script request.
-         */
-        await tofaMenuWarmupDelay(
-          250
-        );
-
-
-        return value;
-
-
-      }catch(e){
-
-        console.warn(
-          '[TOFA MENU CACHE] FAILED',
-          label,
-          e
-        );
-
-
-        /*
-         * Continue with the next module.
-         */
-        await tofaMenuWarmupDelay(
-          400
-        );
-
-
-        return null;
-      }
-    };
-
-
-  try{
-
-    /* =====================================================
-       1. ADD FUNDS HISTORY
-    ===================================================== */
-
-    await warm(
-      'Add Funds',
-      'getFundReceiptHistory',
-      {
-        token:token
-      },
-      'fund_history',
-      function(r){
-
-        return typeof normalizeHistoryRows === 'function'
-          ? normalizeHistoryRows(r)
-          : (
-              Array.isArray(r)
-                ? r
-                : []
-            );
-      }
-    );
-
-
-
-    /* =====================================================
-       2. EXPENSE HISTORY
-    ===================================================== */
-
-    await warm(
-      'Expenses',
-      'getExpenseHistory',
-      {
-        token:token
-      },
-      'expense_history',
-      function(r){
-
-        return typeof normalizeHistoryRows === 'function'
-          ? normalizeHistoryRows(r)
-          : (
-              Array.isArray(r)
-                ? r
-                : []
-            );
-      }
-    );
-
-
-
-    /* =====================================================
-       3. BANK HISTORY
-    ===================================================== */
-
-    await warm(
-      'Bank',
-      'getBankHistory',
-      {
-        token:token
-      },
-      'bank_history',
-      function(r){
-
-        return typeof normalizeHistoryRows === 'function'
-          ? normalizeHistoryRows(r)
-          : (
-              Array.isArray(r)
-                ? r
-                : []
-            );
-      }
-    );
-
-
-
-    /* =====================================================
-       4. OUTSTANDING / UNCOLLECTED
-    ===================================================== */
-
-    const outstanding =
-      await warm(
-        'Outstanding Members',
-        'getOutstandingMembers',
-        {
-          token:token
-        },
-        'outstanding_members',
-        function(r){
-
-          return Array.isArray(r)
-            ? r
-            : [];
-        }
-      );
-
-
-    if(
-      Array.isArray(outstanding)
-    ){
-
-      try{
-
-        const total =
-          outstanding.reduce(
-            function(sum,row){
-
-              return (
-                sum +
-                Number(
-                  row.totalUncollected ||
-                  0
-                )
-              );
-            },
-            0
-          );
-
-
-        localStorage.setItem(
-          'tofa_dashboard_uncollected_amount',
-          String(total)
-        );
-
-      }catch(_){}
-    }
-
-
-
-    /* =====================================================
-       5. MEMBER MASTERLIST
-       -----------------------------------------------------
-       Masterlist only.
-       Individual profiles remain cache-on-open.
-    ===================================================== */
-
-    const memberResponse =
-      await warm(
-        'Member Masterlist',
-        'getMemberList',
-        {
-          token:token
-        },
-        null
-      );
-
-
-    if(memberResponse){
-
-      let members =
-        typeof normalizeMemberListResponse === 'function'
-          ? normalizeMemberListResponse(
-              memberResponse
-            )
-          : (
-              Array.isArray(memberResponse)
-                ? memberResponse
-                : (
-                    memberResponse &&
-                    Array.isArray(
-                      memberResponse.members
-                    )
-                      ? memberResponse.members
-                      : []
-                  )
-            );
-
-
-      if(Array.isArray(members)){
-
-        /*
-         * Browser current-session cache.
-         */
-        if(
-          typeof tofaMemberCacheMemory !==
-          'undefined'
-        ){
-
-          tofaMemberCacheMemory =
-            members.slice();
-        }
-
-
-        /*
-         * Browser persistent cache +
-         * Android financial cache fallback.
-         */
-        saveFinancialCache(
-          'member_masterlist',
-          members
-        );
-
-
-        /*
-         * Native Android member DB remains supported.
-         */
-        if(
-          typeof saveAndroidMemberCache ===
-          'function'
-        ){
-
-          try{
-            saveAndroidMemberCache(
-              members
-            );
-          }catch(_){}
-        }
-      }
-    }
-
-
-
-    /* =====================================================
-       6. ATTENDANCE HISTORY
-    ===================================================== */
-
-    await warm(
-      'Attendance History',
-      'getAttendanceHistory',
-      {
-        token:token
-      },
-      'attendance_history',
-      function(r){
-
-        return Array.isArray(r)
-          ? r
-          : [];
-      }
-    );
-
-
-
-    /* =====================================================
-       7. ATTENDANCE SUMMARY
-    ===================================================== */
-
-    await warm(
-      'Attendance Summary',
-      'getAttendanceSummary',
-      {
-        token:token
-      },
-      null
-    );
-
-
-    const currentYear =
-      new Date().getFullYear();
-
-
-    await warm(
-      'Annual Attendance',
-      'getAnnualAttendanceSummary',
-      {
-        token:token,
-        year:currentYear
-      },
-      null
-    );
-
-
-
-    /* =====================================================
-       8. PREVIOUS TREASURER
-    ===================================================== */
-
-    await warm(
-      'Previous Treasurer Summary',
-      'getPreviousTreasurerReconciliationReport',
-      {
-        token:token
-      },
-      null
-    );
-
-
-    await warm(
-      'Previous Treasurer Expenses',
-      'getPreviousTreasurerExpenseState',
-      {
-        token:token
-      },
-      'ptr_expense_state'
-    );
-
-
-    await warm(
-      'Previous Treasurer Beginning Funds',
-      'getPreviousTreasurerBeginningFunds',
-      {
-        token:token
-      },
-      null
-    );
-
-
-    await warm(
-      'Previous Treasurer Passbook',
-      'getPreviousTreasurerPassbook',
-      {
-        token:token
-      },
-      null
-    );
-
-
-    await warm(
-      'Previous Treasurer Turnover',
-      'getPreviousTreasurerTurnover',
-      {
-        token:token
-      },
-      null
-    );
-
-
-    await warm(
-      'Previous Treasurer Unremitted',
-      'getPreviousTreasurerUnremitted',
-      {
-        token:token
-      },
-      null
-    );
-
-
-
-    /* =====================================================
-       9. CURRENT MONTH FINANCIAL REPORT
-    ===================================================== */
-
-    const currentMonth =
-      new Date().getMonth() + 1;
-
-
-    const monthlyReport =
-      await warm(
-        'Current Monthly Financial Report',
-        'getFinancialReport',
-        {
-          token:token,
-          year:currentYear,
-          fromMonth:currentMonth,
-          toMonth:currentMonth,
-          reportType:'monthly'
-        },
-        null
-      );
-
-
-    if(monthlyReport){
-
-      saveFinancialCache(
-        'financial_report:monthly:' +
-          currentYear + ':' +
-          currentMonth + ':' +
-          currentMonth,
-        monthlyReport
-      );
-    }
-
-
-
-    /* =====================================================
-       10. CURRENT YEAR FINANCIAL REPORT
-    ===================================================== */
-
-    const annualReport =
-      await warm(
-        'Current Annual Financial Report',
-        'getFinancialReport',
-        {
-          token:token,
-          year:currentYear,
-          fromMonth:1,
-          toMonth:12,
-          reportType:'annual'
-        },
-        null
-      );
-
-
-    if(annualReport){
-
-      saveFinancialCache(
-        'financial_report:annual:' +
-          currentYear +
-          ':1:12',
-        annualReport
-      );
-    }
-
-
-
-    /* =====================================================
-       11. TEXT ANNOUNCEMENT CONTACTS
-    ===================================================== */
-
-    await warm(
-      'Announcement Contacts',
-      'getAnnouncementMembers',
-      {
-        token:token
-      },
-      null
-    );
-
-
-    /*
-     * Officers and Payment Types are intentionally
-     * not pre-cached here.
-     */
-
-
-    console.log(
-      '[TOFA MENU CACHE] COMPLETE'
-    );
-
-
-  }finally{
-
-    tofaBrowserMenuWarmupRunning =
-      false;
-  }
-}
-  
 </script>
 
 
