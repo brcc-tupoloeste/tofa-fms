@@ -2631,6 +2631,23 @@ body.print-member-list-android #androidMemberListPrintArea {
 <style>
 /* TOFA MEMBER MASTERLIST FULL-FIELD CACHE v1 */
 </style>
+
+<style>/* TOFA MONTHLY FINANCIAL SUMMARY TOTAL v1 */</style>
+
+<style>/* TOFA TOTAL FUNDS FOR THE MONTH v2 */</style>
+
+<style>
+/* TOFA FINANCIAL TOTAL FUNDS MONTH FINAL v3 */
+.report-kpi-total-funds-month{
+  font-weight:700;
+  border-width:2px !important;
+}
+.report-kpi-total-funds-month b,
+.report-kpi-total-funds-month span{
+  font-weight:800;
+}
+</style>
+
 </head>
 
 
@@ -16305,7 +16322,9 @@ function renderFinancialReport(r){
       +'<div class="report-kpi"><b>Beginning Balance</b><span>'+money(r.beginningBalance)+'</span></div>'
       +'<div class="report-kpi"><b>Member Collections</b><span>'+money(r.totalCollections)+'</span></div>'
       +'<div class="report-kpi"><b>Fund Receipts / Add Funds</b><span>'+money(totalFundReceipts)+'</span></div>'
-      +'<div class="report-kpi"><b>Total Funds Received</b><span>'+money(totalFundsReceived)+'</span></div>'
+      +(isAnnual
+        ? '<div class="report-kpi"><b>Total Funds Received</b><span>'+money(totalFundsReceived)+'</span></div>'
+        : '<div class="report-kpi report-kpi-total-funds-month"><b>TOTAL FUNDS FOR THE MONTH</b><span>'+money(Number(r.beginningBalance||0)+Number(totalFundsReceived||0))+'</span></div>')
       +'<div class="report-kpi"><b>Total Expenses</b><span>'+money(r.totalExpenses)+'</span></div>'
       +'<div class="report-kpi"><b>Net Income</b><span>'+money(r.netIncome)+'</span></div>'
       +'<div class="report-kpi"><b>Association Balance</b><span>'+money(r.associationBalance)+'</span></div>'
