@@ -549,6 +549,29 @@ td{
 .dashboard-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
 .dashboard-title{font-size:16px;font-weight:800;color:#0f172a}
 .dashboard-period{font-size:11px;color:#64748b;text-align:right}
+  .dashboard-head-right{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:2px;
+}
+
+.dashboard-update-status{
+  font-size:10px;
+  line-height:1.2;
+  font-weight:700;
+  color:#64748b;
+  text-align:right;
+  white-space:nowrap;
+}
+
+.dashboard-update-status.is-ok{
+  color:#166534;
+}
+
+.dashboard-update-status.is-warn{
+  color:#92400e;
+}
 .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-bottom:10px}
 .stat{
   border:1px solid #e5e7eb;
@@ -2878,11 +2901,22 @@ body.print-member-list-android #androidMemberListPrintArea {
      DASHBOARD
 ======================================================= -->
 <div id="dashboardView" class="card dashboard">
-  <div class="dashboard-head">
-    <div class="dashboard-title">Financial Overview</div>
-    <div id="dashboardPeriod" class="dashboard-period">Loading...</div>
-  </div>
+<div class="dashboard-head">
+  <div class="dashboard-title">Financial Overview</div>
 
+  <div class="dashboard-head-right">
+    <div
+      id="dashboardUpdateStatus"
+      class="dashboard-update-status hidden">
+    </div>
+
+    <div
+      id="dashboardPeriod"
+      class="dashboard-period">
+      Loading...
+    </div>
+  </div>
+</div>
   <div class="stats">
     <div class="stat">
       <div class="stat-label">Association Balance</div>
@@ -13966,6 +14000,93 @@ function clearSearchAndPayment(){
 ========================================================= */
 
 let dashboardLoading = false;
+let dashboardUpdateStatusTimer = null;
+
+
+function setDashboardUpdateStatus(
+  text,
+  state,
+  autoClearMs
+){
+
+  const el =
+    document.getElementById(
+      'dashboardUpdateStatus'
+    );
+
+  if(!el){
+    return;
+  }
+
+
+  if(dashboardUpdateStatusTimer){
+
+    clearTimeout(
+      dashboardUpdateStatusTimer
+    );
+
+    dashboardUpdateStatusTimer =
+      null;
+  }
+
+
+  el.classList.remove(
+    'is-ok',
+    'is-warn'
+  );
+
+
+  if(!text){
+
+    el.textContent = '';
+
+    el.classList.add(
+      'hidden'
+    );
+
+    return;
+  }
+
+
+  el.textContent =
+    text;
+
+  el.classList.remove(
+    'hidden'
+  );
+
+
+  if(state === 'ok'){
+
+    el.classList.add(
+      'is-ok'
+    );
+
+  }else if(state === 'warn'){
+
+    el.classList.add(
+      'is-warn'
+    );
+  }
+
+
+  if(autoClearMs){
+
+    dashboardUpdateStatusTimer =
+      setTimeout(
+        function(){
+
+          setDashboardUpdateStatus(
+            ''
+          );
+
+        },
+        autoClearMs
+      );
+  }
+}
+
+
 
 async function loadDashboard(options){
 
@@ -13982,26 +14103,19 @@ async function loadDashboard(options){
   }
 
 
-  /*
-   * =======================================================
-   * CACHE-FIRST DASHBOARD
-   *
-   * Always paint the last synchronized snapshot immediately,
-   * even when ONLINE. Then refresh from server in background.
-   * =======================================================
-   */
+  /* =======================================================
+     CACHE-FIRST DASHBOARD
+     ======================================================= */
+
   const cachedDashboard =
     getFinancialCache(
       'dashboard_summary'
     );
 
 
-  /*
-   * Dedicated lightweight cache for Uncollected Amount.
-   * Kept separately from the dashboard JSON cache.
-   */
   let cachedUncollectedAmount =
     null;
+
 
   try{
 
@@ -14009,6 +14123,7 @@ async function loadDashboard(options){
       localStorage.getItem(
         'tofa_dashboard_uncollected_amount'
       );
+
 
     if(
       rawUncollected !== null &&
@@ -14020,11 +14135,13 @@ async function loadDashboard(options){
           rawUncollected
         );
 
+
       if(
         Number.isFinite(
           parsedUncollected
         )
       ){
+
         cachedUncollectedAmount =
           parsedUncollected;
       }
@@ -14032,6 +14149,11 @@ async function loadDashboard(options){
 
   }catch(_){}
 
+
+
+  /* =======================================================
+     DISPLAY CACHE IMMEDIATELY
+     ======================================================= */
 
   if(cachedDashboard){
 
@@ -14042,12 +14164,14 @@ async function loadDashboard(options){
       )
     );
 
+
     set(
       'statBank',
       money(
         cachedDashboard.bankBalance
       )
     );
+
 
     set(
       'statCash',
@@ -14056,6 +14180,7 @@ async function loadDashboard(options){
       )
     );
 
+
     set(
       'statCurrent',
       money(
@@ -14063,12 +14188,14 @@ async function loadDashboard(options){
       )
     );
 
+
     set(
       'statPrevious',
       money(
         cachedDashboard.previousMonthCollections
       )
     );
+
 
     set(
       'statUncollected',
@@ -14092,14 +14219,51 @@ async function loadDashboard(options){
         ''
       )
     );
+
+  }else if(!silent){
+
+    /*
+     * First load only.
+     * Do not block the entire application.
+     */
+
+    set(
+      'statAssociation',
+      '—'
+    );
+
+    set(
+      'statBank',
+      '—'
+    );
+
+    set(
+      'statCash',
+      '—'
+    );
+
+    set(
+      'statCurrent',
+      '—'
+    );
+
+    set(
+      'statPrevious',
+      '—'
+    );
+
+    set(
+      'statUncollected',
+      '—'
+    );
   }
 
 
-  /*
-   * =======================================================
-   * OFFLINE MODE
-   * =======================================================
-   */
+
+  /* =======================================================
+     OFFLINE MODE
+     ======================================================= */
+
   if(
     tofaOfflineMode ||
     navigator.onLine === false ||
@@ -14108,32 +14272,33 @@ async function loadDashboard(options){
 
     if(!cachedDashboard){
 
-      set('statAssociation','—');
-      set('statBank','—');
-      set('statCash','—');
-      set('statCurrent','—');
-      set('statPrevious','—');
-
       if(
         cachedUncollectedAmount !== null
       ){
+
         set(
           'statUncollected',
           money(
             cachedUncollectedAmount
           )
         );
-      }else{
-        set(
-          'statUncollected',
-          '—'
-        );
       }
+
 
       msg(
         'dashboardMsg',
         'OFFLINE MODE • No dashboard snapshot has been synchronized yet.',
         ''
+      );
+    }
+
+
+    if(!silent){
+
+      setDashboardUpdateStatus(
+        'Saved data',
+        'warn',
+        2500
       );
     }
 
@@ -14144,11 +14309,11 @@ async function loadDashboard(options){
   }
 
 
-  /*
-   * =======================================================
-   * ONLINE BACKGROUND REFRESH
-   * =======================================================
-   */
+
+  /* =======================================================
+     PREVENT DUPLICATE REQUEST
+     ======================================================= */
+
   if(dashboardLoading){
 
     console.log(
@@ -14163,22 +14328,20 @@ async function loadDashboard(options){
     true;
 
 
-  /*
-   * If cache is already visible, don't block the UI with a spinner.
-   * Only show the busy overlay when there is no cached dashboard yet.
-   */
-  const shouldShowBusy =
-    !silent &&
-    !cachedDashboard;
 
+  /* =======================================================
+     SMALL NON-BLOCKING STATUS
+     ======================================================= */
 
-  if(shouldShowBusy){
+  if(!silent){
 
-    showBusy(
-      'Loading Dashboard...',
-      'Preparing financial overview'
+    setDashboardUpdateStatus(
+      cachedDashboard
+        ? '↻ Updating…'
+        : '↻ Loading latest figures…'
     );
   }
+
 
 
   try{
@@ -14193,15 +14356,17 @@ async function loadDashboard(options){
       );
 
 
+
+    /* =====================================================
+       SAVE NEW DASHBOARD CACHE
+       ===================================================== */
+
     saveFinancialCache(
       'dashboard_summary',
       d
     );
 
 
-    /*
-     * Persist Uncollected Amount separately.
-     */
     try{
 
       if(
@@ -14223,12 +14388,18 @@ async function loadDashboard(options){
     }catch(_){}
 
 
+
+    /* =====================================================
+       UPDATE LIVE VALUES
+       ===================================================== */
+
     set(
       'statAssociation',
       money(
         d.associationBalance
       )
     );
+
 
     set(
       'statBank',
@@ -14237,12 +14408,14 @@ async function loadDashboard(options){
       )
     );
 
+
     set(
       'statCash',
       money(
         d.cashOnHand
       )
     );
+
 
     set(
       'statCurrent',
@@ -14251,12 +14424,14 @@ async function loadDashboard(options){
       )
     );
 
+
     set(
       'statPrevious',
       money(
         d.previousMonthCollections
       )
     );
+
 
     set(
       'statUncollected',
@@ -14280,6 +14455,23 @@ async function loadDashboard(options){
     );
 
 
+    msg(
+      'dashboardMsg',
+      '',
+      ''
+    );
+
+
+    if(!silent){
+
+      setDashboardUpdateStatus(
+        '✓ Updated',
+        'ok',
+        1500
+      );
+    }
+
+
     console.log(
       '[TOFA DASHBOARD] Live values refreshed'
     );
@@ -14298,6 +14490,11 @@ async function loadDashboard(options){
       e.message === 'SESSION_EXPIRED'
     ){
 
+      setDashboardUpdateStatus(
+        ''
+      );
+
+
       fail(
         e,
         'dashboardMsg'
@@ -14307,11 +14504,22 @@ async function loadDashboard(options){
     }
 
 
+
     /*
-     * If cache is already displayed, keep it.
-     * Do not replace it with "...".
+     * Keep cached values when server refresh fails.
      */
+
     if(cachedDashboard){
+
+      if(!silent){
+
+        setDashboardUpdateStatus(
+          'Using saved values',
+          'warn',
+          3000
+        );
+      }
+
 
       console.log(
         '[TOFA DASHBOARD] Keeping cached values'
@@ -14322,6 +14530,11 @@ async function loadDashboard(options){
 
 
     if(!silent){
+
+      setDashboardUpdateStatus(
+        ''
+      );
+
 
       fail(
         e,
@@ -14335,9 +14548,6 @@ async function loadDashboard(options){
     dashboardLoading =
       false;
 
-    if(shouldShowBusy){
-      hideBusy();
-    }
 
     refreshUnifiedSyncStatus();
   }
