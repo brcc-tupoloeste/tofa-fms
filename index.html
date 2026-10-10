@@ -3005,6 +3005,7 @@ body.print-member-list-android #androidMemberListPrintArea {
 
 </style>
 <!-- TOFA OBLIGATIONS UX + CRUD FIX v2 -->
+<!-- TOFA EDIT OBLIGATION ROBUST FIX v5 -->
 </head>
 
 
@@ -21272,38 +21273,140 @@ function obligationDescriptionChanged(){
 
 function editManagedObligation(index){
 
-  const o = obligationAdminRows[index];
-  if(!o) return;
+  const o =
+    obligationAdminRows[index];
 
-  if(managedObligationsShowAll){
-    obligationAdminMember={id:o.memberId,memberId:o.memberId,name:o.memberName,memberName:o.memberName};
-    managedObligationsShowAll=false;
-    document.getElementById('obligationSelectedMemberName').textContent=o.memberName || o.memberId || 'Selected Member';
-    document.getElementById('obligationSelectedMemberMeta').textContent=o.memberId || '';
-    const head=document.getElementById('managedMemberHead'); if(head) head.classList.add('hidden');
+  if(!o){
+    msg(
+      'obligationManagementMsg',
+      'Unable to load the selected obligation.',
+      'error'
+    );
+    return;
   }
 
-  document.getElementById('manageObligationId').value = obligationRowId(o);
-  document.getElementById('manageObligationDescription').value = o.description || '';
-  document.getElementById('manageObligationAmount').value = obligationRowDue(o) || '';
-  document.getElementById('manageObligationRemarks').value =
-    remarksWithoutSize(cleanInternalObligationId(o.remarks || ''));
+  const obligationId =
+    obligationRowId(o);
 
-  obligationManagementMode='manage';
+  if(!obligationId){
+    msg(
+      'obligationManagementMsg',
+      'This obligation has no Obligation ID and cannot be edited.',
+      'error'
+    );
+    return;
+  }
 
-  const selectedArea =
+  obligationAdminMember = {
+    id:o.memberId || '',
+    memberId:o.memberId || '',
+    name:o.memberName || '',
+    memberName:o.memberName || ''
+  };
+
+  managedObligationsShowAll = false;
+  obligationManagementMode = 'manage';
+
+  const selected =
     document.getElementById(
       'obligationSelectedMember'
     );
 
-  if(selectedArea){
-    selectedArea.classList.remove(
-      'hidden'
-    );
+  if(selected){
+    selected.classList.remove('hidden');
   }
 
-  const form=document.getElementById('managedObligationForm');
-  if(form) form.classList.remove('hidden');
+  const selectedName =
+    document.getElementById(
+      'obligationSelectedMemberName'
+    );
+
+  if(selectedName){
+    selectedName.textContent =
+      o.memberName ||
+      o.memberId ||
+      'Selected Member';
+  }
+
+  const selectedMeta =
+    document.getElementById(
+      'obligationSelectedMemberMeta'
+    );
+
+  if(selectedMeta){
+    selectedMeta.textContent =
+      o.memberId || '';
+  }
+
+  const head =
+    document.getElementById(
+      'managedMemberHead'
+    );
+
+  if(head){
+    head.classList.add('hidden');
+  }
+
+  const idInput =
+    document.getElementById(
+      'manageObligationId'
+    );
+
+  const descriptionInput =
+    document.getElementById(
+      'manageObligationDescription'
+    );
+
+  const amountInput =
+    document.getElementById(
+      'manageObligationAmount'
+    );
+
+  const remarksInput =
+    document.getElementById(
+      'manageObligationRemarks'
+    );
+
+  if(idInput){
+    idInput.value = obligationId;
+  }
+
+  if(descriptionInput){
+    descriptionInput.value =
+      o.description || '';
+  }
+
+  if(amountInput){
+    amountInput.value =
+      obligationRowDue(o) || '';
+  }
+
+  if(remarksInput){
+    remarksInput.value =
+      remarksWithoutSize(
+        cleanInternalObligationId(
+          o.remarks || ''
+        )
+      );
+  }
+
+  const form =
+    document.getElementById(
+      'managedObligationForm'
+    );
+
+  if(form){
+    form.classList.remove('hidden');
+  }
+
+  const list =
+    document.getElementById(
+      'managedObligationsSection'
+    );
+
+  if(list){
+    list.classList.remove('hidden');
+  }
 
   const banner =
     document.getElementById(
@@ -21313,13 +21416,11 @@ function editManagedObligation(index){
   if(banner){
     banner.textContent =
       'Editing ' +
-      obligationRowId(o) +
+      obligationId +
       ' • ' +
       (o.description || 'Obligation');
 
-    banner.classList.remove(
-      'hidden'
-    );
+    banner.classList.remove('hidden');
   }
 
   const saveBtn =
@@ -21330,17 +21431,32 @@ function editManagedObligation(index){
   if(saveBtn){
     saveBtn.textContent =
       '💾 UPDATE OBLIGATION';
+    saveBtn.disabled = false;
   }
 
   obligationDescriptionChanged();
 
-  setTimeout(()=>{
+  msg(
+    'obligationManagementMsg',
+    'Editing ' +
+      obligationId +
+      '. Update the fields, then tap UPDATE OBLIGATION.',
+    'ok'
+  );
+
+  setTimeout(function(){
+
     if(form){
       form.scrollIntoView({
         behavior:'smooth',
         block:'start'
       });
     }
+
+    if(descriptionInput){
+      descriptionInput.focus();
+    }
+
   },50);
 }
 
@@ -21378,64 +21494,163 @@ function clearManagedObligationForm(){
 async function saveManagedObligation(){
 
   if(!obligationAdminMember){
-    msg('obligationManagementMsg','Select a member first.','error');
+    msg(
+      'obligationManagementMsg',
+      'Select a member first.',
+      'error'
+    );
     return;
   }
 
+  const idInput =
+    document.getElementById(
+      'manageObligationId'
+    );
+
+  const descriptionInput =
+    document.getElementById(
+      'manageObligationDescription'
+    );
+
+  const amountInput =
+    document.getElementById(
+      'manageObligationAmount'
+    );
+
+  const remarksInput =
+    document.getElementById(
+      'manageObligationRemarks'
+    );
+
   const obligationId =
-    document.getElementById('manageObligationId').value.trim();
+    String(
+      idInput ? idInput.value : ''
+    ).trim();
+
   const description =
-    document.getElementById('manageObligationDescription').value.trim();
+    String(
+      descriptionInput
+        ? descriptionInput.value
+        : ''
+    ).trim();
+
   const amount =
-    Number(document.getElementById('manageObligationAmount').value || 0);
-  let remarks =
-    document.getElementById('manageObligationRemarks').value.trim();
+    Number(
+      amountInput
+        ? amountInput.value
+        : 0
+    );
+
+  const remarks =
+    String(
+      remarksInput
+        ? remarksInput.value
+        : ''
+    ).trim();
 
   if(!description){
-    msg('obligationManagementMsg','Enter the obligation description.','error');
+    msg(
+      'obligationManagementMsg',
+      'Enter the obligation description.',
+      'error'
+    );
     return;
   }
 
   if(!(amount > 0)){
-    msg('obligationManagementMsg','Enter a valid amount.','error');
+    msg(
+      'obligationManagementMsg',
+      'Enter a valid amount.',
+      'error'
+    );
     return;
   }
 
   const memberId =
-    obligationAdminMember.id ||
-    obligationAdminMember.memberId ||
-    '';
+    String(
+      obligationAdminMember.memberId ||
+      obligationAdminMember.id ||
+      ''
+    ).trim();
 
   const memberName =
-    obligationAdminMember.name ||
-    obligationAdminMember.memberName ||
-    '';
+    String(
+      obligationAdminMember.memberName ||
+      obligationAdminMember.name ||
+      obligationAdminMember.fullName ||
+      ''
+    ).trim();
+
+  if(!memberId){
+    msg(
+      'obligationManagementMsg',
+      'The selected member has no Member ID.',
+      'error'
+    );
+    return;
+  }
 
   const data = {
     obligationId:obligationId,
+    id:obligationId,
     memberId:memberId,
     memberName:memberName,
+    name:memberName,
     description:description,
     amount:amount,
     dueAmount:amount,
     remarks:remarks
   };
 
+  const isEdit =
+    !!obligationId;
+
+  const saveBtn =
+    document.getElementById(
+      'managedObligationSaveBtn'
+    );
+
+  const oldText =
+    saveBtn
+      ? saveBtn.textContent
+      : '';
+
+  if(saveBtn){
+    saveBtn.disabled = true;
+    saveBtn.textContent =
+      isEdit
+        ? '⏳ UPDATING...'
+        : '⏳ SAVING...';
+  }
+
   try{
-    const action = obligationId ? 'editObligation' : 'addObligation';
+
+    const action =
+      isEdit
+        ? 'editObligation'
+        : 'addObligation';
 
     const r =
       await api(
         action,
-        {token:token,obligationData:data},
-        obligationId ? 'Updating Obligation...' : 'Saving Obligation...',
+        {
+          token:token,
+          obligationData:data
+        },
+        isEdit
+          ? 'Updating Obligation...'
+          : 'Saving Obligation...',
         'Please wait'
       );
 
     msg(
       'obligationManagementMsg',
       (r && r.message) ||
-        (obligationId ? 'Obligation updated.' : 'Obligation added.'),
+        (
+          isEdit
+            ? 'Obligation updated successfully.'
+            : 'Obligation added successfully.'
+        ),
       'ok'
     );
 
@@ -21451,16 +21666,32 @@ async function saveManagedObligation(){
         );
 
       if(list){
-        list.classList.remove(
-          'hidden'
-        );
+        list.classList.remove('hidden');
       }
     }
 
     clearManagedObligationForm();
 
   }catch(e){
-    fail(e,'obligationManagementMsg');
+
+    fail(
+      e,
+      'obligationManagementMsg'
+    );
+
+  }finally{
+
+    if(saveBtn){
+      saveBtn.disabled = false;
+
+      saveBtn.textContent =
+        oldText ||
+        (
+          isEdit
+            ? '💾 UPDATE OBLIGATION'
+            : '💾 SAVE OBLIGATION'
+        );
+    }
   }
 }
 
