@@ -3006,6 +3006,7 @@ body.print-member-list-android #androidMemberListPrintArea {
 </style>
 <!-- TOFA OBLIGATIONS UX + CRUD FIX v2 -->
 <!-- TOFA EDIT OBLIGATION ROBUST FIX v5 -->
+<!-- TOFA OBLIGATION PROFILE DEPENDENCY FIX v6 -->
 </head>
 
 
@@ -21120,46 +21121,215 @@ async function searchObligationMembers(){
 
 async function selectObligationMember(memberId){
 
+  const id =
+    String(
+      memberId || ''
+    ).trim();
+
+  if(!id){
+    msg(
+      'obligationManagementMsg',
+      'Member ID is missing.',
+      'error'
+    );
+    return;
+  }
+
+  /*
+   * Obligations Management should not be blocked just because
+   * the full Member Profile endpoint is unavailable.
+   *
+   * Use the selected Member ID immediately, then enrich with
+   * profile data when available.
+   */
+  obligationAdminMember = {
+    id:id,
+    memberId:id,
+    name:'',
+    memberName:''
+  };
+
   try{
-    const p =
-      await api(
-        'getMemberProfile',
-        {token:token,memberId:memberId},
-        'Loading Member...',
-        'Please wait'
+
+    let p = null;
+
+    try{
+      p =
+        await api(
+          'getMemberProfile',
+          {
+            token:token,
+            memberId:id
+          },
+          'Loading Member...',
+          'Please wait'
+        );
+    }catch(profileError){
+
+      const text =
+        String(
+          profileError &&
+          (
+            profileError.message ||
+            profileError
+          ) ||
+          ''
+        );
+
+      /*
+       * Keep going for Obligations Management.
+       * The backend profile restore is still required for the
+       * normal Member Profile / Payment screens.
+       */
+      if(
+        text.toLowerCase()
+          .indexOf(
+            'onlinegetmemberprofile is not defined'
+          ) === -1
+      ){
+        throw profileError;
+      }
+    }
+
+    if(
+      p &&
+      typeof p === 'object'
+    ){
+      obligationAdminMember =
+        Object.assign(
+          {},
+          p,
+          {
+            id:
+              p.id ||
+              p.memberId ||
+              id,
+            memberId:
+              p.memberId ||
+              p.id ||
+              id,
+            name:
+              p.name ||
+              p.memberName ||
+              p.fullName ||
+              '',
+            memberName:
+              p.memberName ||
+              p.name ||
+              p.fullName ||
+              ''
+          }
+        );
+    }
+
+    const selected =
+      document.getElementById(
+        'obligationSelectedMember'
       );
 
-    // Keep the exact ID from the clicked search result. Some profile responses
-    // do not expose id/memberId even though the profile itself loaded correctly.
-    obligationAdminMember = Object.assign({}, p || {}, {
-      id: (p && (p.id || p.memberId)) || memberId,
-      memberId: (p && (p.memberId || p.id)) || memberId
-    });
-    document.getElementById('obligationSelectedMember').classList.remove('hidden');
-    document.getElementById('obligationSelectedMemberName').textContent =
-      obligationAdminMember.name || obligationAdminMember.memberName || memberId;
-    document.getElementById('obligationSelectedMemberMeta').textContent =
-      memberId +
-      ((obligationAdminMember.address || obligationAdminMember.sitio) ? ' • ' + (obligationAdminMember.address || obligationAdminMember.sitio) : '');
-    const resultBox=document.getElementById('obligationMemberResults');
-    if(resultBox) resultBox.innerHTML='';
+    if(selected){
+      selected.classList.remove(
+        'hidden'
+      );
+    }
+
+    const selectedName =
+      document.getElementById(
+        'obligationSelectedMemberName'
+      );
+
+    if(selectedName){
+      selectedName.textContent =
+        obligationAdminMember.name ||
+        obligationAdminMember.memberName ||
+        id;
+    }
+
+    const selectedMeta =
+      document.getElementById(
+        'obligationSelectedMemberMeta'
+      );
+
+    if(selectedMeta){
+      selectedMeta.textContent =
+        id +
+        (
+          (
+            obligationAdminMember.address ||
+            obligationAdminMember.sitio
+          )
+            ? ' • ' +
+              (
+                obligationAdminMember.address ||
+                obligationAdminMember.sitio
+              )
+            : ''
+        );
+    }
+
+    const resultBox =
+      document.getElementById(
+        'obligationMemberResults'
+      );
+
+    if(resultBox){
+      resultBox.innerHTML = '';
+    }
 
     clearManagedObligationForm();
-    const form=document.getElementById('managedObligationForm');
-    const list=document.getElementById('managedObligationsSection');
-    if(obligationManagementMode === 'manage'){
-      managedObligationsShowAll=false;
-      if(form) form.classList.add('hidden');
-      if(list) list.classList.remove('hidden');
+
+    const form =
+      document.getElementById(
+        'managedObligationForm'
+      );
+
+    const list =
+      document.getElementById(
+        'managedObligationsSection'
+      );
+
+    if(
+      obligationManagementMode ===
+      'manage'
+    ){
+      managedObligationsShowAll = false;
+
+      if(form){
+        form.classList.add(
+          'hidden'
+        );
+      }
+
+      if(list){
+        list.classList.remove(
+          'hidden'
+        );
+      }
+
       await loadManagedObligations();
+
     }else{
-      if(form) form.classList.remove('hidden');
-      if(list) list.classList.add('hidden');
-      obligationAdminRows=[];
+
+      if(form){
+        form.classList.remove(
+          'hidden'
+        );
+      }
+
+      if(list){
+        list.classList.add(
+          'hidden'
+        );
+      }
+
+      obligationAdminRows = [];
     }
 
   }catch(e){
-    fail(e,'obligationManagementMsg');
+    fail(
+      e,
+      'obligationManagementMsg'
+    );
   }
 }
 
