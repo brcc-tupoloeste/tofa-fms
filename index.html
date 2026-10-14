@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+<!-- TOFA OBLIGATION IDEMPOTENT SAVE FIX 2026-10-14 -->
 
 <head>
 
@@ -4871,7 +4872,7 @@ body.print-member-list-android #androidMemberListPrintArea {
         <div id="batchMemberList" class="batch-member-list"><div class="panel-note" style="padding:10px">Tick Show Member List to load members.</div></div>
       </div>
       <div class="form-actions-row">
-        <button type="button" onclick="saveBatchObligations()">➕ ADD OBLIGATION TO SELECTED MEMBERS</button>
+        <button id="batchObligationSaveBtn" type="button" onclick="saveBatchObligations()">➕ ADD OBLIGATION TO SELECTED MEMBERS</button>
         <button type="button" class="alt" onclick="clearBatchObligationForm()">CLEAR</button>
       </div>
       <div id="batchObligationMsg"></div>
@@ -18494,58 +18495,202 @@ async function loadBatchObligationMembers(){
     fail(e,'batchObligationMsg');
   }
 }
+/* =========================================================
+   OBLIGATION DUPLICATE-SAVE CLIENT STATE
+   - Same Request ID is reused after a failed response.
+   - A changed transaction receives a new Request ID.
+========================================================= */
+
+let tofaPendingIndividualObligationSave = null;
+let tofaPendingBatchObligationSave = null;
+let tofaIndividualObligationSaveBusy = false;
+let tofaBatchObligationSaveBusy = false;
+
+function tofaCreateObligationRequestId(prefix){
+  return (
+    String(prefix || 'OREQ') +
+    '-' +
+    Date.now() +
+    '-' +
+    Math.random()
+      .toString(36)
+      .substring(2,10)
+      .toUpperCase()
+  );
+}
+
 function clearBatchObligationForm(){
-  ['batchObligationDescription','batchObligationAmount','batchObligationRemarks','batchMemberFilter'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.value='';
+  [
+    'batchObligationDescription',
+    'batchObligationAmount',
+    'batchObligationRemarks',
+    'batchMemberFilter'
+  ].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.value='';
   });
-  document.querySelectorAll('.batch-member-check').forEach(cb=>cb.checked=false);
-  const all=document.getElementById('batchSelectAll'); if(all){all.checked=false;all.indeterminate=false;}
+
+  document
+    .querySelectorAll('.batch-member-check')
+    .forEach(cb=>cb.checked=false);
+
+  const all=document.getElementById('batchSelectAll');
+  if(all){
+    all.checked=false;
+    all.indeterminate=false;
+  }
+
+  /* Explicit Clear starts a new transaction. */
+  tofaPendingBatchObligationSave=null;
+
   msg('batchObligationMsg','','');
   if(batchObligationMembers.length) renderBatchMembers();
 }
+
 async function saveBatchObligations(){
-  const description=document.getElementById('batchObligationDescription').value.trim();
-  const amount=Number(document.getElementById('batchObligationAmount').value||0);
-  const remarks=document.getElementById('batchObligationRemarks').value.trim();
+  if(tofaBatchObligationSaveBusy) return;
+
+  const description=
+    document.getElementById('batchObligationDescription').value.trim();
+  const amount=
+    Number(document.getElementById('batchObligationAmount').value||0);
+  const remarks=
+    document.getElementById('batchObligationRemarks').value.trim();
   const ids=selectedBatchIds();
 
-  if(!description){msg('batchObligationMsg','Enter the obligation description.','error');return;}
-  if(!(amount>0)){msg('batchObligationMsg','Enter a valid amount.','error');return;}
-  if(!ids.length){msg('batchObligationMsg','Select at least one member.','error');return;}
+  if(!description){
+    msg('batchObligationMsg','Enter the obligation description.','error');
+    return;
+  }
+  if(!(amount>0)){
+    msg('batchObligationMsg','Enter a valid amount.','error');
+    return;
+  }
+  if(!ids.length){
+    msg('batchObligationMsg','Select at least one member.','error');
+    return;
+  }
 
   const idSet=new Set(ids);
-  const members=batchObligationMembers.filter(m=>idSet.has(batchMemberId(m))).map(m=>({
-    memberId:batchMemberId(m),
-    memberName:batchMemberName(m)
-  }));
+  const members=
+    batchObligationMembers
+      .filter(m=>idSet.has(batchMemberId(m)))
+      .map(m=>({
+        memberId:batchMemberId(m),
+        memberName:batchMemberName(m)
+      }));
 
-  const confirmed =
-    await tofaConfirmAction(
-      'Add Batch Obligation',
-      'Obligation: ' + description +
-      '\nAmount: ' + money(amount) +
-      '\nSelected Members: ' + members.length,
-      'ADD TO ' + members.length + ' MEMBERS'
-    );
+  const fingerprint=
+    JSON.stringify({
+      description:description,
+      amount:amount,
+      remarks:remarks,
+      memberIds:members.map(m=>m.memberId).sort()
+    });
 
-  if(!confirmed) return;
+  if(
+    !tofaPendingBatchObligationSave ||
+    tofaPendingBatchObligationSave.fingerprint!==fingerprint
+  ){
+    tofaPendingBatchObligationSave={
+      fingerprint:fingerprint,
+      requestId:tofaCreateObligationRequestId('OBATCH')
+    };
+  }
+
+  const requestId=tofaPendingBatchObligationSave.requestId;
+  const saveBtn=document.getElementById('batchObligationSaveBtn');
+  const oldText=saveBtn ? saveBtn.textContent : '';
+
+  tofaBatchObligationSaveBusy=true;
+  if(saveBtn){
+    saveBtn.disabled=true;
+    saveBtn.textContent='⏳ SAVING...';
+  }
 
   try{
+    const confirmed=
+      await tofaConfirmAction(
+        'Add Batch Obligation',
+        'Obligation: ' + description +
+        '\nAmount: ' + money(amount) +
+        '\nSelected Members: ' + members.length,
+        'ADD TO ' + members.length + ' MEMBERS'
+      );
+
+    if(!confirmed){
+      /* Nothing was sent to the server. */
+      tofaPendingBatchObligationSave=null;
+      return;
+    }
+
     const r=await api(
       'batchAddObligations',
-      {token:token,batchData:{description:description,amount:amount,remarks:remarks,members:members}},
+      {
+        token:token,
+        batchData:{
+          description:description,
+          amount:amount,
+          remarks:remarks,
+          members:members,
+          requestId:requestId
+        }
+      },
       'Adding Obligations...',
       'Saving '+members.length+' member obligation(s)'
     );
-    msg('batchObligationMsg',(r&&r.message)||members.length+' obligation(s) added successfully.','ok');
-    document.querySelectorAll('.batch-member-check').forEach(cb=>cb.checked=false);
+
+    /*
+     * Server response reached us: transaction is complete.
+     * Clear the Request ID BEFORE any non-critical refresh.
+     */
+    tofaPendingBatchObligationSave=null;
+
+    msg(
+      'batchObligationMsg',
+      r && r.duplicatePrevented
+        ? '✅ This batch was already saved. Duplicate entries were prevented.'
+        : ((r&&r.message)||members.length+' obligation(s) added successfully.'),
+      'ok'
+    );
+
+    document
+      .querySelectorAll('.batch-member-check')
+      .forEach(cb=>cb.checked=false);
     batchSelectionChanged();
+
     document.getElementById('batchObligationDescription').value='';
     document.getElementById('batchObligationAmount').value='';
     document.getElementById('batchObligationRemarks').value='';
-    await loadDashboard();
+
+    /*
+     * IMPORTANT: dashboard refresh failure must NEVER turn a
+     * successful obligation save into a visible "Save failed".
+     */
+    try{
+      await loadDashboard();
+    }catch(refreshError){
+      console.warn(
+        '[TOFA OBLIGATION] Batch saved, dashboard refresh failed',
+        refreshError
+      );
+    }
+
   }catch(e){
+    /*
+     * Keep the same Request ID. If Apps Script saved the rows but
+     * the response was lost, pressing Save again is idempotent.
+     */
     fail(e,'batchObligationMsg');
+
+  }finally{
+    tofaBatchObligationSaveBusy=false;
+
+    if(saveBtn){
+      saveBtn.disabled=false;
+      saveBtn.textContent=
+        oldText || '➕ ADD OBLIGATION TO SELECTED MEMBERS';
+    }
   }
 }
 
@@ -21631,37 +21776,38 @@ function editManagedObligation(index){
 }
 
 function clearManagedObligationForm(){
-  ['manageObligationId','manageObligationDescription','manageObligationAmount',
-   'manageObligationRemarks'].forEach(id => {
-    const el = document.getElementById(id);
-    if(el) el.value = '';
+  [
+    'manageObligationId',
+    'manageObligationDescription',
+    'manageObligationAmount',
+    'manageObligationRemarks'
+  ].forEach(id => {
+    const el=document.getElementById(id);
+    if(el) el.value='';
   });
 
-  const banner =
-    document.getElementById(
-      'managedObligationEditBanner'
-    );
+  const banner=
+    document.getElementById('managedObligationEditBanner');
 
   if(banner){
-    banner.classList.add(
-      'hidden'
-    );
-    banner.textContent =
-      'Editing obligation';
+    banner.classList.add('hidden');
+    banner.textContent='Editing obligation';
   }
 
-  const saveBtn =
-    document.getElementById(
-      'managedObligationSaveBtn'
-    );
+  const saveBtn=
+    document.getElementById('managedObligationSaveBtn');
 
   if(saveBtn){
-    saveBtn.textContent =
-      '💾 SAVE OBLIGATION';
+    saveBtn.disabled=false;
+    saveBtn.textContent='💾 SAVE OBLIGATION';
   }
+
+  /* Explicit Clear starts a new Add transaction. */
+  tofaPendingIndividualObligationSave=null;
 }
 
 async function saveManagedObligation(){
+  if(tofaIndividualObligationSaveBusy) return;
 
   if(!obligationAdminMember){
     msg(
@@ -21672,51 +21818,15 @@ async function saveManagedObligation(){
     return;
   }
 
-  const idInput =
-    document.getElementById(
-      'manageObligationId'
-    );
+  const idInput=document.getElementById('manageObligationId');
+  const descriptionInput=document.getElementById('manageObligationDescription');
+  const amountInput=document.getElementById('manageObligationAmount');
+  const remarksInput=document.getElementById('manageObligationRemarks');
 
-  const descriptionInput =
-    document.getElementById(
-      'manageObligationDescription'
-    );
-
-  const amountInput =
-    document.getElementById(
-      'manageObligationAmount'
-    );
-
-  const remarksInput =
-    document.getElementById(
-      'manageObligationRemarks'
-    );
-
-  const obligationId =
-    String(
-      idInput ? idInput.value : ''
-    ).trim();
-
-  const description =
-    String(
-      descriptionInput
-        ? descriptionInput.value
-        : ''
-    ).trim();
-
-  const amount =
-    Number(
-      amountInput
-        ? amountInput.value
-        : 0
-    );
-
-  const remarks =
-    String(
-      remarksInput
-        ? remarksInput.value
-        : ''
-    ).trim();
+  const obligationId=String(idInput ? idInput.value : '').trim();
+  const description=String(descriptionInput ? descriptionInput.value : '').trim();
+  const amount=Number(amountInput ? amountInput.value : 0);
+  const remarks=String(remarksInput ? remarksInput.value : '').trim();
 
   if(!description){
     msg(
@@ -21727,7 +21837,7 @@ async function saveManagedObligation(){
     return;
   }
 
-  if(!(amount > 0)){
+  if(!(amount>0)){
     msg(
       'obligationManagementMsg',
       'Enter a valid amount.',
@@ -21736,14 +21846,14 @@ async function saveManagedObligation(){
     return;
   }
 
-  const memberId =
+  const memberId=
     String(
       obligationAdminMember.memberId ||
       obligationAdminMember.id ||
       ''
     ).trim();
 
-  const memberName =
+  const memberName=
     String(
       obligationAdminMember.memberName ||
       obligationAdminMember.name ||
@@ -21760,7 +21870,7 @@ async function saveManagedObligation(){
     return;
   }
 
-  const data = {
+  const data={
     obligationId:obligationId,
     id:obligationId,
     memberId:memberId,
@@ -21772,95 +21882,121 @@ async function saveManagedObligation(){
     remarks:remarks
   };
 
-  const isEdit =
-    !!obligationId;
+  const isEdit=!!obligationId;
 
-  const saveBtn =
-    document.getElementById(
-      'managedObligationSaveBtn'
-    );
+  if(!isEdit){
+    const fingerprint=
+      JSON.stringify({
+        memberId:memberId,
+        memberName:memberName,
+        description:description,
+        amount:amount,
+        remarks:remarks
+      });
 
-  const oldText =
-    saveBtn
-      ? saveBtn.textContent
-      : '';
+    if(
+      !tofaPendingIndividualObligationSave ||
+      tofaPendingIndividualObligationSave.fingerprint!==fingerprint
+    ){
+      tofaPendingIndividualObligationSave={
+        fingerprint:fingerprint,
+        requestId:tofaCreateObligationRequestId('OIND')
+      };
+    }
+
+    data.requestId=
+      tofaPendingIndividualObligationSave.requestId;
+  }
+
+  const saveBtn=
+    document.getElementById('managedObligationSaveBtn');
+  const oldText=saveBtn ? saveBtn.textContent : '';
+
+  tofaIndividualObligationSaveBusy=true;
 
   if(saveBtn){
-    saveBtn.disabled = true;
-    saveBtn.textContent =
-      isEdit
-        ? '⏳ UPDATING...'
-        : '⏳ SAVING...';
+    saveBtn.disabled=true;
+    saveBtn.textContent=
+      isEdit ? '⏳ UPDATING...' : '⏳ SAVING...';
   }
 
   try{
+    const action=isEdit ? 'editObligation' : 'addObligation';
 
-    const action =
-      isEdit
-        ? 'editObligation'
-        : 'addObligation';
+    const r=await api(
+      action,
+      {
+        token:token,
+        obligationData:data
+      },
+      isEdit ? 'Updating Obligation...' : 'Saving Obligation...',
+      'Please wait'
+    );
 
-    const r =
-      await api(
-        action,
-        {
-          token:token,
-          obligationData:data
-        },
-        isEdit
-          ? 'Updating Obligation...'
-          : 'Saving Obligation...',
-        'Please wait'
-      );
+    /*
+     * The server response confirms the transaction is complete.
+     * Clear pending ID BEFORE any list/dashboard refresh.
+     */
+    if(!isEdit){
+      tofaPendingIndividualObligationSave=null;
+    }
 
     msg(
       'obligationManagementMsg',
-      (r && r.message) ||
-        (
-          isEdit
-            ? 'Obligation updated successfully.'
-            : 'Obligation added successfully.'
-        ),
+      r && r.duplicatePrevented
+        ? '✅ This obligation was already saved. Duplicate prevented.'
+        : (
+            (r&&r.message) ||
+            (isEdit
+              ? 'Obligation updated successfully.'
+              : 'Obligation added successfully.')
+          ),
       'ok'
     );
 
+    clearManagedObligationForm();
+
+    /*
+     * IMPORTANT: a refresh failure is NOT a save failure.
+     * This prevents users from retrying a transaction that was
+     * already committed successfully.
+     */
     if(
       obligationAdminMember &&
-      obligationManagementMode === 'manage'
+      obligationManagementMode==='manage'
     ){
-      await loadManagedObligations();
+      try{
+        await loadManagedObligations();
 
-      const list =
-        document.getElementById(
-          'managedObligationsSection'
+        const list=
+          document.getElementById('managedObligationsSection');
+        if(list) list.classList.remove('hidden');
+
+      }catch(refreshError){
+        console.warn(
+          '[TOFA OBLIGATION] Saved, obligation-list refresh failed',
+          refreshError
         );
-
-      if(list){
-        list.classList.remove('hidden');
       }
     }
 
-    clearManagedObligationForm();
-
   }catch(e){
-
-    fail(
-      e,
-      'obligationManagementMsg'
-    );
+    /*
+     * Keep the same pending Request ID after a transport failure.
+     * Retry of unchanged data will be recognized by the server.
+     */
+    fail(e,'obligationManagementMsg');
 
   }finally{
+    tofaIndividualObligationSaveBusy=false;
 
     if(saveBtn){
-      saveBtn.disabled = false;
-
-      saveBtn.textContent =
+      saveBtn.disabled=false;
+      saveBtn.textContent=
         oldText ||
-        (
-          isEdit
-            ? '💾 UPDATE OBLIGATION'
-            : '💾 SAVE OBLIGATION'
-        );
+        (isEdit
+          ? '💾 UPDATE OBLIGATION'
+          : '💾 SAVE OBLIGATION');
     }
   }
 }
